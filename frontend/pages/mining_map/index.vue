@@ -7,13 +7,19 @@
       <v-flex xs12 md10 my-4>
         <v-layout column>
           <div style="width: 100%">
-            The Bitcoin Mining Map visualises the approximate geographic distribution of global Bitcoin hashrate. The average hashrate share by country is available for display in monthly intervals starting from September 2019. In addition, a second map with an exclusive focus on China’s hashrate distribution by province is provided.
+            <p>The Bitcoin Mining Map visualises the approximate geographic distribution of global Bitcoin hashrate. The average hashrate share by country is available for display in monthly intervals starting from September 2019. In addition, a second map with an exclusive focus on China’s hashrate distribution by province is provided.
+            </p>
+            <p>
+              <b>Disclaimer</b><br>
+              Past periods may be adjusted when additional data becomes available. Please note that the map has been last updated in April 2020 and may not provide an accurate representation of the current state of global hashrate distribution. In some countries, and China in particular, mining operations tend to move between locations according to seasonal variance in renewables production. These migration patterns can only be observed when selecting a longer timeframe for the analysis.
+            </p>
+            <p>
+              All changes are listed in the <nuxt-link to="change-log/">Change log</nuxt-link>
+            </p>
           </div>
           <iframe :width="containerWidth" :height="containerWidth / 32 * 22" src="https://app.powerbi.com/view?r=eyJrIjoiYTg4NTNlZDAtNmIzNS00OWQyLWExNmQtNDY5MTAzNTM3YjIyIiwidCI6IjAwYzliM2IxLTAzMTItNGMzMy1hZTdmLTgwZjNhNzU5ZGVjMSIsImMiOjh9" frameborder="0" allowFullScreen="true" />
           <v-flex my-4>
             <div style="width: 100%">
-              <p style="text-align: center"><b>Disclaimer:</b> <i>past periods may be adjusted when additional data becomes available.</i></p>
-              <p style="text-align: center"><i>All changes will be listed in the change log, which will be published soon.</i></p>
               <v-flex mt-5>
                 <p>The chart below shows the average monthly hashrate breakdown by country (and Chinese provinces, if selected) in descending order.</p>
               </v-flex>

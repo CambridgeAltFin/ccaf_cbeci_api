@@ -1,0 +1,38 @@
+name: Cbeci FRONTEND demo server deploy
+on: 
+  push:
+    branches:
+      - develop
+    paths:
+      - 'frontend/*'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: CLI commands for deploy
+      uses: appleboy/ssh-action@master
+      env:
+        SHA: ${{ github.sha }}
+      with:
+        host: ${{ secrets.DEMO_SERVER_HOST }}
+        username: cbeci
+        port: 22
+        envs: SHA
+        script_stop: true
+        key:  ${{ secrets.DEMO_CBECI_USER_KEY }}
+        script: |
+          export NVM_DIR=~/.nvm
+          source ~/.nvm/nvm.sh
+          cd ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}
+          rm -rf releases/$SHA
+          mkdir releases/$SHA
+          cd releases/$SHA
+          ssh-agent bash -c 'ssh-add /home/cbeci/.ssh/id_rsa_mining_energy_consumption; git clone git@github.com:dektox/mining_energy_consumption.git .'
+          git checkout $SHA
+          cd frontend
+          npm i
+          ln -s ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/.env .env
+          npm run generate
+          rm -rf ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/actual
+          ln -s ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/releases/$SHA/frontend/dist ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/actual

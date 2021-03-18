@@ -1,0 +1,40 @@
+name: Cbeci API demo server deploy
+on: 
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - 'frontend/*'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: CLI commands for deploy
+      uses: appleboy/ssh-action@master
+      env:
+        SHA: ${{ github.sha }}
+      with:
+        host: ${{ secrets.DEMO_SERVER_HOST }}
+        username: cbeci
+        port: 22
+        envs: SHA
+        script_stop: true
+        key:  ${{ secrets.DEMO_CBECI_USER_KEY }}
+        script: |
+          export PATH="/home/cbeci/.pyenv/bin:$PATH"
+          eval "$(pyenv init -)"
+          eval "$(pyenv virtualenv-init -)"
+          source $HOME/.poetry/env
+          cd ${{ secrets.DEMO_API_PROJECT_PATH }}
+          rm -rf releases/$SHA
+          mkdir releases/$SHA
+          cd releases/$SHA
+          ssh-agent bash -c 'ssh-add /home/cbeci/.ssh/id_rsa_mining_energy_consumption; git clone git@github.com:dektox/mining_energy_consumption.git .'
+          git checkout $SHA
+          ln -s ${{ secrets.DEMO_API_PROJECT_PATH }}/.env .env
+          ln -s ${{ secrets.DEMO_API_PROJECT_PATH }}/CONFIG.yml CONFIG.yml
+          poetry install
+          rm -rf ${{ secrets.DEMO_API_PROJECT_PATH }}/actual
+          ln -s ${{ secrets.DEMO_API_PROJECT_PATH }}/releases/$SHA ${{ secrets.DEMO_API_PROJECT_PATH }}/actual
+          sudo /usr/sbin/service demo.cbeci_api restart

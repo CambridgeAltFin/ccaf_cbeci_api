@@ -20,6 +20,9 @@ import yaml
 import csv
 import io
 import os
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 
 config_path = '../CONFIG.yml'
 if config_path:
@@ -93,6 +96,9 @@ def get_file_handler(filename):
 
     return file_handler
 
+def get_request_ip():
+    return request.headers.get('X-Real-Ip')
+
 app = Flask(__name__)
 app.logger.setLevel(LOG_LEVEL)
 app.logger.addHandler(get_file_handler("./logs/errors.log"))
@@ -101,8 +107,8 @@ CORS(app)
 if get_limiter_flag():
     Limiter(
         app,
-        key_func=get_remote_address,
-        default_limits=["240000 per day", "6000 per 10 minutes", "3000 per 10 seconds"]
+        key_func=get_request_ip,
+        default_limits=["12000 per day", "300 per 10 minutes", "15 per 10 seconds"]
     )
 
 # initialisation of cache vars:
@@ -119,7 +125,7 @@ except Exception as err:
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
-    app.logger.info(f"{str(e)} - IP: {get_remote_address()}")
+    app.logger.info(f"{str(e)} - IP: {get_request_ip()}")
     return make_response(
         jsonify(error="Too many requests from your IP, try again later")
         , 429

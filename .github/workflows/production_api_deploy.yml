@@ -4,7 +4,7 @@ on:
     branches:
       - master
     paths-ignore:
-      - 'frontend/*'
+      - 'frontend/**'
 jobs:
   deploy:
     environment:

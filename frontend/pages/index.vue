@@ -69,6 +69,7 @@ export default {
   async fetch ({ store }) {
       await store.dispatch('INITIALIZATION')
   },
+  fetchOnServer: false,
   data() {
     return {
       containerWidth: 0

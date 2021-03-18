@@ -51,7 +51,7 @@
                         <td>{{ props.item.parameter }}</td>
                         <td>{{ props.item.description }}</td>
                         <td>{{ props.item.unit }}</td>
-                        <td>{{ props.item.source }}</td>
+                        <td>{{ props.item.source }} <a v-if="props.item.link" :href="props.item.link" target="_blank">{{props.item.link}}</a></td>
                     </tr>
                 </template>
             </v-data-table>
@@ -75,37 +75,43 @@
             parameter: 'Network hashrate, mean daily',
             description: 'The mean rate at which miners are solving hashes that day',
             unit: 'Exahashes per second (Eh/s)',
-            source: 'Dynamic: https://coinmetrics.io/ ',
+            source: 'Dynamic: ',
+            link: 'https://coinmetrics.io/'
           },
           {
             parameter: 'Bitcoin issuance value, daily',
             description: 'The sum USD value of all bitcoins issued that day',
             unit: 'USD',
-            source: 'Dynamic: https://coinmetrics.io/ ',
+            source: 'Dynamic: ',
+            link: 'https://coinmetrics.io/'
           },
           {
             parameter: 'Miners fees, daily',
             description: 'The sum USD value of all fees paid to miners that day',
             unit: 'USD',
-            source: 'Dynamic: https://coinmetrics.io/ ',
+            source: 'Dynamic: ',
+            link: 'https://coinmetrics.io/'
           },
           {
             parameter: 'Difficulty, mean daily',
             description: 'The mean difficulty of finding a new block that day',
             unit: 'Dimensionless',
-            source: 'Dynamic: https://coinmetrics.io/ ',
+            source: 'Dynamic: ',
+            link: 'https://coinmetrics.io/'
           },
           {
             parameter: 'Bitcoin market price',
             description: 'The fixed closing price of the asset as of 00:00 UTC that day',
             unit: 'USD',
-            source: 'Dynamic: https://coinmetrics.io/ ',
+            source: 'Dynamic: ',
+            link: 'https://coinmetrics.io/'
           },
           {
             parameter: 'Network hashrate, real-time estimate',
             description: 'The real-time estimate of the rate at which miners are solving hashes',
             unit: 'Exahashes per second (Eh/s)',
-            source: 'Dynamic: https://www.blockchain.com/ ',
+            source: 'Dynamic: ',
+            link: 'https://www.blockchain.com/'
           },
           {
             parameter: 'Mining equipment efficiency',

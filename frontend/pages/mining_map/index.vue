@@ -96,9 +96,11 @@
 </template>
 
 <script>
+import myMiddleware from '@/middleware/myMiddleware'
+
 export default {
   name: 'index',
-  layout: 'demo',
+  layout: myMiddleware || 'demo',
   components: {
   },
   async fetch ({ store }) {

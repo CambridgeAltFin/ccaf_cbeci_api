@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-content>
+    <v-content style="padding: 0 !important;">
       <v-container>
         <nuxt />
       </v-container>

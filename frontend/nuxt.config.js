@@ -4,7 +4,7 @@ import pkg from './package'
 import shrinkRay from 'shrink-ray-current'
 
 export default {
-  mode: 'universal',
+  mode: 'spa',
   head: {
     title: 'Cambridge Bitcoin Electricity Consumption Index (CBECI)',
     meta: [

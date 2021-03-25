@@ -54,12 +54,14 @@
 
 <script>
 import Controllers from '~/components/index/Controllers'
+import myMiddleware from '@/middleware/myMiddleware'
 // import Cards from '~/components/index/Cards'
 import ChartLoading from '~/components/index/ChartLoading'
 import Chart from '~/components/index/Chart'
 
 export default {
   name: 'index',
+  layout: myMiddleware || 'default',
   components: {
     controllers: Controllers,
     cards: () => import('~/components/index/Cards'),

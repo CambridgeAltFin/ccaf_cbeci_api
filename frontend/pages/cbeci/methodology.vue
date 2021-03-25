@@ -14,9 +14,11 @@ import Overview from '~/components/methodology/Overview'
 import Model from '~/components/methodology/Model'
 import Discussion from '~/components/methodology/Discussion'
 import ChangeLog from '~/components/methodology/ChangeLog'
+import myMiddleware from '@/middleware/myMiddleware'
 
 export default {
     name: 'methodology',
+    layout: myMiddleware || 'default',
     components: {
         overview: Overview,
         model: Model,

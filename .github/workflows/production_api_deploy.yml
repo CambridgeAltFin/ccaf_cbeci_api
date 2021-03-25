@@ -40,3 +40,4 @@ jobs:
           rm -rf ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/actual
           ln -s ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/releases/$SHA ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/actual
           sudo /usr/sbin/service cbeci_api restart
+

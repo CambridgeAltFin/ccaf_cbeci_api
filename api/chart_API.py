@@ -282,13 +282,14 @@ def recalculate_guess(value):
 
 @app.route("/api/countries")
 def countries_btc():
-    tup2dict = {a:[c,d] for a,b,c,d,e,f in countries}
+    tup2dict = {a:[c,d,b] for a,b,c,d,e,f in countries}
     tup2dict['Bitcoin'][0] = round(cons[-1][4],2)
     dictsort = sorted(tup2dict.items(), key = lambda i: i[1][0], reverse=True)
     response = []
     for item in dictsort:
          response.append({
             'country': item[0],
+            'code': item[1][2],
             'y': item[1][0],        
             'x': dictsort.index(item)+1,
             'bitcoin_percentage': round(item[1][0]/round(cons[-1][4], 2)*100, 2),

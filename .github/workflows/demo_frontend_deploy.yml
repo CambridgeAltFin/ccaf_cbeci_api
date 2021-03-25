@@ -33,6 +33,8 @@ jobs:
           cd frontend
           npm i
           ln -s ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/.env .env
-          npm run generate
+          npm run build
           rm -rf ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/actual
-          ln -s ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/releases/$SHA/frontend/dist ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/actual
+          ln -s ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/releases/$SHA ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}/actual
+          cd ${{ secrets.DEMO_FRONTEND_PROJECT_PATH }}
+          pm2 restart pm2.config.json

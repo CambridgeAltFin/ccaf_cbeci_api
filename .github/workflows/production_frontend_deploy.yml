@@ -35,9 +35,9 @@ jobs:
           cd frontend
           npm i
           cp ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/.env .env
-          npm run generate
-          ssh cbeci@${{ secrets.PRODUCTION_SERVER_HOST }} "rm -rf ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA;mkdir -p ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA;"
-          scp -r ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA/frontend/dist cbeci@${{ secrets.PRODUCTION_SERVER_HOST }}:${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA
+          npm run build
+          ssh cbeci@${{ secrets.PRODUCTION_SERVER_HOST }} "rm -rf ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA"
+          scp -r ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA cbeci@${{ secrets.PRODUCTION_SERVER_HOST }}:${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases
     - uses: actions/checkout@v1
     - name: CLI commands for launch built project on live server
       uses: appleboy/ssh-action@master
@@ -55,4 +55,5 @@ jobs:
           source ~/.nvm/nvm.sh
           cd ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}
           rm -rf actual
-          ln -s ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA/dist ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/actual
+          ln -s ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/releases/$SHA ${{ secrets.PRODUCTION_FRONTEND_BUILD_PATH }}/actual
+          pm2 restart pm2.config.json

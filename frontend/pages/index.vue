@@ -68,13 +68,16 @@ export default {
     chartLoading: ChartLoading,
     chart: Chart
   },
-  async fetch ({ store }) {
-      await store.dispatch('INITIALIZATION')
-  },
   fetchOnServer: false,
   data() {
     return {
       containerWidth: 0
+    }
+  },
+  created() {
+    const isClientSide = typeof window !== 'undefined'
+    if (isClientSide) {
+      this.$store.dispatch('INITIALIZATION')
     }
   },
   computed: {

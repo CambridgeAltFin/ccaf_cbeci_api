@@ -97,18 +97,22 @@ def get_file_handler(filename):
     return file_handler
 
 def get_request_ip():
-    return request.headers.get('X-Real-Ip')
+    return request.headers.get('X-Real-Ip') or get_remote_address()
 
 app = Flask(__name__)
 app.logger.setLevel(LOG_LEVEL)
 app.logger.addHandler(get_file_handler("./logs/errors.log"))
+ratelimit_storage_url = os.environ.get("RATELIMIT_STORAGE_URL")
+if ratelimit_storage_url:
+    app.config["RATELIMIT_STORAGE_URL"] = ratelimit_storage_url
 
 CORS(app)
 if get_limiter_flag():
     Limiter(
         app,
         key_func=get_request_ip,
-        default_limits=["12000 per day", "300 per 10 minutes", "15 per 10 seconds"]
+        default_limits=["12000 per day", "300 per 10 minutes", "15 per 10 seconds"],
+        default_limits_exempt_when=lambda: get_request_ip() == '127.0.0.1'
     )
 
 # initialisation of cache vars:

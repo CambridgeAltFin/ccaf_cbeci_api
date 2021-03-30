@@ -1,5 +1,11 @@
 <template>
     <v-flex xs12 md10 my-3 py-3>
+        <h3 class="display-2 text-md-left">19 Mar 2021 13:12 GMT</h3>
+        <v-flex class="main-text" my-3>
+            <p>
+                Mining map > Visualisation: updated disclaimer
+            </p>
+        </v-flex>
         <h3 class="display-2 text-md-left">17 Feb 2021 08:30 GMT</h3>
         <v-flex class="main-text" my-3>
             <p>
@@ -16,13 +22,6 @@
                 CBECI > Comparisons > Country Ranking: updated country consumption data (<a href="https://www.cia.gov/the-world-factbook/field/electricity-production/country-comparison" target="_blank">U.S. Energy Information Administration</a>, 2019)
             </p>
         </v-flex>
-        <h3 class="display-2 text-md-left">19 Mar 2021 13:12 GMT</h3>
-        <v-flex class="main-text" my-3>
-            <p>
-                Mining map > Visualisation: updated disclaimer
-            </p>
-        </v-flex>
-
     </v-flex>
 </template>
 

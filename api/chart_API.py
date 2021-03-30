@@ -102,6 +102,9 @@ def get_request_ip():
 app = Flask(__name__)
 app.logger.setLevel(LOG_LEVEL)
 app.logger.addHandler(get_file_handler("./logs/errors.log"))
+ratelimit_storage_url = os.environ.get("RATELIMIT_STORAGE_URL")
+if ratelimit_storage_url:
+    app.config["RATELIMIT_STORAGE_URL"] = ratelimit_storage_url
 
 CORS(app)
 if get_limiter_flag():

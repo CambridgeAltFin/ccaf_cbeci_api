@@ -73,6 +73,14 @@ def send_err_to_slack(err, name):
     except:
         pass # not the best practice but we want API working even if Slack msg failed for any reason
 
+def get_request_ip():
+    return request.headers.get('X-Real-Ip') or get_remote_address()
+
+def limits_exempt_when():
+    exempt_ip = os.environ.get("RATELIMIT_EXEMPT_IP")
+
+    return exempt_ip is not None and exempt_ip.lower() not in ("0", "false", "no") and get_request_ip() == exempt_ip
+
 def get_file_handler(filename):
     file_handler = RotatingFileHandler(filename, maxBytes=10 * 1024 * 1024, backupCount=5)  # mb * kb * b
     file_handler.setLevel(logging.INFO)
@@ -81,7 +89,7 @@ def get_file_handler(filename):
         def format(self, record):
             if has_request_context():
                 record.url = request.url
-                record.remote_addr = request.remote_addr
+                record.remote_addr = get_request_ip()
             else:
                 record.url = None
                 record.remote_addr = None
@@ -96,19 +104,20 @@ def get_file_handler(filename):
 
     return file_handler
 
-def get_request_ip():
-    return request.headers.get('X-Real-Ip')
-
 app = Flask(__name__)
 app.logger.setLevel(LOG_LEVEL)
 app.logger.addHandler(get_file_handler("./logs/errors.log"))
+ratelimit_storage_url = os.environ.get("RATELIMIT_STORAGE_URL")
+if ratelimit_storage_url:
+    app.config["RATELIMIT_STORAGE_URL"] = ratelimit_storage_url
 
 CORS(app)
 if get_limiter_flag():
     Limiter(
         app,
         key_func=get_request_ip,
-        default_limits=["12000 per day", "300 per 10 minutes", "15 per 10 seconds"]
+        default_limits=["12000 per day", "300 per 10 minutes", "15 per 10 seconds"],
+        default_limits_exempt_when=limits_exempt_when
     )
 
 # initialisation of cache vars:

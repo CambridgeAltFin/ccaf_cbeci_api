@@ -25,7 +25,7 @@
                     <p>The Bitcoin mining map is based on an extrapolation of a sample of mining pool data. This sample may not be fully representative for the following two reasons: first, it represents only a little more than a third of the total hashrate; and second, the data is provided by three Bitcoin mining pools that are all headquartered in China. </p>
                     <p>While the current version seems overly biased towards China, there are reasons to believe that the sample nevertheless provides a reasonable approximation of the actual hashrate distribution. For one, all participating pools maintain servers in various geographies across the globe to serve their foreign customer base with minimal latency. Furthermore, Chinese pools have dominated Bitcoin mining in recent years, among others because of their relatively low fee structure which has attracted numerous non-Chinese hashers.</p>
                     <p>The research team is actively looking to partner with additional mining pools and hashers to improve the accuracy and reliability of the mining map. Please do not hesitate to
-                        <nuxt-link to="/contact">
+                        <nuxt-link to="/contact/">
                             <span>get in touch</span>
                         </nuxt-link>
                         if you would like to contribute. </p>

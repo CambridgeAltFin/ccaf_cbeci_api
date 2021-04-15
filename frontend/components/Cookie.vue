@@ -3,19 +3,19 @@
         <div class="cookies__cover" />
         <div class="cookies__panel">
             <v-layout align-center justify-center>
-                <v-flex xs10>
+                <v-flex cols="12" md10 pa-3>
                     <v-layout align-center justify-center>
-                        <v-flex class="grow" md8 pa-4>
+                        <v-flex md8 pa-4>
                             <slot name="message">
                                 We use Google Analytics to see how people use our website. This helps us improve the
                                 website. The data we have is anonymised.
-                                <nuxt-link class="cookie__link" to="https://www.jbs.cam.ac.uk/about-this-site/cookies/"
+                                <a class="cookies__link" href="https://www.jbs.cam.ac.uk/about-this-site/cookies/"
                                            target="_blank">
                                     Learn More
-                                </nuxt-link>
+                                </a>
                             </slot>
                         </v-flex>
-                        <v-flex class="shrink d-flex justify-end" cols="12" md="4">
+                        <v-flex class="shrink d-flex justify-end" cols12>
                             <v-btn class="ma-2 main" dark @click="accept">
                                 {{ buttonTextAccept }}
                             </v-btn>
@@ -77,21 +77,27 @@
 </script>
 
 <style lang="scss" scoped>
-    .cookie {
-        z-index: 1000000;
-        position: fixed;
-        bottom: 0;
-
-        &__overlay {
-            .v-alert {
-                width: 100vw;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                margin-bottom: 0 !important;
-            }
+    .cookies{
+        &.active{
+            display: block;
         }
-
+        display: none;
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1000;
+        &__cover{
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            opacity: 0.4;
+        }
+        &__panel{
+            position: absolute;
+            width: 100vw;
+            bottom: 0;
+            background-color: #FEE9BA;
+        }
         &__link {
             color: black;
             text-decoration: underline;
@@ -99,6 +105,14 @@
 
             &:hover {
                 text-decoration: none;
+            }
+        }
+    }
+    @media only screen and (max-width: 960px) {
+        .cookies{
+            &__panel{
+                width: 100vw;
+                bottom: 20vh;
             }
         }
     }

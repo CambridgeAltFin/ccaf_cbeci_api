@@ -44,7 +44,7 @@
       <a href="https://cbeci.org/api/csv" target="_blank">Download data in CSV format</a>
     </v-layout>
     <v-layout row align-center my-4>
-      <span>You can adjust the electricity cost parameter below to explore how the model reacts.</span>
+      <span style="text-align: center">You can adjust the electricity cost parameter below to explore how the model reacts.</span>
     </v-layout>
     <client-only>
       <controllers />

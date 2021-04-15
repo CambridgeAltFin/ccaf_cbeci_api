@@ -105,6 +105,12 @@
                         .then(function (response) {
                             if(response.data.status === 'success') {
                                 self.status = true
+                              self.message = ''
+                              self.name = ''
+                              self.email = ''
+                              self.organisation = ''
+                              self.checkbox = false
+                              self.reset()
                             }
                             if(response.data.status === 'fail') {
                                 self.error = true

@@ -100,12 +100,15 @@
               interval: {}
             }
         },
-        created() {
-            const self = this
-            this.interval = setInterval(function () {
-                self.getNewData()
-            }, 30000)
-        },
+      beforeMount() {
+        const isClientSide = typeof window !== 'undefined'
+        if (isClientSide) {
+          const self = this
+          this.interval = setInterval(function () {
+            self.getNewData()
+          }, 30000)
+        }
+      },
       beforeDestroy() {
           clearInterval(this.interval)
       },

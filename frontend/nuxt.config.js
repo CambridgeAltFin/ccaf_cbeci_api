@@ -62,8 +62,6 @@ export default {
       compressor: shrinkRay()
   },
   axios: {
-    proxyHeaders: false,
-    credentials: false,
     baseURL: process.env.BASE_URL || 'https://cbeci.org/api'
   },
   build: {

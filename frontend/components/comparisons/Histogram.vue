@@ -7,10 +7,10 @@
         ></v-switch>
         <highcharts :options="{
         chart: {
-          marginBottom: (containerWidth > 1000) ? 100 : 100,
+          marginBottom: (containerWidth > 1000) ? 100 : 60,
           reflow: false,
-          marginLeft: (containerWidth > 1000) ? 100 : 30,
-          marginRight: (containerWidth > 1000) ? 100 : 0,
+          marginLeft: (containerWidth > 1000) ? 100 : 55,
+          marginRight: (containerWidth > 1000) ? 100 : 5,
           height: (containerWidth > 1000) ? '56%' : 400,
           width: (containerWidth > 1000) ? containerWidth * 0.9 : containerWidth,
           type: 'column'

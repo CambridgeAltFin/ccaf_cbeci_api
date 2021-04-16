@@ -9,10 +9,11 @@
 
 <script>
   import Overview from '~/components/mining_methodology/Overview'
+  import myMiddleware from '@/middleware/myMiddleware'
 
   export default {
     name: 'methodology',
-    layout: 'demo',
+    layout: myMiddleware || 'demo',
     mounted() {
     },
     components: {

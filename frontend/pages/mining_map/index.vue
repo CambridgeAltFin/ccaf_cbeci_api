@@ -85,7 +85,7 @@
       <v-flex xs12 md10 my-4>
         <div style="width: 100%; font-style: italic; text-align: center">
           <span>If you are a mining pool operator and would like to contribute, please
-          <nuxt-link to="/contact">
+          <nuxt-link to="/contact/">
             <span>get in touch</span>
           </nuxt-link>
             !</span>

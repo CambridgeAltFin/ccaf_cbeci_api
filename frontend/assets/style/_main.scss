@@ -29,39 +29,6 @@
     }
 }
 
-.cookies{
-    &.active{
-        display: block;
-    }
-    display: none;
-    position: fixed;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1000;
-    &__cover{
-        width: 100vw;
-        height: 100vh;
-        background-color: #000;
-        opacity: 0.4;
-    }
-    &__panel{
-        position: absolute;
-        width: 100vw;
-        bottom: 0;
-        background-color: #FEE9BA;
-    }
-}
-
-@media only screen and (max-width: 960px) {
-    .cookies{
-        &__panel{
-            width: 80vw;
-            bottom: 20vh;
-            left: 10vw;
-        }
-    }
-}
-
 html, body{
     width: 100vw;
     font-size: 16px;

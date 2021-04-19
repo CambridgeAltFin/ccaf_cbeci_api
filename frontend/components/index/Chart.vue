@@ -5,7 +5,7 @@
         chart: {
           marginBottom: (containerWidth > 1000) ? 100 : 30,
           reflow: false,
-          marginLeft: (containerWidth > 1000) ? 100 : 30,
+          marginLeft: (containerWidth > 1000) ? 100 : 60,
           marginRight: (containerWidth > 1000) ? 100 : 30,
           height: (containerWidth > 1000) ? '56%' : 400,
           width: (containerWidth > 1000) ? containerWidth * 0.9 : containerWidth,

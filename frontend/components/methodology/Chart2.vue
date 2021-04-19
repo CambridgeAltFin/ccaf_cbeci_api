@@ -6,7 +6,7 @@
         <highcharts :options="{
         chart: {
           marginBottom: (containerWidth > 400) ? 120 : 30,
-          marginLeft: (containerWidth > 400) ? 100 : 35,
+          marginLeft: (containerWidth > 400) ? 100 : 65,
           marginRight: (containerWidth > 400) ? 100 : 10,
           height: (containerWidth > 400) ? '56%' : 300,
           width: (containerWidth > 400) ? containerWidth * 0.9 : containerWidth,

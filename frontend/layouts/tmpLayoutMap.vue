@@ -3,22 +3,12 @@
     <v-layout column class="menu hidden-sm-and-down">
       <v-list class="demo" expand>
         <v-list-tile>
-          <nuxt-link :class="{'active': $route.path === '/'}" to="/?page=tmp1">
-            Index
+          <nuxt-link :class="{'active': $route.path === '/mining_map'}" to="/mining_map?page=tmp2">
+            Mining Map
           </nuxt-link>
         </v-list-tile>
         <v-list-tile>
-          <nuxt-link :class="{'active': $route.path.includes('/cbeci/comparisons/')}" to="/cbeci/comparisons/?page=tmp1">
-            Comparisons
-          </nuxt-link>
-        </v-list-tile>
-        <v-list-tile>
-          <nuxt-link :class="{'active': $route.path === '/faq/'}" to="/faq/?page=tmp1">
-            FAQ
-          </nuxt-link>
-        </v-list-tile>
-        <v-list-tile>
-          <nuxt-link :class="{'active': $route.path === '/cbeci/methodology/'}" to="/cbeci/methodology/?page=tmp1">
+          <nuxt-link :class="{'active': $route.path === '/mining_map/methodology'}" to="/mining_map/methodology?page=tmp2">
             Methodology
           </nuxt-link>
         </v-list-tile>

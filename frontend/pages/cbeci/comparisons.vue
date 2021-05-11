@@ -30,10 +30,12 @@ import PC from '~/components/comparisons/PC'
 import RP from '~/components/comparisons/RP'
 import FF from '~/components/comparisons/FF'
 import Histogram from '~/components/comparisons/Histogram'
+import myMiddleware from '@/middleware/myMiddleware'
 
 export default {
     name: 'comparisons',
-    components: {
+  layout: myMiddleware || 'default',
+  components: {
         comparisonsCards: countriesCards,
         comparisonsPC: PC,
         comparisonsRP: RP,

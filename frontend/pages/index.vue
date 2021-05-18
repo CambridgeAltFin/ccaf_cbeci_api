@@ -71,6 +71,11 @@ export default {
   async fetch ({ store }) {
     await store.dispatch('INITIALIZATION')
   },
+  mounted() {
+    if (typeof window === 'object') {
+      window.addEventListener('resize', this.resize());
+    }
+  },
   data() {
     return {
       containerWidth: 0
@@ -87,6 +92,14 @@ export default {
       set () {
         this.$store.commit('SET_ERROR', {status: false, message: ''})
       }
+    }
+  },
+  methods: {
+    resize () {
+      const body = document.body
+      const html = document.documentElement
+      document.iframeHeight = Math.max( body.scrollHeight, body.clientHeight, body.offsetHeight,
+              html.clientHeight, html.scrollHeight, html.offsetHeight )
     }
   }
 }

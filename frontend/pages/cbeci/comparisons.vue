@@ -57,6 +57,11 @@ export default {
         }, 30000)
       }
     },
+  mounted() {
+    if (typeof window === 'object') {
+      window.addEventListener('resize', this.resize());
+    }
+  },
     beforeDestroy() {
         clearInterval(this.interval)
     },
@@ -74,7 +79,13 @@ export default {
     methods: {
         async getNewData() {
           await this.$store.dispatch('LOAD_NUMBERS')
-        }
+        },
+      resize () {
+        const body = document.body
+        const html = document.documentElement
+        document.iframeHeight = Math.max( body.scrollHeight, body.clientHeight, body.offsetHeight,
+          html.clientHeight, html.scrollHeight, html.offsetHeight )
+      }
     }
 }
 </script>

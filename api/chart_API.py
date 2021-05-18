@@ -16,20 +16,14 @@ import requests
 import logging
 import time
 import psycopg2
-import yaml
 import csv
 import io
 import os
 from dotenv import load_dotenv
+from config import config
+from extensions import cache
 
 load_dotenv(override=True)
-
-config_path = '../CONFIG.yml'
-if config_path:
-    with open(config_path) as fp:
-        config = yaml.load(fp, yaml.FullLoader)
-else:
-    config = {}
 
 LOG_LEVEL = logging.INFO
 
@@ -104,7 +98,16 @@ def get_file_handler(filename):
 
     return file_handler
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+
+    from blueprints import charts
+    app.register_blueprint(charts.bp, url_prefix='/api/charts')
+
+    return app
+
+app = create_app()
+cache.init_app(app)
 app.logger.setLevel(LOG_LEVEL)
 app.logger.addHandler(get_file_handler("./logs/errors.log"))
 ratelimit_storage_url = os.environ.get("RATELIMIT_STORAGE_URL")

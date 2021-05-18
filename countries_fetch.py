@@ -9,7 +9,6 @@ from datetime import datetime
 DEFAULT_LOG_LEVEL = logging.INFO
 LOGGER = logging.getLogger()
 
-
 def get_countries():
     def _to_item(record):
         return {

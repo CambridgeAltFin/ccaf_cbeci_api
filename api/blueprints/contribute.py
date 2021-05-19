@@ -40,16 +40,19 @@ schema = Schema({
 @bp.route('/miners_geo_distribution', methods=('POST',))
 @auth.bearer()
 @validators.validate(schema)
-def miners_geo_distribution():
+def miners_geo_distribution(api_token):
     data = request.json['data']
     if len(data) > 0:
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            insert_sql = "INSERT INTO hashrate_geo_distribution (frequency, country, province, average_hashrate, unit, period)" \
-                         " VALUES (%(frequency)s, %(country)s, %(province)s, %(average_hashrate)s, %(unit)s, %(period)s)"
+            insert_sql = "INSERT INTO hashrate_geo_distribution (frequency, country, province, average_hashrate, unit, period, api_token_id)" \
+                         " VALUES (%(frequency)s, %(country)s, %(province)s, %(average_hashrate)s, %(unit)s, %(period)s, %(api_token_id)s)"
             try:
+                for row in data:
+                    row['api_token_id'] = api_token[0]
+
                 cursor.executemany(insert_sql, data)
             except Exception as error:
-                return jsonify(data=data, status="fail", error=error)
+                return jsonify(data=data, status="fail", error=str(error))
 
     return jsonify(data=data, status="success")

@@ -8,7 +8,7 @@ from config import config
 def get_api_tokens():
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT * FROM api_tokens')
+        cursor.execute('SELECT * FROM api_tokens WHERE is_active is TRUE')
         return cursor.fetchall()
 
 class AuthenticationError(Exception):

@@ -4,11 +4,11 @@ from flask import Blueprint, jsonify, request
 from config import config
 from extensions import cache
 from schema import Schema
-from decorators import validators
+from decorators import validators, auth
 
 bp = Blueprint('contribute', __name__, url_prefix='/contribute')
 
-@cache.cached()
+@cache.cached(key_prefix='all_countries')
 def get_countries():
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
@@ -38,6 +38,7 @@ schema = Schema({
 }, ignore_extra_keys=True)
 
 @bp.route('/miners_geo_distribution', methods=('POST',))
+@auth.bearer()
 @validators.validate(schema)
 def miners_geo_distribution():
     data = request.json['data']

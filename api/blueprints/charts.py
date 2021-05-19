@@ -8,7 +8,7 @@ bp = Blueprint('charts', __name__, url_prefix='/charts')
 
 @bp.route('/mining_equipment_efficiency')
 def mining_equipment_efficiency():
-    @cache.cached()
+    @cache.cached(key_prefix='all_miners')
     def get_miners():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
@@ -30,7 +30,7 @@ def mining_equipment_efficiency():
 
 @bp.route('/profitability_threshold')
 def profitability_threshold():
-    @cache.cached()
+    @cache.cached(key_prefix='all_prof_threshold')
     def get_prof_thresholds():
         with psycopg2.connect(**config['blockchain_data']) as conn:
             cursor = conn.cursor()

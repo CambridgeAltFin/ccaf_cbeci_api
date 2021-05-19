@@ -22,6 +22,7 @@ import io
 import os
 from dotenv import load_dotenv
 from config import config
+from decorators.auth import AuthenticationError
 from extensions import cache
 
 load_dotenv(override=True)
@@ -147,7 +148,11 @@ def ratelimit_handler(e):
 
 @app.errorhandler(SchemaError)
 def bad_request(error):
-    return make_response(jsonify(error=str(error)), 422)
+    return make_response(jsonify(error=str(error)), 422)\
+
+@app.errorhandler(AuthenticationError)
+def bad_request(error):
+    return make_response(jsonify(error=str(error)), 401)
 
 # cache:
 @app.before_request

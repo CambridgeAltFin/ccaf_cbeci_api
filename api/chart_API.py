@@ -8,8 +8,8 @@ from flask import Flask, jsonify, make_response, request, has_request_context
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from jsonschema import ValidationError
 from logging.handlers import RotatingFileHandler
+from schema import SchemaError
 import pandas as pd
 from datetime import datetime
 import flask
@@ -145,14 +145,9 @@ def ratelimit_handler(e):
         , 429
     )
 
-@ app.errorhandler(400)
+@app.errorhandler(SchemaError)
 def bad_request(error):
-    if isinstance(error.description, ValidationError):
-        original_error = error.description
-        print('original_error', original_error)  # @todo: tmp
-        return make_response(jsonify({'error': original_error.message}), 400)
-    # handle other "Bad Request"-errors
-    return error
+    return make_response(jsonify(error=str(error)), 422)
 
 # cache:
 @app.before_request

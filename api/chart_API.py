@@ -8,6 +8,7 @@ from flask import Flask, jsonify, make_response, request, has_request_context
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from jsonschema import ValidationError
 from logging.handlers import RotatingFileHandler
 import pandas as pd
 from datetime import datetime
@@ -101,8 +102,9 @@ def get_file_handler(filename):
 def create_app():
     app = Flask(__name__)
 
-    from blueprints import charts
+    from blueprints import charts, contribute
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
+    app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
 
     return app
 
@@ -142,6 +144,15 @@ def ratelimit_handler(e):
         jsonify(error="Too many requests from your IP, try again later")
         , 429
     )
+
+@ app.errorhandler(400)
+def bad_request(error):
+    if isinstance(error.description, ValidationError):
+        original_error = error.description
+        print('original_error', original_error)  # @todo: tmp
+        return make_response(jsonify({'error': original_error.message}), 400)
+    # handle other "Bad Request"-errors
+    return error
 
 # cache:
 @app.before_request

@@ -9,6 +9,7 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from logging.handlers import RotatingFileHandler
+from schema import SchemaError
 import pandas as pd
 from datetime import datetime
 import flask
@@ -21,6 +22,7 @@ import io
 import os
 from dotenv import load_dotenv
 from config import config
+from decorators.auth import AuthenticationError
 from extensions import cache
 
 load_dotenv(override=True)
@@ -101,8 +103,9 @@ def get_file_handler(filename):
 def create_app():
     app = Flask(__name__)
 
-    from blueprints import charts
+    from blueprints import charts, contribute
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
+    app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
 
     return app
 
@@ -142,6 +145,14 @@ def ratelimit_handler(e):
         jsonify(error="Too many requests from your IP, try again later")
         , 429
     )
+
+@app.errorhandler(SchemaError)
+def bad_request(error):
+    return make_response(jsonify(error=str(error)), 422)\
+
+@app.errorhandler(AuthenticationError)
+def bad_request(error):
+    return make_response(jsonify(error=str(error)), 401)
 
 # cache:
 @app.before_request

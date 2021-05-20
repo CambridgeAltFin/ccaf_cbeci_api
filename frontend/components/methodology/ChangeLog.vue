@@ -1,5 +1,12 @@
 <template>
     <v-flex xs12 md10 my-3 py-3>
+        <h3 class="display-2 text-md-left">20 May 2021 20:25 GMT</h3>
+        <v-flex class="main-text" my-3>
+            <p>
+                CBECI > Index: real-time network power estimate removed  due to unavailability of real-time hashrate estimate endpoint
+                <a href="https://blockchain.info/q/hashrate" target="_blank">https://blockchain.info/q/hashrate</a>
+            </p>
+        </v-flex>
         <h3 class="display-2 text-md-left">19 Mar 2021 13:12 GMT</h3>
         <v-flex class="main-text" my-3>
             <p>

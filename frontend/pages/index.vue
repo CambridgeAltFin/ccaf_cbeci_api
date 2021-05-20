@@ -14,22 +14,22 @@
         Close
       </v-btn>
     </v-snackbar>
-    <v-layout row align-center>
-      <v-flex>
-        <img src="~static/live.png" height="40">
-      </v-flex>
-      <v-flex pa-3>
-        <v-layout column>
-          <span class="index-text">&nbsp;Bitcoin network power</span>
-          <v-layout row>
-            <v-icon class="icon-custom">
-              updated
-            </v-icon>
-            <span style="margin-left: 4px" class="index-subtext">updated every 30 seconds</span>
-          </v-layout>
-        </v-layout>
-      </v-flex>
-    </v-layout>
+<!--    <v-layout row align-center>-->
+<!--      <v-flex>-->
+<!--        <img src="~static/live.png" height="40">-->
+<!--      </v-flex>-->
+<!--      <v-flex pa-3>-->
+<!--        <v-layout column>-->
+<!--          <span class="index-text">&nbsp;Bitcoin network power</span>-->
+<!--          <v-layout row>-->
+<!--            <v-icon class="icon-custom">-->
+<!--              updated-->
+<!--            </v-icon>-->
+<!--            <span style="margin-left: 4px" class="index-subtext">updated every 30 seconds</span>-->
+<!--          </v-layout>-->
+<!--        </v-layout>-->
+<!--      </v-flex>-->
+<!--    </v-layout>-->
     <client-only>
       <cards />
     </client-only>

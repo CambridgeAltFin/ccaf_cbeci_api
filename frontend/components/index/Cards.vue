@@ -6,14 +6,14 @@
                     <v-flex mb-4>
                         <h4 class="display-1">Theoretical <br/>lower bound</h4>
                     </v-flex>
-                    <v-flex class="card__number-sm font-weight-bold">
-                        <v-progress-circular v-if="progress" indeterminate :size="50" :width="5"/>
-                        <span v-else>{{ numbers[1] | decimals }}</span>
-                    </v-flex>
-                    <v-flex mb-3 class="card__number-sm">
-                        <span>GW</span>
-                    </v-flex>
-                    <v-divider />
+<!--                    <v-flex class="card__number-sm font-weight-bold">-->
+<!--                        <v-progress-circular v-if="progress" indeterminate :size="50" :width="5"/>-->
+<!--                        <span v-else>{{ numbers[1] | decimals }}</span>-->
+<!--                    </v-flex>-->
+<!--                    <v-flex mb-3 class="card__number-sm">-->
+<!--                        <span>GW</span>-->
+<!--                    </v-flex>-->
+<!--                    <v-divider />-->
                     <v-flex mt-3 class="card__text-orange font-weight-bold">
                         <span>{{ numbers2[1] | decimals }}</span>
                     </v-flex>
@@ -29,14 +29,14 @@
                     <v-flex mb-4>
                         <h4 class="display-1">Estimated</h4>
                     </v-flex>
-                    <v-flex class="card__number-lg font-weight-bold">
-                        <v-progress-circular v-if="progress" indeterminate :size="50" :width="5"/>
-                        <span v-else>{{ numbers[0] | decimals }}</span>
-                    </v-flex>
-                    <v-flex mb-3 class="card__number-sm">
-                        <span>GW</span>
-                    </v-flex>
-                    <v-divider />
+<!--                    <v-flex class="card__number-lg font-weight-bold">-->
+<!--                        <v-progress-circular v-if="progress" indeterminate :size="50" :width="5"/>-->
+<!--                        <span v-else>{{ numbers[0] | decimals }}</span>-->
+<!--                    </v-flex>-->
+<!--                    <v-flex mb-3 class="card__number-sm">-->
+<!--                        <span>GW</span>-->
+<!--                    </v-flex>-->
+<!--                    <v-divider />-->
                     <v-flex mt-3 class="card__description">
                         <span>Annualised consumption </span>
                         <v-tooltip max-width="400" bottom>
@@ -65,14 +65,14 @@
                     <v-flex mb-4>
                         <h4 class="display-1">Theoretical <br/>upper bound</h4>
                     </v-flex>
-                    <v-flex class="card__number-sm font-weight-bold">
-                        <v-progress-circular v-if="progress" indeterminate :size="50" :width="5"/>
-                        <span v-else>{{ numbers[2] | decimals }}</span>
-                    </v-flex>
-                    <v-flex mb-3 class="card__number-sm">
-                        <span>GW</span>
-                    </v-flex>
-                    <v-divider />
+<!--                    <v-flex class="card__number-sm font-weight-bold">-->
+<!--                        <v-progress-circular v-if="progress" indeterminate :size="50" :width="5"/>-->
+<!--                        <span v-else>{{ numbers[2] | decimals }}</span>-->
+<!--                    </v-flex>-->
+<!--                    <v-flex mb-3 class="card__number-sm">-->
+<!--                        <span>GW</span>-->
+<!--                    </v-flex>-->
+<!--                    <v-divider />-->
                     <v-flex mt-3 class="card__text-orange font-weight-bold">
                         <span>{{ numbers2[2] | decimals }}</span>
                     </v-flex>

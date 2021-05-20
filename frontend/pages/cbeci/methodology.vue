@@ -34,11 +34,11 @@ export default {
     }
   },
   methods: {
-    resize () {
+    resize() {
       const body = document.body
       const html = document.documentElement
-      document.iframeHeight = Math.max( body.scrollHeight, body.clientHeight, body.offsetHeight,
-        html.clientHeight, html.scrollHeight, html.offsetHeight )
+      document.iframeHeight = Math.max(body.scrollHeight, body.clientHeight, body.offsetHeight,
+        html.clientHeight, html.scrollHeight, html.offsetHeight)
     }
   }
 }

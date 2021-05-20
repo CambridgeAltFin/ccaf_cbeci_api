@@ -3,7 +3,7 @@ import datetime
 from flask import Blueprint, jsonify, request
 from config import config
 from extensions import cache
-from schema import Schema
+from schema import Schema, Or
 from decorators import validators, auth
 
 bp = Blueprint('contribute', __name__, url_prefix='/contribute')
@@ -30,7 +30,7 @@ schema = Schema({
             'frequency': Schema(lambda s: s in ('daily', 'weekly', 'biweekly', 'monthly',),
                                 error='"frequency" should be "daily", "weekly", "biweekly" or "monthly"'),
             'country': Schema(lambda s: s in [row[0] for row in get_countries()], error='"country" should be one from the list, see documentation'),
-            'province': Schema(str, error='"province" should be string'),
+            'province': Schema(Or(str, None), error='"province" should be string or null'),
             'average_hashrate': Schema(float, error='"average_hashrate" should be numeric'),
             'unit': Schema(lambda s: s in ('th/s', 'ph/s', 'eh/s',), error='"unit" should be "th/s", "ph/s" or "eh/s"')
         }

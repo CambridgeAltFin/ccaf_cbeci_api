@@ -30,10 +30,12 @@ import PC from '~/components/comparisons/PC'
 import RP from '~/components/comparisons/RP'
 import FF from '~/components/comparisons/FF'
 import Histogram from '~/components/comparisons/Histogram'
+import myMiddleware from '@/middleware/myMiddleware'
 
 export default {
     name: 'comparisons',
-    components: {
+  layout: myMiddleware || 'default',
+  components: {
         comparisonsCards: countriesCards,
         comparisonsPC: PC,
         comparisonsRP: RP,
@@ -55,6 +57,11 @@ export default {
         }, 30000)
       }
     },
+  mounted() {
+    if (typeof window === 'object') {
+      window.addEventListener('resize', this.resize());
+    }
+  },
     beforeDestroy() {
         clearInterval(this.interval)
     },
@@ -72,7 +79,13 @@ export default {
     methods: {
         async getNewData() {
           await this.$store.dispatch('LOAD_NUMBERS')
-        }
+        },
+      resize () {
+        const body = document.body
+        const html = document.documentElement
+        document.iframeHeight = Math.max( body.scrollHeight, body.clientHeight, body.offsetHeight,
+          html.clientHeight, html.scrollHeight, html.offsetHeight )
+      }
     }
 }
 </script>

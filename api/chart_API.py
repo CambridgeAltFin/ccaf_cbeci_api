@@ -9,6 +9,7 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from logging.handlers import RotatingFileHandler
+from schema import SchemaError
 import pandas as pd
 from datetime import datetime
 import flask
@@ -16,20 +17,15 @@ import requests
 import logging
 import time
 import psycopg2
-import yaml
 import csv
 import io
 import os
 from dotenv import load_dotenv
+from config import config
+from decorators.auth import AuthenticationError
+from extensions import cache
 
 load_dotenv(override=True)
-
-config_path = '../CONFIG.yml'
-if config_path:
-    with open(config_path) as fp:
-        config = yaml.load(fp, yaml.FullLoader)
-else:
-    config = {}
 
 LOG_LEVEL = logging.INFO
 
@@ -104,7 +100,17 @@ def get_file_handler(filename):
 
     return file_handler
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+
+    from blueprints import charts, contribute
+    app.register_blueprint(charts.bp, url_prefix='/api/charts')
+    app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
+
+    return app
+
+app = create_app()
+cache.init_app(app)
 app.logger.setLevel(LOG_LEVEL)
 app.logger.addHandler(get_file_handler("./logs/errors.log"))
 ratelimit_storage_url = os.environ.get("RATELIMIT_STORAGE_URL")
@@ -139,6 +145,14 @@ def ratelimit_handler(e):
         jsonify(error="Too many requests from your IP, try again later")
         , 429
     )
+
+@app.errorhandler(SchemaError)
+def bad_request(error):
+    return make_response(jsonify(error=str(error)), 422)\
+
+@app.errorhandler(AuthenticationError)
+def bad_request(error):
+    return make_response(jsonify(error=str(error)), 401)
 
 # cache:
 @app.before_request

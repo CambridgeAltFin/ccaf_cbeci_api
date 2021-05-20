@@ -27,6 +27,19 @@ export default {
     data() {
         return {
         }
+    },
+  mounted() {
+    if (typeof window === 'object') {
+      window.addEventListener('resize', this.resize());
     }
+  },
+  methods: {
+    resize() {
+      const body = document.body
+      const html = document.documentElement
+      document.iframeHeight = Math.max(body.scrollHeight, body.clientHeight, body.offsetHeight,
+        html.clientHeight, html.scrollHeight, html.offsetHeight)
+    }
+  }
 }
 </script>

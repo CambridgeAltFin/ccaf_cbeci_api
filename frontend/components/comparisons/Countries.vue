@@ -70,7 +70,7 @@
             binding() {
                 const binding = {}
                 if (!process.server) {
-                    if (this.$vuetify.breakpoint.xsOnly) binding.column = true
+                    if (this.$vuetify.breakpoint.mdAndDown) binding.column = true
                 }
                 return binding
             },

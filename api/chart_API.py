@@ -57,7 +57,9 @@ def load_data():
 
 
 def get_hashrate():
-    return int(requests.get("https://blockchain.info/q/hashrate", timeout=3).json())
+    rate = hash_rate[-1][2]
+    return int(0 if rate is None else rate)
+    # return int(requests.get("https://blockchain.info/q/hashrate", timeout=3).json())
 
 
 def send_err_to_slack(err, name):

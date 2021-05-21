@@ -1,5 +1,5 @@
 <template>
-    <v-flex xs12 md10 my-3 py-3>
+    <v-flex>
         <h2 class="display-3 text-xs-center">Feedback</h2>
         <v-form ref="form" v-model="valid" lazy-validation>
             <v-flex>

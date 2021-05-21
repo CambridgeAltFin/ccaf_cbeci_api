@@ -4,14 +4,12 @@
         <v-flex class="main-text" my-3>
             <p>
                 CBECI > Index: replaced 30-second network power estimate with 24-hour intervals due to unreliability of input data (real-time hashrate estimate)
-                <a href="https://blockchain.info/q/hashrate" target="_blank">https://blockchain.info/q/hashrate</a>
             </p>
         </v-flex>
         <h3 class="display-2 text-md-left">20 May 2021 20:25 GMT</h3>
         <v-flex class="main-text" my-3>
             <p>
                 CBECI > Index: power estimates have been temporarily removed due to an issue with a data input source. The issue is under investigation and will be fixed as soon as possible.
-                <a href="https://blockchain.info/q/hashrate" target="_blank">https://blockchain.info/q/hashrate</a>
             </p>
         </v-flex>
         <h3 class="display-2 text-md-left">19 Mar 2021 13:12 GMT</h3>

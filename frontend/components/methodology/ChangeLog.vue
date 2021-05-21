@@ -3,7 +3,7 @@
         <h3 class="display-2 text-md-left">21 May 2021 15:57 GMT</h3>
         <v-flex class="main-text" my-3>
             <p>
-                CBECI > Index: replaced 30-second network power estimate with 24-hour intervals due to unreliability of input data (real-time hashrate estimate)
+                CBECI > Index: replaced 30-second network power estimate with 24-hour intervals due to unreliability of input data (real-time hashrate estimate).
             </p>
         </v-flex>
         <h3 class="display-2 text-md-left">20 May 2021 20:25 GMT</h3>
@@ -15,7 +15,7 @@
         <h3 class="display-2 text-md-left">19 Mar 2021 13:12 GMT</h3>
         <v-flex class="main-text" my-3>
             <p>
-                Mining map > Visualisation: updated disclaimer
+                Mining map > Visualisation: updated disclaimer.
             </p>
         </v-flex>
         <h3 class="display-2 text-md-left">17 Feb 2021 08:30 GMT</h3>

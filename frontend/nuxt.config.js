@@ -36,6 +36,7 @@ export default {
   ],
   plugins: [
     '@/plugins/vuetify',
+    '~/plugins/swiper.js',
     { src: '~plugins/katex2js.js', ssr: false },
   ],
 

@@ -24,8 +24,8 @@
         <v-flex class="main-text" my-3>
             <p>The CBECI landing page displays two numbers for each type of estimate.</p>
             <p>The first number refers to the total <b>electrical power</b> consumed by the Bitcoin network and is
-                expressed in gigawatts (GW). This figure is updated every 30 seconds and corresponds to the rate at
-                which Bitcoin uses electricity.</p>
+                expressed in gigawatts (GW). This figure is updated every 24 hours and corresponds to the rate at
+                which Bitcoin uses electricity.<sup @click="menu1 = true" style="text-decoration: underline; cursor: pointer">1</sup></p>
             <p>The second number refers to the total <b>yearly electricity consumption</b> of the Bitcoin network and is
                 expressed in terawatt-hours (TWh). We annualise Bitcoin’s electricity consumption assuming continuous
                 power usage at the aforementioned rate over the period of one year. We apply a <b>7-day moving
@@ -33,6 +33,16 @@
                 short-term hashrate movements, and thus more suitable for comparisons with alternative uses of
                 electricity.</p>
         </v-flex>
+        <v-dialog v-model="menu1" :max-width="600" offset-x>
+            <v-card>
+                <v-flex pa-4>
+                    An earlier version of the model used a real-time estimate of Bitcoin's hashrate to ensure updates to the power
+                    estimate in 30-second intervals. However, hashrate is notoriously difficult to calculate given that time
+                    elapsed between blocks is entirely random. As a result, only measurements over longer periods can be
+                    considered reliable. We have chosen a daily average as an acceptable trade-off and updated the model accordingly.
+                </v-flex>
+            </v-card>
+        </v-dialog>
         <h3 class="display-2 text-md-left">Model parameters</h3>
         <v-flex class="main-text" my-3>
             <p>The model takes into account the parameters outlined in <b>Table 1</b> below. The following sections will
@@ -64,6 +74,7 @@
     name: 'Overview',
     data() {
       return {
+        menu1: false,
         headers: [
           {text: 'Parameter', sortable: false, value: 'parameter'},
           {text: 'Description', sortable: false, value: 'description'},
@@ -105,13 +116,6 @@
             unit: 'USD',
             source: 'Dynamic: ',
             link: 'https://coinmetrics.io/'
-          },
-          {
-            parameter: 'Network hashrate, real-time estimate',
-            description: 'The real-time estimate of the rate at which miners are solving hashes',
-            unit: 'Exahashes per second (Eh/s)',
-            source: 'Dynamic: ',
-            link: 'https://www.blockchain.com/'
           },
           {
             parameter: 'Mining equipment efficiency',

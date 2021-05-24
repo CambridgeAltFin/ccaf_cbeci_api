@@ -5,7 +5,7 @@
         <v-flex class="main-text" my-3>
             <p>In the first years of Bitcoin, mining was mainly performed using general-purpose <a target="_blank" href="https://en.wikipedia.org/wiki/Graphics_processing_unit">graphics processing units (GPUs)</a> and <a target="_blank" href="https://en.wikipedia.org/wiki/Field-programmable_gate_array">field-programmable gate arrays (FPGAs)</a>. This changed considerably when in 2012 the first <a target="_blank" href="https://en.wikipedia.org/wiki/Application-specific_integrated_circuit">application-specific integrated circuits (ASICs)</a> started to emerge. ASICs are specialised hardware specifically optimised for Bitcoin mining that are orders of magnitude more efficient than previous devices used for mining: it didn’t take long for ASICs to become popular and displace GPU and FPGA mining.</p>
             <p>We have compiled a list of more than 60 different Bitcoin ASIC models designed for SHA-256 operations that have been brought to market since October 2014, which serves as the starting date of the CBECI. The list is based on a combination of public resources that list various types of mining equipment and their specifications.
-                <sup @click="menu1 = true" style="text-decoration: underline; cursor: pointer">1</sup>
+                <sup @click="menu1 = true" style="text-decoration: underline; cursor: pointer">2</sup>
             </p>
             <p>Mining efficiency of each machine type is expressed in Joules per Gigahash (J/Gh): given that real power usage can vary significantly depending on several parameters (e.g. usage conditions, overclocking), the manufacturer specifications have been refined with the help of experts to more accurately reflect real power usage. The full list is available at <a href="http://sha256.cbeci.org" target="_blank">http://sha256.cbeci.org</a> and is open to comments and suggestions. <b>Figure 1</b> shows the evolution of Bitcoin mining equipment efficiency since late 2014.</p>
             <v-dialog v-model="menu1" :max-width="600" offset-x>
@@ -47,7 +47,7 @@
                 <span><u>Assumption 1</u>: the global average electricity price is constant over time and corresponds to 0.05 USD/kWh. </span>
             </v-flex>
             <p>Electricity prices available to miners vary significantly from one region to another for a variety of reasons. We assume that on average, miners face a constant electricity price of 5 USD cents per kilowatt-hour (0.05 USD/kWh). This default value is based on in-depth conversations with miners worldwide and is consistent with estimates used in previous research.
-                <sup @click="menu2 = true" style="text-decoration: underline; cursor: pointer">2</sup>
+                <sup @click="menu2 = true" style="text-decoration: underline; cursor: pointer">3</sup>
             </p>
             <v-dialog v-model="menu2" :max-width="600" offset-x>
                 <v-card>
@@ -166,9 +166,9 @@
             </p>
             <p>
                 However, when comparing our best-guess estimate to a simulation that uses hardware weighting based on Stoll et al.’s (2019) market share calculations,
-                <sup @click="menu3 = true" style="text-decoration: underline; cursor: pointer">3</sup>
+                <sup @click="menu3 = true" style="text-decoration: underline; cursor: pointer">4</sup>
                 the resulting electricity consumption values do not differ substantially <strong>(Figure 3)</strong>.
-                <sup @click="menu4 = true" style="text-decoration: underline; cursor: pointer">4</sup>
+                <sup @click="menu4 = true" style="text-decoration: underline; cursor: pointer">5</sup>
                 This suggests that using the current assumption of equally-weighted profitable equipment is acceptable until further research and analysis on better weighting approaches becomes available.
             </p>
             <v-dialog v-model="menu3" :max-width="600" offset-x>
@@ -192,7 +192,7 @@
         </v-flex>
         <v-flex class="main-text" my-3>
             <p>We assume that all mining farms have a PUE of 1.10 when calculating our best-guess estimate.
-                <sup @click="menu5 = true" style="text-decoration: underline; cursor: pointer">5</sup>
+                <sup @click="menu5 = true" style="text-decoration: underline; cursor: pointer">6</sup>
                 This figure is slightly more conservative than other estimates but has been confirmed during private conversations with miners and mining experts.</p>
             <p>Our best-guess estimate can be mathematically expressed as follows:</p>
             <v-dialog v-model="menu5" :max-width="600" offset-x>

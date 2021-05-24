@@ -10,7 +10,7 @@
                 </li>
                 <li>
                     <p><strong>Hardware selection:</strong> we may not be aware of new and more efficient hardware that is not yet available on the market. Some have argued that manufacturers are using proprietary equipment to their own benefits before public release.
-                        <sup @click="menu6 = true" style="text-decoration: underline; cursor: pointer">6</sup>
+                        <sup @click="menu6 = true" style="text-decoration: underline; cursor: pointer">7</sup>
                     </p>
                 </li>
                 <li>
@@ -62,7 +62,7 @@
         <v-flex class="main-text" my-3>
             <p>These studies tend to produce considerably diverging findings along a relatively broad range of possible estimates. This can be explained by the application of different methodologies adopted by the study authors: some use a top-down economic approach, whereas others are based on a bottom-up techno-economic approach (like the CBECI model).</p>
             <p>Each study is based on a set of assumptions that can be put into question. As a result, the design of each study - including our own analysis - has its own pitfalls and limitations. Some papers, however, have been criticised for applying overly simplistic assumptions and containing non-trivial errors such as inappropriate averaging over time periods or simple extrapolations. For a more thorough review of previous studies, see Koomey (2019).
-                <sup @click="menu7 = true" style="text-decoration: underline; cursor: pointer">7</sup>
+                <sup @click="menu7 = true" style="text-decoration: underline; cursor: pointer">8</sup>
             </p>
             <p>
                 The CBECI has been designed with the aforementioned studies in mind. We have carefully reviewed the various methodologies and incorporated best practices. This website attempts to provide comprehensive documentation with transparent version control, highlight the model’s dependence on the electricity cost assumption by allowing visitors to adjust the default value, and openly present the uncertainties and limitations of the model. Feedback and suggestions for further improvements can be given <nuxt-link to="/contact/">here</nuxt-link>.

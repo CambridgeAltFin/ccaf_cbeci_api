@@ -10,6 +10,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from logging.handlers import RotatingFileHandler
 from schema import SchemaError
+from flask_swagger import swagger
+from flask_swagger_ui import get_swaggerui_blueprint
 import pandas as pd
 from datetime import datetime
 import flask
@@ -28,6 +30,9 @@ from extensions import cache
 load_dotenv(override=True)
 
 LOG_LEVEL = logging.INFO
+
+SWAGGER_URL = '/api/docs'
+SWAGGER_SPEC_URL = '/api/docs/spec'
 
 def get_limiter_flag():
     val = os.environ.get("LIMITER_ENABLED")
@@ -108,6 +113,15 @@ def create_app():
     from blueprints import charts, contribute
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
+
+    swaggerui_bp = get_swaggerui_blueprint(
+        SWAGGER_URL,
+        SWAGGER_SPEC_URL,
+        config={
+            'app_name': "Cbeci API"
+        }
+    )
+    app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
 
     return app
 
@@ -509,6 +523,20 @@ def download_report():
 #     return jsonify(response)
 # 
 # =============================================================================
+
+@app.route(SWAGGER_SPEC_URL)
+def spec():
+    swag = swagger(app)
+    swag['info']['version'] = "1.0"
+    swag['info']['title'] = "Cbeci API"
+    swag['securityDefinitions'] = {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+    return jsonify(swag)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', use_reloader=True)

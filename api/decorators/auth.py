@@ -28,9 +28,13 @@ def bearer(header='Authorization'):
 
             auth_token = ''
             if auth_header:
-                auth_token = auth_header.split(" ")[1]
+                parts = auth_header.split(" ")
+                if len(parts) > 1:
+                    auth_token = parts[1]
 
-            api_token = get_api_token(auth_token)
+            api_token = None
+            if auth_token:
+                api_token = get_api_token(auth_token)
             if api_token is None:
                 raise AuthenticationError('Invalid bearer token')
 

@@ -31,7 +31,7 @@ load_dotenv(override=True)
 
 LOG_LEVEL = logging.INFO
 
-SWAGGER_URL = '/api/docs'
+SWAGGER_URL = '/api/docs/contribute'
 SWAGGER_SPEC_URL = '/api/docs/spec'
 
 def get_limiter_flag():

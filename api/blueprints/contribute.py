@@ -287,7 +287,6 @@ def miners_geo_distribution(api_token):
                - "Zimbabwe"
             province:
              type: string
-             nullable: true
              description: If need to specify location. Can be empty
              example: null
             average_hashrate:

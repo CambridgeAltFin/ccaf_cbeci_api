@@ -2,9 +2,11 @@ import logging
 import psycopg2
 import pandas as pd
 from datetime import datetime
+from dateutil import parser
 import click
 import yaml
 from api.data_source.coinmetrics import CoinMetrics
+from api.api.coinmetrics import CoinMetrics as ApiCoinMetrics
 
 config_path = 'CONFIG.yml'
 if config_path:
@@ -41,8 +43,12 @@ def save_values(values, connection, table_name):
         finally:
             connection.commit()
 
+@click.group()
+def cli():
+    pass
+
 # this is to change parameters from CLI
-@click.command()
+@cli.command()
 @click.option('--price', '-p', default=DEFAULT_ELECTRICITY_PRICE)
 @click.option('--log-level', '-l', default=DEFAULT_LOG_LEVEL)
 def main(log_level, price):
@@ -232,6 +238,45 @@ def main(log_level, price):
 #             energy_ma.to_sql('energy_ma', eng, if_exists='replace')
 # =============================================================================
 
+@cli.command()
+@click.option('--log-level', '-l', default=DEFAULT_LOG_LEVEL)
+def coinmetrics(log_level):
+    with psycopg2.connect(**config['custom_data']) as connection:
+        cursor = connection.cursor()
+
+        def save_hasrate(type, time, value, asset='btc'):
+            table_name = 'hash_rate_by_types'
+            date = parser.parse(time).date()
+
+            # Template of the query to paste a row to a table
+            insert_sql = f"INSERT INTO {table_name} (type, asset, value, date) " \
+                         f"VALUES (%s, %s, %s, %s) ON CONFLICT ON CONSTRAINT {table_name}_date_ukey DO NOTHING;"
+            try:
+                cursor.execute(insert_sql, (type, asset, value, date))
+            except Exception as error:
+                LOGGER.exception(f"{table_name}: {str(error)}")
+            finally:
+                connection.commit()
+
+    # Logging
+    level = log_level.upper() if isinstance(log_level, str) else log_level
+    LOGGER.setLevel(level)
+    # Console outputs
+    LOGGER.addHandler(logging.StreamHandler())
+
+    api_coinmetrics = ApiCoinMetrics(api_key=config['api.coinmetrics.io']['api_key'])
+    # start_time = datetime(year=2014, month=1, day=1) # @todo: uncomment
+    start_time = datetime(year=2021, month=5, day=29) # @todo: remove
+    metrics = {
+        # 's9': 'HashRate30dS9Pct', # @todo: uncomment
+        's7': 'HashRate30dS7Pct'
+    }
+    for type, metric in metrics.items():
+        data = api_coinmetrics.timeseries().asset_metrics(metrics=metric, start_time=start_time)
+        df = pd.DataFrame(data).sort_values(by=['time'])
+
+        for row in df.itertuples(name='Metric'):
+            save_hasrate(type=type, asset=row.asset, time=row.time, value=getattr(row, metric))
 
 if __name__ == '__main__':
-    main()
+    cli()

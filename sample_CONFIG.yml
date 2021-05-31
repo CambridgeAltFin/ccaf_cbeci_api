@@ -15,3 +15,6 @@ webhook_err: "https://yourwebhookurl.com"
 
 api_eia_gov:
   api_key: "api key"
+
+api.coinmetrics.io:
+  api_key: "api key"

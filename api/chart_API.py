@@ -14,6 +14,7 @@ from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 import pandas as pd
 from datetime import datetime
+import calendar
 import flask
 import requests
 import logging
@@ -52,13 +53,27 @@ def load_data():
         c.execute('SELECT * FROM energy_consumption_ma')
         cons = c.fetchall()
         cons = cons[500:]
-    with psycopg2.connect(**config['custom_data']) as conn2:   
+    with psycopg2.connect(**config['custom_data']) as conn2:
+        def load_typed_hasrates():
+            typed_hasrates = {}
+            hash_rate_types = ['s7', 's9']
+            for hash_rate_type in hash_rate_types:
+                c2.execute(f'SELECT type, value, date FROM hash_rate_by_types WHERE type = %s;', (hash_rate_type,))
+                data = c2.fetchall()
+                formatted_data = {}
+                for row in data:
+                    r = dict(zip(['type', 'value', 'date'], row))
+                    formatted_data[calendar.timegm(r['date'].timetuple())] = r
+                typed_hasrates[hash_rate_type] = formatted_data
+            return typed_hasrates
+
         c2 = conn2.cursor()
-        c2.execute('SELECT * FROM miners')
+        c2.execute('SELECT * FROM miners WHERE is_active is true')
         miners=c2.fetchall()
         c2.execute('SELECT * FROM countries')
         countries=c2.fetchall()
-    return prof_threshold, hash_rate, miners, countries, cons
+        typed_hasrates = load_typed_hasrates()
+    return prof_threshold, hash_rate, miners, countries, cons, typed_hasrates
 
 
 def get_hashrate():
@@ -143,7 +158,7 @@ if get_limiter_flag():
     )
 
 # initialisation of cache vars:
-prof_threshold, hash_rate, miners, countries, cons = load_data()
+prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
 lastupdate = time.time()
 lastupdate_power = time.time()
 cache = {}
@@ -173,10 +188,10 @@ def bad_request(error):
 # cache:
 @app.before_request
 def before_request():
-    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, cache
+    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, cache, typed_hasrates
     if time.time() - lastupdate > 3600:
         try:
-            prof_threshold, hash_rate, miners, countries, cons = load_data()
+            prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
         except Exception as err:
             app.logger.exception(f"Getting data from DB err: {str(err)}")
             send_err_to_slack(err, 'DB')
@@ -197,6 +212,34 @@ def before_request():
 @app.route('/api/data')
 @app.route('/api/data/<value>')
 def recalculate_data(value=None):
+    def get_hash_rates(typed_hasrates, timestamp):
+        hash_rates = {}
+        for miner_type, hr in typed_hasrates.items():
+            hash_rates[miner_type] = hr[timestamp]['value']
+        return hash_rates
+
+    def get_avg_effciency_by_types(miners):
+        miners_by_types = {}
+        typed_avg_effciency = {}
+        for miner in miners:
+            type = miner[5]
+            if type:
+                if type not in miners_by_types:
+                    miners_by_types[type] = []
+                miners_by_types[type].append(miner[2])
+
+        for t, efficiencies in miners_by_types.items():
+            typed_avg_effciency[t] = sum(efficiencies) / len(efficiencies)
+
+        return typed_avg_effciency
+
+    def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
+        hash_rate_with_types = sum(hash_rates.values())
+        guess_consumption = sum(prof_eqp) / len(prof_eqp) * (1 - hash_rate_with_types)
+        for t, hr in hash_rates.items():
+            guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)
+        return guess_consumption * hash_rate * 365.25 * 24 / 1e9 * 1.1
+
     try:
         if value is None:
             value = request.args.get('p')
@@ -212,6 +255,7 @@ def recalculate_data(value=None):
     # that is because base calculation in the DB is for the price 0.05 USD/KWth
     # temporary vars:
     prof_eqp = []
+    prof_eqp_by_types = {}
     all_prof_eqp = []
     max_all = []
     min_all = []
@@ -227,16 +271,24 @@ def recalculate_data(value=None):
     hashra = pd.DataFrame(hash_rate)
     hashra = hashra.drop(1, axis=1).set_index(0)
 
+    typed_avg_effciency = get_avg_effciency_by_types(miners)
     for timestamp, row in prof_th_ma.iterrows():
+        hash_rates = get_hash_rates(typed_hasrates, timestamp)
         for miner in miners:
             if timestamp > miner[1] and row[2] * k > miner[2]:
-                prof_eqp.append(miner[2])
+                type = miner[5]
+                if type:
+                    if type not in prof_eqp_by_types:
+                        prof_eqp_by_types[type] = []
+                    prof_eqp_by_types[type].append(miner[2])
+                else:
+                    prof_eqp.append(miner[2])
             # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
         all_prof_eqp.append(prof_eqp)
         try:
             max_consumption = max(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.2
             min_consumption = min(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.01
-            guess_consumption = sum(prof_eqp) / len(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.1
+            guess_consumption = get_guess_consumption(prof_eqp, hashra[2][timestamp], hash_rates, typed_avg_effciency)
         except:  # in case if mining is not profitable (it is impossible to find MIN or MAX of empty list)
             max_consumption = max_all[-1]
             min_consumption = min_all[-1]

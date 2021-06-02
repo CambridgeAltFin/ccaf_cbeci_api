@@ -265,10 +265,9 @@ def coinmetrics(log_level):
     LOGGER.addHandler(logging.StreamHandler())
 
     api_coinmetrics = ApiCoinMetrics(api_key=config['api.coinmetrics.io']['api_key'])
-    # start_time = datetime(year=2014, month=1, day=1) # @todo: uncomment
-    start_time = datetime(year=2021, month=5, day=29) # @todo: remove
+    start_time = datetime(year=2014, month=1, day=1)
     metrics = {
-        # 's9': 'HashRate30dS9Pct', # @todo: uncomment
+        's9': 'HashRate30dS9Pct',
         's7': 'HashRate30dS7Pct'
     }
     for type, metric in metrics.items():
@@ -276,7 +275,7 @@ def coinmetrics(log_level):
         df = pd.DataFrame(data).sort_values(by=['time'])
 
         for row in df.itertuples(name='Metric'):
-            save_hasrate(type=type, asset=row.asset, time=row.time, value=getattr(row, metric))
+            save_hasrate(type=type, asset=row.asset, time=row.time, value=float(getattr(row, metric))/100)
 
 if __name__ == '__main__':
     cli()

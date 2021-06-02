@@ -42,14 +42,13 @@ def get_limiter_flag():
 
 # loading data in cache of each worker:
 def load_data():
+    start_date = datetime(year=2014, month=7, day=1)
     with psycopg2.connect(**config['blockchain_data']) as conn:
         c = conn.cursor()
-        c.execute('SELECT * FROM prof_threshold')
+        c.execute('SELECT * FROM prof_threshold WHERE timestamp >= %s', (start_date.timestamp(),))
         prof_threshold = c.fetchall()
-        prof_threshold = prof_threshold[500:]
-        c.execute('SELECT * FROM hash_rate')
+        c.execute('SELECT * FROM hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
         hash_rate = c.fetchall()
-        hash_rate = hash_rate[500:]
         c.execute('SELECT * FROM energy_consumption_ma')
         cons = c.fetchall()
         cons = cons[500:]
@@ -234,8 +233,7 @@ def recalculate_data(value=None):
         return typed_avg_effciency
 
     def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
-        hash_rate_with_types = sum(hash_rates.values())
-        guess_consumption = sum(prof_eqp) / len(prof_eqp) * (1 - hash_rate_with_types)
+        guess_consumption = sum(prof_eqp) / len(prof_eqp)
         for t, hr in hash_rates.items():
             guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)
         return guess_consumption * hash_rate * 365.25 * 24 / 1e9 * 1.1
@@ -255,7 +253,6 @@ def recalculate_data(value=None):
     # that is because base calculation in the DB is for the price 0.05 USD/KWth
     # temporary vars:
     prof_eqp = []
-    prof_eqp_by_types = {}
     all_prof_eqp = []
     max_all = []
     min_all = []
@@ -264,7 +261,7 @@ def recalculate_data(value=None):
     guess_all = []
     response = []
 
-    prof_th = pd.DataFrame(prof_threshold)
+    prof_th = pd.DataFrame(prof_threshold).sort_values(by=0)
     prof_th = prof_th.drop(1, axis=1).set_index(0)
     prof_th_ma = prof_th.rolling(window=14, min_periods=1).mean()
 
@@ -277,11 +274,7 @@ def recalculate_data(value=None):
         for miner in miners:
             if timestamp > miner[1] and row[2] * k > miner[2]:
                 type = miner[5]
-                if type:
-                    if type not in prof_eqp_by_types:
-                        prof_eqp_by_types[type] = []
-                    prof_eqp_by_types[type].append(miner[2])
-                else:
+                if not type:
                     prof_eqp.append(miner[2])
             # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
         all_prof_eqp.append(prof_eqp)

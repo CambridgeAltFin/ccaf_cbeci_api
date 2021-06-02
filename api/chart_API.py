@@ -49,9 +49,8 @@ def load_data():
         prof_threshold = c.fetchall()
         c.execute('SELECT * FROM hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
         hash_rate = c.fetchall()
-        c.execute('SELECT * FROM energy_consumption_ma')
+        c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
         cons = c.fetchall()
-        cons = cons[500:]
     with psycopg2.connect(**config['custom_data']) as conn2:
         def load_typed_hasrates():
             typed_hasrates = {}

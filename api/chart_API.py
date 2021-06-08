@@ -533,7 +533,14 @@ def spec():
         'Bearer': {
             'type': 'apiKey',
             'name': 'Authorization',
-            'in': 'header'
+            'in': 'header',
+            'description': """
+    To authorize, please use the following request header: "Authorization"
+
+    Example:
+    "Authorization": "Bearer 1234567890",
+    where 1234567890 - is your token
+            """
         }
     }
     return jsonify(swag)

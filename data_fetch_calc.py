@@ -241,7 +241,7 @@ def main(log_level, price):
 @cli.command()
 @click.option('--log-level', '-l', default=DEFAULT_LOG_LEVEL)
 def coinmetrics(log_level):
-    with psycopg2.connect(**config['custom_data']) as connection:
+    with psycopg2.connect(**config['blockchain_data']) as connection:
         cursor = connection.cursor()
 
         def save_hasrate(type, time, value, asset='btc'):

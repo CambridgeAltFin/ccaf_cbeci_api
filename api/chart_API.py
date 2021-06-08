@@ -45,19 +45,12 @@ def load_data():
     start_date = datetime(year=2014, month=7, day=1)
     with psycopg2.connect(**config['blockchain_data']) as conn:
         c = conn.cursor()
-        c.execute('SELECT * FROM prof_threshold WHERE timestamp >= %s', (start_date.timestamp(),))
-        prof_threshold = c.fetchall()
-        c.execute('SELECT * FROM hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
-        hash_rate = c.fetchall()
-        c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
-        cons = c.fetchall()
-    with psycopg2.connect(**config['custom_data']) as conn2:
         def load_typed_hasrates():
             typed_hasrates = {}
             hash_rate_types = ['s7', 's9']
             for hash_rate_type in hash_rate_types:
-                c2.execute(f'SELECT type, value, date FROM hash_rate_by_types WHERE type = %s;', (hash_rate_type,))
-                data = c2.fetchall()
+                c.execute(f'SELECT type, value, date FROM hash_rate_by_types WHERE type = %s;', (hash_rate_type,))
+                data = c.fetchall()
                 formatted_data = {}
                 for row in data:
                     r = dict(zip(['type', 'value', 'date'], row))
@@ -65,12 +58,19 @@ def load_data():
                 typed_hasrates[hash_rate_type] = formatted_data
             return typed_hasrates
 
+        c.execute('SELECT * FROM prof_threshold WHERE timestamp >= %s', (start_date.timestamp(),))
+        prof_threshold = c.fetchall()
+        c.execute('SELECT * FROM hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
+        hash_rate = c.fetchall()
+        c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
+        cons = c.fetchall()
+        typed_hasrates = load_typed_hasrates()
+    with psycopg2.connect(**config['custom_data']) as conn2:
         c2 = conn2.cursor()
         c2.execute('SELECT * FROM miners WHERE is_active is true')
         miners=c2.fetchall()
         c2.execute('SELECT * FROM countries')
         countries=c2.fetchall()
-        typed_hasrates = load_typed_hasrates()
     return prof_threshold, hash_rate, miners, countries, cons, typed_hasrates
 
 

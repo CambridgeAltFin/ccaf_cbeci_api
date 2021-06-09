@@ -43,20 +43,20 @@ def save_values(values, connection, table_name):
         finally:
             connection.commit()
 
-@click.group()
-def cli():
-    pass
-
-# this is to change parameters from CLI
-@cli.command()
-@click.option('--price', '-p', default=DEFAULT_ELECTRICITY_PRICE)
+@click.group(chain=True)
 @click.option('--log-level', '-l', default=DEFAULT_LOG_LEVEL)
-def main(log_level, price):
+def cli(log_level):
     # Logging
     level = log_level.upper() if isinstance(log_level, str) else log_level
     LOGGER.setLevel(level)
     # Console outputs
     LOGGER.addHandler(logging.StreamHandler())
+
+# this is to change parameters from CLI
+@cli.command()
+@click.option('--price', '-p', default=DEFAULT_ELECTRICITY_PRICE)
+def hash_rate(price):
+    LOGGER.info('hash_rate called')
     
     with psycopg2.connect(**config['custom_data']) as connection2:
         with connection2.cursor() as c2:
@@ -239,8 +239,8 @@ def main(log_level, price):
 # =============================================================================
 
 @cli.command()
-@click.option('--log-level', '-l', default=DEFAULT_LOG_LEVEL)
-def coinmetrics(log_level):
+def coinmetrics():
+    LOGGER.info('coinmetrics called')
     with psycopg2.connect(**config['blockchain_data']) as connection:
         cursor = connection.cursor()
 
@@ -258,24 +258,19 @@ def coinmetrics(log_level):
             finally:
                 connection.commit()
 
-    # Logging
-    level = log_level.upper() if isinstance(log_level, str) else log_level
-    LOGGER.setLevel(level)
-    # Console outputs
-    LOGGER.addHandler(logging.StreamHandler())
-
     api_coinmetrics = ApiCoinMetrics(api_key=config['api.coinmetrics.io']['api_key'])
     start_time = datetime(year=2014, month=1, day=1)
     metrics = {
         's9': 'HashRate30dS9Pct',
         's7': 'HashRate30dS7Pct'
     }
-    for type, metric in metrics.items():
+    for t, metric in metrics.items():
+        LOGGER.info(f"hash_rate_by_types (type: {t}): as of {datetime.utcnow().isoformat()}")
         data = api_coinmetrics.timeseries().asset_metrics(metrics=metric, start_time=start_time)
         df = pd.DataFrame(data).sort_values(by=['time'])
 
         for row in df.itertuples(name='Metric'):
-            save_hasrate(type=type, asset=row.asset, time=row.time, value=float(getattr(row, metric))/100)
+            save_hasrate(type=t, asset=row.asset, time=row.time, value=float(getattr(row, metric))/100)
 
 if __name__ == '__main__':
     cli()

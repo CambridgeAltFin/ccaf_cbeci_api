@@ -14,7 +14,6 @@ from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 import pandas as pd
 from datetime import datetime
-import calendar
 import flask
 import requests
 import logging
@@ -27,6 +26,7 @@ from dotenv import load_dotenv
 from config import config
 from decorators.auth import AuthenticationError
 from extensions import cache
+from helpers import get_guess_consumption, get_hash_rates, get_avg_effciency_by_types, load_typed_hasrates
 
 load_dotenv(override=True)
 
@@ -45,26 +45,13 @@ def load_data():
     start_date = datetime(year=2014, month=7, day=1)
     with psycopg2.connect(**config['blockchain_data']) as conn:
         c = conn.cursor()
-        def load_typed_hasrates():
-            typed_hasrates = {}
-            hash_rate_types = ['s7', 's9']
-            for hash_rate_type in hash_rate_types:
-                c.execute(f'SELECT type, value, date FROM hash_rate_by_types WHERE type = %s;', (hash_rate_type,))
-                data = c.fetchall()
-                formatted_data = {}
-                for row in data:
-                    r = dict(zip(['type', 'value', 'date'], row))
-                    formatted_data[calendar.timegm(r['date'].timetuple())] = r
-                typed_hasrates[hash_rate_type] = formatted_data
-            return typed_hasrates
-
         c.execute('SELECT * FROM prof_threshold WHERE timestamp >= %s', (start_date.timestamp(),))
         prof_threshold = c.fetchall()
         c.execute('SELECT * FROM hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
         hash_rate = c.fetchall()
         c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
         cons = c.fetchall()
-        typed_hasrates = load_typed_hasrates()
+        typed_hasrates = load_typed_hasrates(c)
     with psycopg2.connect(**config['custom_data']) as conn2:
         c2 = conn2.cursor()
         c2.execute('SELECT * FROM miners WHERE is_active is true')
@@ -81,7 +68,7 @@ def get_hashrate():
 
 
 def send_err_to_slack(err, name):
-    try: 
+    try:
         headers = {'Content-type': 'application/json',}
         data = {"text":""}
         data["text"] = f"Getting {name} failed. It unexpectedly returned: " + str(err)[0:140]
@@ -210,33 +197,6 @@ def before_request():
 @app.route('/api/data')
 @app.route('/api/data/<value>')
 def recalculate_data(value=None):
-    def get_hash_rates(typed_hasrates, timestamp):
-        hash_rates = {}
-        for miner_type, hr in typed_hasrates.items():
-            hash_rates[miner_type] = hr[timestamp]['value']
-        return hash_rates
-
-    def get_avg_effciency_by_types(miners):
-        miners_by_types = {}
-        typed_avg_effciency = {}
-        for miner in miners:
-            type = miner[5]
-            if type:
-                if type not in miners_by_types:
-                    miners_by_types[type] = []
-                miners_by_types[type].append(miner[2])
-
-        for t, efficiencies in miners_by_types.items():
-            typed_avg_effciency[t] = sum(efficiencies) / len(efficiencies)
-
-        return typed_avg_effciency
-
-    def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
-        guess_consumption = sum(prof_eqp) / len(prof_eqp)
-        for t, hr in hash_rates.items():
-            guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)
-        return guess_consumption * hash_rate * 365.25 * 24 / 1e9 * 1.1
-
     try:
         if value is None:
             value = request.args.get('p')

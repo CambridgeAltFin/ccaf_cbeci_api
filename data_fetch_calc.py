@@ -5,6 +5,7 @@ from datetime import datetime
 from dateutil import parser
 import click
 import yaml
+from api.helpers import get_guess_consumption, get_hash_rates, get_avg_effciency_by_types, load_typed_hasrates
 from api.data_source.coinmetrics import CoinMetrics
 from api.api.coinmetrics import CoinMetrics as ApiCoinMetrics
 
@@ -57,16 +58,16 @@ def cli(log_level):
 @click.option('--price', '-p', default=DEFAULT_ELECTRICITY_PRICE)
 def hash_rate(price):
     LOGGER.info('hash_rate called')
-    
+
     with psycopg2.connect(**config['custom_data']) as connection2:
         with connection2.cursor() as c2:
-            c2.execute("SELECT * FROM miners")
-            miners=c2.fetchall()
+            c2.execute('SELECT * FROM miners WHERE is_active is true')
+            miners = c2.fetchall()
 
     all_data = {}
     # Opening DB. When the 'with' block ends, connection will be closed
     with psycopg2.connect(**config['blockchain_data']) as connection:
-        data = CoinMetrics().get_values(start_date='2021-02-15')
+        data = CoinMetrics().get_values(start_date='2014-07-01')
         for item in data:
             if any(item[metric] is None for metric in ['difficulty', 'hash-rate', 'miners-revenue', 'market-price']):
                 continue
@@ -83,58 +84,58 @@ def hash_rate(price):
                         all_data[timestamp] = {}
 
                     all_data[timestamp][metric] = value
-                    
-# =============================================================================
-#        # This is to create block reward time series
-#        for timestamp, data in all_data.items():
-#            # 0 <= timestamp < 28 November 2012
-#            if timestamp < 1353967200:
-#                data['block-reward'] = 50.0
-#            # 28 November 2012 <= timestamp < 9 July 2016
-#            elif timestamp < 1467925200:
-#                data['block-reward'] = 25.0
-#           # 9 July 2016 <= timestamp < 01 May 2020   # Will not work forever
-#            elif timestamp < 1588291200:
-#                data['block-reward'] = 12.5
-#            else:
-#                LOGGER.warning(f"Timestamp {timestamp} is out of range")
-#                data['block-reward'] = None
-#        save_values(((timestamp, data['block-reward']) for timestamp, 
-#                        data in all_data.items()),
-#                    connection, 'block_reward')
-# =============================================================================
-#        # Profitability threshold calculation -- block rewards only (bro)
-#        for timestamp, data in all_data.items():
-#            try:
-#                data['thresh-bro'] = 1.0e+09 / (2 ** 32 * data['difficulty'])\ 
-#                 *data['block-reward']* data['market-price'] / price * 3.6e+06
-#            except KeyError:
-#                pass
-#            except ZeroDivisionError:
-#                data['thresh-bro'] = float('inf')
-#                LOGGER.warning(f"Zero div: timestamp={timestamp},data={data}")
-#        save_values(((timestamp, data['prof-threshold-block-reward-only']) 
-#                    for timestamp, data
-#                     in all_data.items() if 'thresh-bro' in data),
-#                    connection, 'prof_threshold_block_reward_only')    
-# =============================================================================
-                    
+
+        # =============================================================================
+        #        # This is to create block reward time series
+        #        for timestamp, data in all_data.items():
+        #            # 0 <= timestamp < 28 November 2012
+        #            if timestamp < 1353967200:
+        #                data['block-reward'] = 50.0
+        #            # 28 November 2012 <= timestamp < 9 July 2016
+        #            elif timestamp < 1467925200:
+        #                data['block-reward'] = 25.0
+        #           # 9 July 2016 <= timestamp < 01 May 2020   # Will not work forever
+        #            elif timestamp < 1588291200:
+        #                data['block-reward'] = 12.5
+        #            else:
+        #                LOGGER.warning(f"Timestamp {timestamp} is out of range")
+        #                data['block-reward'] = None
+        #        save_values(((timestamp, data['block-reward']) for timestamp,
+        #                        data in all_data.items()),
+        #                    connection, 'block_reward')
+        # =============================================================================
+        #        # Profitability threshold calculation -- block rewards only (bro)
+        #        for timestamp, data in all_data.items():
+        #            try:
+        #                data['thresh-bro'] = 1.0e+09 / (2 ** 32 * data['difficulty'])\
+        #                 *data['block-reward']* data['market-price'] / price * 3.6e+06
+        #            except KeyError:
+        #                pass
+        #            except ZeroDivisionError:
+        #                data['thresh-bro'] = float('inf')
+        #                LOGGER.warning(f"Zero div: timestamp={timestamp},data={data}")
+        #        save_values(((timestamp, data['prof-threshold-block-reward-only'])
+        #                    for timestamp, data
+        #                     in all_data.items() if 'thresh-bro' in data),
+        #                    connection, 'prof_threshold_block_reward_only')
+        # =============================================================================
+
         # Profitability threshold calculation based on the miners revenue est.
         LOGGER.info(f"prof-threshold: as of {datetime.utcnow().isoformat()}")
         for timestamp, data in all_data.items():
             try:
-                data['prof-threshold'] = (data['miners-revenue']/
-                    (data['hash-rate']*60*60*24))/(price/3.6e+06)/1000
+                data['prof-threshold'] = (data['miners-revenue'] /
+                                          (data['hash-rate'] * 60 * 60 * 24)) / (price / 3.6e+06) / 1000
             except KeyError:
                 pass
             except ZeroDivisionError:
                 data['prof-threshold'] = float('inf')
                 LOGGER.warning(f"Zero div: timestamp={timestamp}, data={data}")
-                
+
         save_values(((timestamp, data['prof-threshold']) for timestamp, data
                      in all_data.items() if 'prof-threshold' in data),
-                    connection, 'prof_threshold')    
-        
+                    connection, 'prof_threshold')
+
         # Calculating energy consumption
         LOGGER.info(f"energy-consumption: as of {datetime.utcnow().isoformat()}")
         with connection.cursor() as c:
@@ -147,40 +148,46 @@ def hash_rate(price):
                          "min_consumption, guess_consumption, all_prof_eqp, all_prof_eqp_qty) " \
                          "VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT ON CONSTRAINT " \
                          "energy_consumption_pkey DO NOTHING;"
-            prof_eqp = []   # temp var for list of profit. eqp efficiency
-            prof_eqp_all = []  # list of lists of profit. eqp efficiency 
+            prof_eqp = []  # temp var for list of profit. eqp efficiency
+            prof_eqp_all = []  # list of lists of profit. eqp efficiency
             prof_eqp_qty = []  # temp var for the list of profit. eqp qty
-            prof_eqp_qty_all = [] # list of lists of profitable equipment qty
+            prof_eqp_qty_all = []  # list of lists of profitable equipment qty
             max_all = []
             min_all = []
             guess_all = []
             ts_all = []
-            
-            data_df=pd.DataFrame.from_dict(all_data, orient='index')
-            data_ma=data_df.rolling(window=14, min_periods=1).mean()
-            
+
+            data_df = pd.DataFrame.from_dict(all_data, orient='index')
+            data_ma = data_df.rolling(window=14, min_periods=1).mean()
+
+            typed_hasrates = load_typed_hasrates(c)
+            typed_avg_effciency = get_avg_effciency_by_types(miners)
             for timestamp, data in all_data.items():
+                hash_rates = get_hash_rates(typed_hasrates, timestamp)
                 for miner in miners:
-                    if timestamp>miner[1] and data_ma['prof-threshold'][timestamp]>miner[2]:
+                    if timestamp > miner[1] and data_ma['prof-threshold'][timestamp] > miner[2]:
                         # ^^current date and date of miner release ^^checks if miner is profitable;
                         # if yes, adds miner's efficiency and qty to the lists:
-                        prof_eqp.append(miner[2])
-                        prof_eqp_qty.append(miner[3])
+                        type = miner[5]
+                        if not type:
+                            prof_eqp.append(miner[2])
+                            prof_eqp_qty.append(miner[3])
                 prof_eqp_qty_all.append(prof_eqp_qty)
                 prof_eqp_all.append(prof_eqp)
                 try:
-                    max_consumption = max(prof_eqp)*data['hash-rate']*365.25*24/1e+9*1.2
-                    min_consumption = min(prof_eqp)*data['hash-rate']*365.25*24/1e+9*1.01
-                    guess_consumption = sum(prof_eqp)/len(prof_eqp)*data['hash-rate']*365.25*24/1e+9*1.1        
-# ====this=is=for=weighting===================================================
-#                 weighted_sum = 0
-#                 eqp_qty_this_day = 0
-#                 # calculating the guess_consumption using the weighted average of prof_eqp efficiencies:
-#                 for j in range(0, len(prof_eqp)):
-#                     weighted_sum = weighted_sum + prof_eqp[j]*prof_eqp_qty[j]
-#                     eqp_qty_this_day = eqp_qty_this_day + prof_eqp_qty[j]
-#                 guess_consumption = weighted_sum/eqp_qty_this_day*hash_rate[i][2]*365.25*24/1e+9*1.05
-# ===========================================================================
+                    max_consumption = max(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.2
+                    min_consumption = min(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.01
+                    guess_consumption = get_guess_consumption(prof_eqp, data['hash-rate'], hash_rates,
+                                                              typed_avg_effciency)
+                # ====this=is=for=weighting===================================================
+                #                 weighted_sum = 0
+                #                 eqp_qty_this_day = 0
+                #                 # calculating the guess_consumption using the weighted average of prof_eqp efficiencies:
+                #                 for j in range(0, len(prof_eqp)):
+                #                     weighted_sum = weighted_sum + prof_eqp[j]*prof_eqp_qty[j]
+                #                     eqp_qty_this_day = eqp_qty_this_day + prof_eqp_qty[j]
+                #                 guess_consumption = weighted_sum/eqp_qty_this_day*hash_rate[i][2]*365.25*24/1e+9*1.05
+                # ===========================================================================
                 except Exception as error:  # in case if mining is not profitable (impossible to find MAX of empty list)
                     LOGGER.warning(f"Mining was unprofitable at timestamp={timestamp}: '{error}'")
                     max_consumption = max_all[-1]
@@ -194,8 +201,8 @@ def hash_rate(price):
                 prof_eqp = str(prof_eqp).strip('[]')  # making str from prof_eqp
                 prof_eqp_qty = str(prof_eqp_qty).strip('[]')
                 try:
-                    c.execute(insert_sql, (timestamp, date, max_consumption, 
-                                           min_consumption, guess_consumption, 
+                    c.execute(insert_sql, (timestamp, date, max_consumption,
+                                           min_consumption, guess_consumption,
                                            prof_eqp, prof_eqp_qty))
                 # If the row with this timestamp already exist, ignore it:
                 except Exception as error:
@@ -204,19 +211,19 @@ def hash_rate(price):
                     pass
                 prof_eqp = []
                 prof_eqp_qty = []
-            
+
             # calculating MA of the resulting stats
             LOGGER.info(f"energy-consump-MA: as of {datetime.utcnow().isoformat()}")
-            energy_df=pd.DataFrame(list(zip(max_all,min_all,guess_all)),
-                              index=ts_all, columns = ['MAX', 'MIN', 'GUESS'])
-            energy_ma=energy_df.rolling(window=7, min_periods=1).mean()
-            
+            energy_df = pd.DataFrame(list(zip(max_all, min_all, guess_all)),
+                                     index=ts_all, columns=['MAX', 'MIN', 'GUESS'])
+            energy_ma = energy_df.rolling(window=7, min_periods=1).mean()
+
             c.execute("CREATE TABLE IF NOT EXISTS energy_consumption_ma (timestamp INT PRIMARY KEY, "
                       "date TEXT, max_consumption REAL, min_consumption REAL, guess_consumption REAL);")
             insert_sql = "INSERT INTO energy_consumption_ma (timestamp, date, max_consumption, " \
                          "min_consumption, guess_consumption) VALUES (%s, %s, %s, %s, %s) " \
                          "ON CONFLICT ON CONSTRAINT energy_consumption_ma_pkey DO NOTHING;"
-    
+
             max_ma = list(energy_ma['MAX'])
             min_ma = list(energy_ma['MIN'])
             guess_ma = list(energy_ma['GUESS'])
@@ -225,13 +232,15 @@ def hash_rate(price):
             for t in ts:
                 date = datetime.utcfromtimestamp(t).isoformat()
                 date_all.append(date)
-                
+
             for item in zip(ts, date_all, max_ma, min_ma, guess_ma):
                 try:
                     c.execute(insert_sql, item)
                 except Exception as error:
                     LOGGER.warning(f"Energy consumption MA saving err: {error}'")
                     pass
+
+
 # =============================================================================
 #             from sqlalchemy import create_engine
 #             eng = create_engine('postgresql://user:pass@localhost:5432/db')
@@ -270,7 +279,8 @@ def coinmetrics():
         df = pd.DataFrame(data).sort_values(by=['time'])
 
         for row in df.itertuples(name='Metric'):
-            save_hasrate(type=t, asset=row.asset, time=row.time, value=float(getattr(row, metric))/100)
+            save_hasrate(type=t, asset=row.asset, time=row.time, value=float(getattr(row, metric)) / 100)
+
 
 if __name__ == '__main__':
     cli()

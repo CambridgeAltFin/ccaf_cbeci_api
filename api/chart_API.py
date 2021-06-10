@@ -40,9 +40,10 @@ def get_limiter_flag():
 
     return val is not None and val.lower() not in ("0", "false", "no")
 
+start_date = datetime(year=2014, month=7, day=1)
+
 # loading data in cache of each worker:
 def load_data():
-    start_date = datetime(year=2014, month=7, day=1)
     with psycopg2.connect(**config['blockchain_data']) as conn:
         c = conn.cursor()
         c.execute('SELECT * FROM prof_threshold WHERE timestamp >= %s', (start_date.timestamp(),))
@@ -431,9 +432,8 @@ def teardown_request(_: Exception):
 def download_report():
         with psycopg2.connect(**config['blockchain_data']) as conn:
             c = conn.cursor()
-            c.execute('SELECT * FROM energy_consumption_ma')
+            c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
         rows = c.fetchall()
-        rows = rows[500:]
         si = io.StringIO()
         cw = csv.writer(si)
         line = ['Timestamp', 'Date and Time', 'MAX', 'MIN', 'GUESS']

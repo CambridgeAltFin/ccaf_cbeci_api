@@ -266,7 +266,7 @@ def coinmetrics():
                                "type text NOT NULL,"
                                "value real NOT NULL,"
                                "date date NOT NULL,"
-                               "created_at timestamp without time zone NOT NULL,"
+                               "created_at timestamp without time zone NOT NULL DEFAULT NOW(),"
                                "asset text NOT NULL,"
                                "CONSTRAINT hash_rate_by_types_pkey PRIMARY KEY (id),"
                                "CONSTRAINT hash_rate_by_types_date_ukey UNIQUE (type, date)"

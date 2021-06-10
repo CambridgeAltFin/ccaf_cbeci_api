@@ -261,6 +261,16 @@ def coinmetrics():
             insert_sql = f"INSERT INTO {table_name} (type, asset, value, date) " \
                          f"VALUES (%s, %s, %s, %s) ON CONFLICT ON CONSTRAINT {table_name}_date_ukey DO NOTHING;"
             try:
+                cursor.execute("CREATE TABLE IF NOT EXISTS hash_rate_by_types ("
+                               "id serial NOT NULL,"
+                               "type text NOT NULL,"
+                               "value real NOT NULL,"
+                               "date date NOT NULL,"
+                               "created_at timestamp without time zone NOT NULL,"
+                               "asset text NOT NULL,"
+                               "CONSTRAINT hash_rate_by_types_pkey PRIMARY KEY (id),"
+                               "CONSTRAINT hash_rate_by_types_date_ukey UNIQUE (type, date)"
+                          ");")
                 cursor.execute(insert_sql, (type, asset, value, date))
             except Exception as error:
                 LOGGER.exception(f"{table_name}: {str(error)}")

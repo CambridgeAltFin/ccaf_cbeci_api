@@ -532,7 +532,13 @@ def download_report():
 def spec():
     swag = swagger(app)
     swag['info']['version'] = "1.0"
-    swag['info']['title'] = "Cbeci API"
+    swag['info']['title'] = "Cbeci API Specs"
+    swag['info']['description'] = """
+## Introduction
+The [Cambridge Bitcoin Electricity Consumption Index (CBECI)](http://www.cbeci.org/) is an online tool that tracks the energy expenditure of the Bitcoin network to assess the environmental impact over time. Initially released in 2019, the CBECI is developed and maintained by the [Cambridge Centre for Alternative Finance (CCAF)](http://www.jbs.cam.ac.uk/ccaf) at The University of Cambridge Judge Business School. The tool is provided as a public good to help inform the Bitcoin energy debate through independent analysis based on empirical data.
+
+This API enables participating mining pools to share geolocational data on their average hashrate distribution at both national and provincial levels. This data is then aggregated by the research team to provide regular updates to the CBECI mining map that depicts trends in Bitcoin’s geographical hashrate distribution. In order to use the API, please contact us [here](https://cbeci.org/contact/) to receive a pseudonymous token that enables a secure connection detached from your identity. The documentation below explains the data model in more detail. Please note that we currently target a biweekly frequency for data updates.
+    """
     swag['securityDefinitions'] = {
         'Bearer': {
             'type': 'apiKey',

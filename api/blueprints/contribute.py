@@ -26,9 +26,9 @@ def datetime_validate(date_text):
 schema = Schema({
     'data': [
         {
-            'period': Schema(datetime_validate, error='should be date in "YYYY-MM-DD" format'),
-            'frequency': Schema(lambda s: s in ('daily', 'weekly', 'biweekly', 'monthly',),
-                                error='"frequency" should be "daily", "weekly", "biweekly" or "monthly"'),
+            'period_start_date': Schema(datetime_validate, error='date should be in "YYYY-MM-DD" format'),
+            'period': Schema(lambda s: s in ('daily', 'weekly', 'biweekly', 'monthly',),
+                                error='"period" should be "daily", "weekly", "biweekly" or "monthly"'),
             'country': Schema(lambda s: s in [row[0] for row in get_countries()], error='"country" should be one from the list, see documentation'),
             'province': Schema(Or(str, None), error='"province" should be string or null'),
             'average_hashrate': Schema(Or(float, int), error='"average_hashrate" should be numeric'),
@@ -42,7 +42,7 @@ schema = Schema({
 @validators.validate(schema)
 def miners_geo_distribution(api_token):
     """
-    Contributing new hashrate geo distribution
+    Contribute to geographical hashrate distribution analysis
     ---
     tags:
       - Contribute
@@ -52,14 +52,15 @@ def miners_geo_distribution(api_token):
       - schema:
           id: Hashrate
           properties:
-            period:
+            period_start_date:
              type: string
              format: date
-             description: Information date. Should be date in YYYY-MM-DD format
+             description: Information date. Should be in YYYY-MM-DD format
              example: "2020-01-01"
-            frequency:
+            period:
              type: string
-             description: Data frequency. Should be 'daily', 'weekly', 'biweekly' or 'monthly'
+             description: Data period. Should be from the list below
+             example: "weekly"
              enum:
                 - daily
                 - weekly
@@ -67,7 +68,7 @@ def miners_geo_distribution(api_token):
                 - monthly
             country:
              type: string
-             description: Data country. Should be one from the list
+             description: Country name. Should be from the [World Bank](https://datahelpdesk.worldbank.org/knowledgebase/articles/906519-world-bank-country-and-lending-groups) list below.
              example: "United States"
              enum:
                - "\\"Afghanistan\\""
@@ -287,16 +288,17 @@ def miners_geo_distribution(api_token):
                - "\\"Zimbabwe\\""
             province:
              type: string
-             description: If need to specify location. Can be empty
+             description: Regional provenance within country. Format is open. If submitting country data as a whole, leave this field empty.
              example: null
             average_hashrate:
              type: number
              format: double
-             description: Average hashrate
+             description: Average hashrate for a given country or province over the selected period.
              example: 99.99
             unit:
              type: string
-             description: Data unit. Should be 'th/s', 'ph/s' or 'eh/s'
+             description: Should be from the list below
+             example: 'th/s'
              enum:
                - th/s
                - ph/s
@@ -336,14 +338,14 @@ def miners_geo_distribution(api_token):
             error:
               type: string
               description: Error text
-              example: 'should be date in \"YYYY-MM-DD\" format'
+              example: 'date should be in \"YYYY-MM-DD\" format'
     """
     data = request.json['data']
     if len(data) > 0:
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            insert_sql = "INSERT INTO hashrate_geo_distribution (frequency, country, province, average_hashrate, unit, period, api_token_id)" \
-                         " VALUES (%(frequency)s, %(country)s, %(province)s, %(average_hashrate)s, %(unit)s, %(period)s, %(api_token_id)s)"
+            insert_sql = "INSERT INTO hashrate_geo_distribution (frequency, country, province, average_hashrate, unit, period_start_date, api_token_id)" \
+                         " VALUES (%(frequency)s, %(country)s, %(province)s, %(average_hashrate)s, %(unit)s, %(period_start_date)s, %(api_token_id)s)"
             try:
                 for row in data:
                     row['api_token_id'] = api_token[0]

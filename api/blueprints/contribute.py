@@ -55,11 +55,11 @@ def miners_geo_distribution(api_token):
             period_start_date:
              type: string
              format: date
-             description: Information date. Should be in YYYY-MM-DD format
+             description: Date of the first day of the period. Should be in YYYY-MM-DD format.
              example: "2020-01-01"
             period:
              type: string
-             description: Data period. Should be from the list below
+             description: Data period. Should be from the list below.
              example: "weekly"
              enum:
                 - daily
@@ -309,7 +309,7 @@ def miners_geo_distribution(api_token):
              example: 99.99
             unit:
              type: string
-             description: Should be from the list below
+             description: Should be from the list below.
              example: 'th/s'
              enum:
                - th/s

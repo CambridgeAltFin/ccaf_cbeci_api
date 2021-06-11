@@ -10,6 +10,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from logging.handlers import RotatingFileHandler
 from schema import SchemaError
+from flask_swagger import swagger
+from flask_swagger_ui import get_swaggerui_blueprint
 import pandas as pd
 from datetime import datetime
 import flask
@@ -24,36 +26,40 @@ from dotenv import load_dotenv
 from config import config
 from decorators.auth import AuthenticationError
 from extensions import cache
+from helpers import get_guess_consumption, get_hash_rates, get_avg_effciency_by_types, load_typed_hasrates
 
 load_dotenv(override=True)
 
 LOG_LEVEL = logging.INFO
+
+SWAGGER_URL = '/api/docs/contribute'
+SWAGGER_SPEC_URL = '/api/docs/spec'
 
 def get_limiter_flag():
     val = os.environ.get("LIMITER_ENABLED")
 
     return val is not None and val.lower() not in ("0", "false", "no")
 
+start_date = datetime(year=2014, month=7, day=1)
+
 # loading data in cache of each worker:
 def load_data():
     with psycopg2.connect(**config['blockchain_data']) as conn:
         c = conn.cursor()
-        c.execute('SELECT * FROM prof_threshold')
+        c.execute('SELECT * FROM prof_threshold WHERE timestamp >= %s', (start_date.timestamp(),))
         prof_threshold = c.fetchall()
-        prof_threshold = prof_threshold[500:]
-        c.execute('SELECT * FROM hash_rate')
+        c.execute('SELECT * FROM hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
         hash_rate = c.fetchall()
-        hash_rate = hash_rate[500:]
-        c.execute('SELECT * FROM energy_consumption_ma')
+        c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
         cons = c.fetchall()
-        cons = cons[500:]
-    with psycopg2.connect(**config['custom_data']) as conn2:   
+        typed_hasrates = load_typed_hasrates(c)
+    with psycopg2.connect(**config['custom_data']) as conn2:
         c2 = conn2.cursor()
-        c2.execute('SELECT * FROM miners')
+        c2.execute('SELECT * FROM miners WHERE is_active is true')
         miners=c2.fetchall()
         c2.execute('SELECT * FROM countries')
         countries=c2.fetchall()
-    return prof_threshold, hash_rate, miners, countries, cons
+    return prof_threshold, hash_rate, miners, countries, cons, typed_hasrates
 
 
 def get_hashrate():
@@ -63,7 +69,7 @@ def get_hashrate():
 
 
 def send_err_to_slack(err, name):
-    try: 
+    try:
         headers = {'Content-type': 'application/json',}
         data = {"text":""}
         data["text"] = f"Getting {name} failed. It unexpectedly returned: " + str(err)[0:140]
@@ -109,6 +115,15 @@ def create_app():
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
 
+    swaggerui_bp = get_swaggerui_blueprint(
+        SWAGGER_URL,
+        SWAGGER_SPEC_URL,
+        config={
+            'app_name': "Cbeci API"
+        }
+    )
+    app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
+
     return app
 
 app = create_app()
@@ -129,7 +144,7 @@ if get_limiter_flag():
     )
 
 # initialisation of cache vars:
-prof_threshold, hash_rate, miners, countries, cons = load_data()
+prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
 lastupdate = time.time()
 lastupdate_power = time.time()
 cache = {}
@@ -159,10 +174,10 @@ def bad_request(error):
 # cache:
 @app.before_request
 def before_request():
-    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, cache
+    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, cache, typed_hasrates
     if time.time() - lastupdate > 3600:
         try:
-            prof_threshold, hash_rate, miners, countries, cons = load_data()
+            prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
         except Exception as err:
             app.logger.exception(f"Getting data from DB err: {str(err)}")
             send_err_to_slack(err, 'DB')
@@ -206,23 +221,27 @@ def recalculate_data(value=None):
     guess_all = []
     response = []
 
-    prof_th = pd.DataFrame(prof_threshold)
+    prof_th = pd.DataFrame(prof_threshold).sort_values(by=0)
     prof_th = prof_th.drop(1, axis=1).set_index(0)
     prof_th_ma = prof_th.rolling(window=14, min_periods=1).mean()
 
     hashra = pd.DataFrame(hash_rate)
     hashra = hashra.drop(1, axis=1).set_index(0)
 
+    typed_avg_effciency = get_avg_effciency_by_types(miners)
     for timestamp, row in prof_th_ma.iterrows():
+        hash_rates = get_hash_rates(typed_hasrates, timestamp)
         for miner in miners:
             if timestamp > miner[1] and row[2] * k > miner[2]:
-                prof_eqp.append(miner[2])
+                type = miner[5]
+                if not type:
+                    prof_eqp.append(miner[2])
             # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
         all_prof_eqp.append(prof_eqp)
         try:
             max_consumption = max(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.2
             min_consumption = min(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.01
-            guess_consumption = sum(prof_eqp) / len(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.1
+            guess_consumption = get_guess_consumption(prof_eqp, hashra[2][timestamp], hash_rates, typed_avg_effciency)
         except:  # in case if mining is not profitable (it is impossible to find MIN or MAX of empty list)
             max_consumption = max_all[-1]
             min_consumption = min_all[-1]
@@ -413,9 +432,8 @@ def teardown_request(_: Exception):
 def download_report():
         with psycopg2.connect(**config['blockchain_data']) as conn:
             c = conn.cursor()
-            c.execute('SELECT * FROM energy_consumption_ma')
+            c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
         rows = c.fetchall()
-        rows = rows[500:]
         si = io.StringIO()
         cw = csv.writer(si)
         line = ['Timestamp', 'Date and Time', 'MAX', 'MIN', 'GUESS']
@@ -509,6 +527,33 @@ def download_report():
 #     return jsonify(response)
 # 
 # =============================================================================
+
+@app.route(SWAGGER_SPEC_URL)
+def spec():
+    swag = swagger(app)
+    swag['info']['version'] = "1.0"
+    swag['info']['title'] = "Cbeci API Specs"
+    swag['info']['description'] = """
+## Introduction
+The [Cambridge Bitcoin Electricity Consumption Index (CBECI)](http://www.cbeci.org/) is an online tool that tracks the energy expenditure of the Bitcoin network to assess the environmental impact over time. Initially released in 2019, the CBECI is developed and maintained by the [Cambridge Centre for Alternative Finance (CCAF)](http://www.jbs.cam.ac.uk/ccaf) at The University of Cambridge Judge Business School. The tool is provided as a public good to help inform the Bitcoin energy debate through independent analysis based on empirical data.
+
+This API enables participating mining pools to share geolocational data on their average hashrate distribution at both national and provincial levels. This data is then aggregated by the research team to provide regular updates to the CBECI mining map that depicts trends in Bitcoin’s geographical hashrate distribution. In order to use the API, please contact us [here](https://cbeci.org/contact/) to receive a pseudonymous token that enables a secure connection detached from your identity. The documentation below explains the data model in more detail. Please note that we currently target a biweekly frequency for data updates.
+    """
+    swag['securityDefinitions'] = {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+            'description': """
+    To authorize, please use the following request header: "Authorization"
+
+    Example:
+    "Authorization": "Bearer 1234567890",
+    where 1234567890 - is your token
+            """
+        }
+    }
+    return jsonify(swag)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', use_reloader=True)

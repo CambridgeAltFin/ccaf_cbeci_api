@@ -86,6 +86,29 @@ limits = "*"
 six = ">=1.4.1"
 
 [[package]]
+name = "flask-swagger"
+version = "0.2.14"
+description = "Extract swagger specs from your flask project"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Flask = ">=0.10"
+PyYAML = ">=5.1"
+
+[[package]]
+name = "flask-swagger-ui"
+version = "3.36.0"
+description = "Swagger UI blueprint for Flask"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+flask = "*"
+
+[[package]]
 name = "gunicorn"
 version = "20.0.4"
 description = "WSGI HTTP Server for UNIX"
@@ -294,7 +317,7 @@ watchdog = ["watchdog"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "f42b3890ed07485a758fa4760b90795abb4de5cefbd2f40c1d569cf5e992235b"
+content-hash = "441dc6d24a52924e624025a5878e6e3f976b1df0f058e609fa92ef7b290a6dec"
 
 [metadata.files]
 certifi = [
@@ -329,6 +352,13 @@ flask-limiter = [
     {file = "Flask-Limiter-1.4.tar.gz", hash = "sha256:021279c905a1e24f181377ab3be711be7541734b494f4e6db2b8edeba7601e48"},
     {file = "Flask_Limiter-1.4-py3-none-any.whl", hash = "sha256:f8a65a7874f48ff8df2ea5e86d5b85b48fcbae065ebeb5271b317fe68fcfa979"},
     {file = "Flask_Limiter-1.4-py3.7.egg", hash = "sha256:055a388a89f4d5768c64025443f1f41e3babcbbbf315c728413c27b4975af239"},
+]
+flask-swagger = [
+    {file = "flask-swagger-0.2.14.tar.gz", hash = "sha256:b4085f5bc36df4c20b6548cd1413adc9cf35719b0f0695367cd542065145294d"},
+    {file = "flask_swagger-0.2.14-py2-none-any.whl", hash = "sha256:3caddb1311388eafc86f82f8e64ba386a5df6b84e5f16dfae19ca08173eba216"},
+]
+flask-swagger-ui = [
+    {file = "flask-swagger-ui-3.36.0.tar.gz", hash = "sha256:f329752a65b2940ada8eeb57bce613f7c0a12856a9c31063bb9e33798554c9ed"},
 ]
 gunicorn = [
     {file = "gunicorn-20.0.4-py2.py3-none-any.whl", hash = "sha256:cd4a810dd51bf497552cf3f863b575dabd73d6ad6a91075b65936b151cbf4f9c"},

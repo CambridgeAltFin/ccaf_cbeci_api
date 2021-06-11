@@ -2,6 +2,7 @@ import Vue from 'vue'
 import axios from 'axios'
 import _ from 'lodash'
 import Cookies from 'js-cookie'
+import * as contentAPI from '~/api/content.js'
 
 export const state = () => ({
   data: [],
@@ -12,6 +13,9 @@ export const state = () => ({
   progress2: true,
   cooks: true,
   authenticated: false,
+  change_log: {},
+  contact: {},
+  reports: [],
   error: {
     status: false,
     message: '',
@@ -57,10 +61,20 @@ export const mutations = {
         expires: 365
       });
     }
-  }
+  },
+  SET_PAGE (state, {name, payload}) { state[name] = payload},
+  SET_REPORTS (state, payload) { state.reports = payload }
 }
 
 export const actions = {
+  async getPage ({ commit }, {pageName, variableName}) {
+    const pageContent = await contentAPI.getPage(pageName)
+    commit('SET_PAGE', {name: variableName, payload: pageContent})
+  },
+  async getReports ({ commit }) {
+    const reports = await contentAPI.getReports()
+    commit('SET_REPORTS', reports)
+  },
     signInWithEmail({ commit }, pass) {
       if (pass === 'qr3Vd2ehS3ei1') {
         commit('SET_AUTH', true)

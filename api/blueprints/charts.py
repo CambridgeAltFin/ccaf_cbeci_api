@@ -20,7 +20,7 @@ def mining_equipment_efficiency():
 
     for miner in miners:
         response.append({
-            'x': miner[1],
+            'x': miner[1] * 1000,
             'y': miner[2],
             'name': miner[0]
         })
@@ -42,7 +42,7 @@ def profitability_threshold():
 
     for prof_threshold in prof_thresholds:
         response.append({
-            'x': prof_threshold[0],
+            'x': prof_threshold[0] * 1000,
             'y': prof_threshold[2]
         })
 

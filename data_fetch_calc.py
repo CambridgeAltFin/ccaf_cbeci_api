@@ -179,8 +179,8 @@ def hash_rate(price):
                 prof_eqp_qty_all.append(prof_eqp_qty)
                 prof_eqp_all.append(prof_eqp)
                 try:
-                    max_consumption = max(prof_eqp, default=0) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.2
-                    min_consumption = min(prof_eqp, default=0) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.01
+                    max_consumption = max(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.2
+                    min_consumption = min(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.01
                     # @todo: remove this for S7/S9
                     if len(prof_eqp) == 0:
                         guess_consumption = 0
@@ -200,9 +200,9 @@ def hash_rate(price):
                 # ===========================================================================
                 except Exception as error:  # in case if mining is not profitable (impossible to find MAX of empty list)
                     LOGGER.warning(f"Mining was unprofitable at timestamp={timestamp}: '{error}'")
-                    max_consumption = max_all[-1]
-                    min_consumption = min_all[-1]
-                    guess_consumption = guess_all[-1]
+                    max_consumption = max_all[-1] if len(max_all) > 0 else 0
+                    min_consumption = min_all[-1] if len(min_all) > 0 else 0
+                    guess_consumption = guess_all[-1] if len(guess_all) > 0 else 0
                 max_all.append(max_consumption)
                 min_all.append(min_consumption)
                 guess_all.append(guess_consumption)

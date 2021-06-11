@@ -160,25 +160,35 @@ def hash_rate(price):
             data_df = pd.DataFrame.from_dict(all_data, orient='index')
             data_ma = data_df.rolling(window=14, min_periods=1).mean()
 
-            typed_hasrates = load_typed_hasrates(c)
-            typed_avg_effciency = get_avg_effciency_by_types(miners)
+            # typed_hasrates = load_typed_hasrates(c) # @todo: uncomment this for S7/S9
+            # typed_avg_effciency = get_avg_effciency_by_types(miners) # @todo: uncomment this for S7/S9
             for timestamp, data in all_data.items():
-                hash_rates = get_hash_rates(typed_hasrates, timestamp)
+                # hash_rates = get_hash_rates(typed_hasrates, timestamp) # @todo: uncomment this for S7/S9
                 for miner in miners:
                     if timestamp > miner[1] and data_ma['prof-threshold'][timestamp] > miner[2]:
                         # ^^current date and date of miner release ^^checks if miner is profitable;
                         # if yes, adds miner's efficiency and qty to the lists:
-                        type = miner[5]
-                        if not type:
-                            prof_eqp.append(miner[2])
-                            prof_eqp_qty.append(miner[3])
+                        prof_eqp.append(miner[2]) # @todo: remove this for S7/S9
+                        prof_eqp_qty.append(miner[3]) # @todo: remove this for S7/S9
+                        # @todo: uncomment this for S7/S9
+                        # type = miner[5]
+                        # if not type:
+                        #     prof_eqp.append(miner[2])
+                        #     prof_eqp_qty.append(miner[3])
+                        # @todo: uncomment this for S7/S9
                 prof_eqp_qty_all.append(prof_eqp_qty)
                 prof_eqp_all.append(prof_eqp)
                 try:
                     max_consumption = max(prof_eqp, default=0) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.2
                     min_consumption = min(prof_eqp, default=0) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.01
-                    guess_consumption = get_guess_consumption(prof_eqp, data['hash-rate'], hash_rates,
-                                                              typed_avg_effciency)
+                    # @todo: remove this for S7/S9
+                    if len(prof_eqp) == 0:
+                        guess_consumption = 0
+                    else:
+                        guess_consumption = sum(prof_eqp) / len(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e+9 * 1.1
+                    # @todo: /remove this for S7/S9
+                    # guess_consumption = get_guess_consumption(prof_eqp, data['hash-rate'], hash_rates,
+                    #                                           typed_avg_effciency)  # @todo: uncomment this for S7/S9
                 # ====this=is=for=weighting===================================================
                 #                 weighted_sum = 0
                 #                 eqp_qty_this_day = 0

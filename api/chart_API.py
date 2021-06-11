@@ -228,20 +228,29 @@ def recalculate_data(value=None):
     hashra = pd.DataFrame(hash_rate)
     hashra = hashra.drop(1, axis=1).set_index(0)
 
-    typed_avg_effciency = get_avg_effciency_by_types(miners)
+    # typed_avg_effciency = get_avg_effciency_by_types(miners) # @todo: uncomment this for S7/S9
     for timestamp, row in prof_th_ma.iterrows():
-        hash_rates = get_hash_rates(typed_hasrates, timestamp)
+        # hash_rates = get_hash_rates(typed_hasrates, timestamp) # @todo: uncomment this for S7/S9
         for miner in miners:
             if timestamp > miner[1] and row[2] * k > miner[2]:
-                type = miner[5]
-                if not type:
-                    prof_eqp.append(miner[2])
+                prof_eqp.append(miner[2]) # @todo: remove this for S7/S9
+                # @todo: uncomment this for S7/S9
+                # type = miner[5]
+                # if not type:
+                #     prof_eqp.append(miner[2])
+                # @todo: /uncomment this for S7/S9
             # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
         all_prof_eqp.append(prof_eqp)
         try:
             max_consumption = max(prof_eqp, default=0) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.2
             min_consumption = min(prof_eqp, default=0) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.01
-            guess_consumption = get_guess_consumption(prof_eqp, hashra[2][timestamp], hash_rates, typed_avg_effciency)
+            # @todo: remove this for S7/S9
+            if len(prof_eqp) == 0:
+                guess_consumption = 0
+            else:
+                guess_consumption = sum(prof_eqp) / len(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.1
+            # @todo: /remove this for S7/S9
+            # guess_consumption = get_guess_consumption(prof_eqp, hashra[2][timestamp], hash_rates, typed_avg_effciency) # @todo: uncomment this for S7/S9
         except:  # in case if mining is not profitable (it is impossible to find MIN or MAX of empty list)
             max_consumption = max_all[-1]
             min_consumption = min_all[-1]
@@ -326,8 +335,10 @@ def recalculate_guess(value):
 
 @app.route("/api/countries")
 def countries_btc():
+    print('zzzz') # @todo: tmp
     tup2dict = {a:[c,d,b] for a,b,c,d,e,f in countries}
     tup2dict['Bitcoin'][0] = round(cons[-1][4],2)
+    print('tup2dict.items()', tup2dict.items()) # @todo: tmp
     dictsort = sorted(tup2dict.items(), key = lambda i: i[1][0], reverse=True)
     response = []
     for item in dictsort:

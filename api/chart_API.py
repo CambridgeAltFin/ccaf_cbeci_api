@@ -239,8 +239,8 @@ def recalculate_data(value=None):
             # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
         all_prof_eqp.append(prof_eqp)
         try:
-            max_consumption = max(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.2
-            min_consumption = min(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.01
+            max_consumption = max(prof_eqp, default=0) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.2
+            min_consumption = min(prof_eqp, default=0) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.01
             guess_consumption = get_guess_consumption(prof_eqp, hashra[2][timestamp], hash_rates, typed_avg_effciency)
         except:  # in case if mining is not profitable (it is impossible to find MIN or MAX of empty list)
             max_consumption = max_all[-1]
@@ -283,7 +283,7 @@ def recalculate_max(value):
         if prof_threshold[-1][0]>miner[1] and prof_threshold[-1][2]*k>miner[2]: prof_eqp.append(miner[2])
         # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
     try:
-        max_consumption = max(prof_eqp)*hashrate*1.2/1e6
+        max_consumption = max(prof_eqp, default=0)*hashrate*1.2/1e6
     except:
         max_consumption = 'mining is not profitable'
     return jsonify(max_consumption)

@@ -41,6 +41,8 @@ def get_avg_effciency_by_types(miners):
     return typed_avg_effciency
 
 def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
+    if len(prof_eqp) == 0:
+        return 0
     guess_consumption = sum(prof_eqp) / len(prof_eqp)
     for t, hr in hash_rates.items():
         guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)

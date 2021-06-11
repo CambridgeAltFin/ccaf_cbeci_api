@@ -175,8 +175,8 @@ def hash_rate(price):
                 prof_eqp_qty_all.append(prof_eqp_qty)
                 prof_eqp_all.append(prof_eqp)
                 try:
-                    max_consumption = max(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.2
-                    min_consumption = min(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.01
+                    max_consumption = max(prof_eqp, default=0) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.2
+                    min_consumption = min(prof_eqp, default=0) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.01
                     guess_consumption = get_guess_consumption(prof_eqp, data['hash-rate'], hash_rates,
                                                               typed_avg_effciency)
                 # ====this=is=for=weighting===================================================

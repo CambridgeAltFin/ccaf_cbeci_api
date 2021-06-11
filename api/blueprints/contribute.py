@@ -344,8 +344,8 @@ def miners_geo_distribution(api_token):
     if len(data) > 0:
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            insert_sql = "INSERT INTO hashrate_geo_distribution (frequency, country, province, average_hashrate, unit, period_start_date, api_token_id)" \
-                         " VALUES (%(frequency)s, %(country)s, %(province)s, %(average_hashrate)s, %(unit)s, %(period_start_date)s, %(api_token_id)s)"
+            insert_sql = "INSERT INTO hashrate_geo_distribution (period, country, province, average_hashrate, unit, period_start_date, api_token_id)" \
+                         " VALUES (%(period)s, %(country)s, %(province)s, %(average_hashrate)s, %(unit)s, %(period_start_date)s, %(api_token_id)s)"
             try:
                 for row in data:
                     row['api_token_id'] = api_token[0]

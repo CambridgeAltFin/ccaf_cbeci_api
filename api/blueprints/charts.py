@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 import psycopg2
+import calendar
 from config import config
 from extensions import cache
 import pandas as pd
@@ -49,6 +50,48 @@ def profitability_threshold():
         response.append({
             'x': date.timestamp() * 1000,
             'y': value.value
+        })
+
+    return jsonify(data=response)
+
+@bp.route('/mining_countries')
+def mining_countries():
+    @cache.cached(key_prefix='all_mining_countries')
+    def get_mining_countries():
+        with psycopg2.connect(**config['blockchain_data']) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM mining_area_countries')
+            return cursor.fetchall()
+
+    response = []
+    mining_countries = get_mining_countries()
+
+    for mining_country in mining_countries:
+        response.append({
+            'x': calendar.timegm(mining_country[3].timetuple()) * 1000,
+            'y': mining_country[2],
+            'name': mining_country[1]
+        })
+
+    return jsonify(data=response)
+
+@bp.route('/mining_provinces')
+def mining_provinces():
+    @cache.cached(key_prefix='all_mining_provinces')
+    def get_mining_provinces():
+        with psycopg2.connect(**config['blockchain_data']) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM mining_area_provinces')
+            return cursor.fetchall()
+
+    response = []
+    mining_provinces = get_mining_provinces()
+
+    for mining_province in mining_provinces:
+        response.append({
+            'x': calendar.timegm(mining_province[3].timetuple()) * 1000,
+            'y': mining_province[2],
+            'name': mining_province[1]
         })
 
     return jsonify(data=response)

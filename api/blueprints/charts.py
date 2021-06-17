@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify
 import psycopg2
 from config import config
 from extensions import cache
+import pandas as pd
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -40,10 +41,14 @@ def profitability_threshold():
     response = []
     prof_thresholds = get_prof_thresholds()
 
-    for prof_threshold in prof_thresholds:
+    df = pd.DataFrame(prof_thresholds, columns=['timestamp', 'date', 'value']).drop(columns=['timestamp'])
+    df['date'] = df['date'].astype('datetime64[ns]')
+    df_by_weeks = df.resample('W-MON', on='date', closed='left', label='left').mean()
+
+    for date, value in df_by_weeks.iterrows():
         response.append({
-            'x': prof_threshold[0] * 1000,
-            'y': prof_threshold[2]
+            'x': date.timestamp() * 1000,
+            'y': value.value
         })
 
     return jsonify(data=response)

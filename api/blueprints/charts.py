@@ -58,7 +58,7 @@ def profitability_threshold():
 def mining_countries():
     @cache.cached(key_prefix='all_mining_countries')
     def get_mining_countries():
-        with psycopg2.connect(**config['blockchain_data']) as conn:
+        with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM mining_area_countries')
             return cursor.fetchall()
@@ -79,7 +79,7 @@ def mining_countries():
 def mining_provinces():
     @cache.cached(key_prefix='all_mining_provinces')
     def get_mining_provinces():
-        with psycopg2.connect(**config['blockchain_data']) as conn:
+        with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM mining_area_provinces')
             return cursor.fetchall()

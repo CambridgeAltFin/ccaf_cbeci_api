@@ -89,8 +89,8 @@ def mining_provinces():
 
     for mining_province in mining_provinces:
         response.append({
-            'x': calendar.timegm(mining_province[3].timetuple()) * 1000,
-            'y': mining_province[2],
+            'x': calendar.timegm(mining_province[4].timetuple()) * 1000,
+            'y': mining_province[3],
             'name': mining_province[1]
         })
 

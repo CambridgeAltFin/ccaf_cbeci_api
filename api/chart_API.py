@@ -23,7 +23,7 @@ import csv
 import io
 import os
 from dotenv import load_dotenv
-from config import config
+from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
 from helpers import get_guess_consumption, get_hash_rates, get_avg_effciency_by_types, load_typed_hasrates
@@ -39,8 +39,6 @@ def get_limiter_flag():
     val = os.environ.get("LIMITER_ENABLED")
 
     return val is not None and val.lower() not in ("0", "false", "no")
-
-start_date = datetime(year=2014, month=7, day=1)
 
 # loading data in cache of each worker:
 def load_data():
@@ -111,9 +109,10 @@ def get_file_handler(filename):
 def create_app():
     app = Flask(__name__)
 
-    from blueprints import charts, contribute
+    from blueprints import charts, contribute, download
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
+    app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
 
     swaggerui_bp = get_swaggerui_blueprint(
         SWAGGER_URL,
@@ -170,6 +169,10 @@ def bad_request(error):
 @app.errorhandler(AuthenticationError)
 def bad_request(error):
     return make_response(jsonify(error=str(error)), 401)
+
+@app.errorhandler(NotImplementedError)
+def bad_request(error):
+    return make_response(jsonify(error=str(error)), 404)
 
 # cache:
 @app.before_request

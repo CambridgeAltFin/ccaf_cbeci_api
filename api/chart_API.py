@@ -27,6 +27,7 @@ from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
 from helpers import get_guess_consumption, get_hash_rates, get_avg_effciency_by_types, load_typed_hasrates
+from services.energy_consumption import EnergyConsumption
 
 load_dotenv(override=True)
 
@@ -146,7 +147,6 @@ if get_limiter_flag():
 prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
 lastupdate = time.time()
 lastupdate_power = time.time()
-cache = {}
 try:
     hashrate = get_hashrate()
 except Exception as err:
@@ -174,10 +174,9 @@ def bad_request(error):
 def bad_request(error):
     return make_response(jsonify(error=str(error)), 404)
 
-# cache:
 @app.before_request
 def before_request():
-    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, cache, typed_hasrates
+    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, typed_hasrates
     if time.time() - lastupdate > 3600:
         try:
             prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
@@ -185,7 +184,6 @@ def before_request():
             app.logger.exception(f"Getting data from DB err: {str(err)}")
             send_err_to_slack(err, 'DB')
         else:
-            cache = {}
             lastupdate = time.time()
     if time.time() - lastupdate_power > 45:
         try:
@@ -200,6 +198,7 @@ def before_request():
 
 @app.route('/api/data')
 @app.route('/api/data/<value>')
+@cache.memoize()
 def recalculate_data(value=None):
     try:
         if value is None:
@@ -207,10 +206,6 @@ def recalculate_data(value=None):
         price = float(value)
     except:
         return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
-
-
-    if price in cache:
-        return cache[price]
 
     k = 0.05 / price
     # that is because base calculation in the DB is for the price 0.05 USD/KWth
@@ -282,7 +277,6 @@ def recalculate_data(value=None):
         })
 
     value = jsonify(data=response)
-    cache[price] = value
     return value
 
 

@@ -26,8 +26,9 @@ from dotenv import load_dotenv
 from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
-from helpers import get_guess_consumption, get_hash_rates, get_avg_effciency_by_types, load_typed_hasrates
+from helpers import get_guess_consumption, get_hash_rates_by_miners_types, get_avg_effciency_by_miners_types_old, load_typed_hasrates
 from services.energy_consumption import EnergyConsumption
+from services.energy_consumption_by_types import EnergyConsumptionByTypes
 
 load_dotenv(override=True)
 
@@ -51,7 +52,7 @@ def load_data():
         hash_rate = c.fetchall()
         c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
         cons = c.fetchall()
-        typed_hasrates = load_typed_hasrates(c)
+    typed_hasrates = load_typed_hasrates()
     with psycopg2.connect(**config['custom_data']) as conn2:
         c2 = conn2.cursor()
         c2.execute('SELECT * FROM miners WHERE is_active is true')
@@ -207,77 +208,18 @@ def recalculate_data(value=None):
     except:
         return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
 
-    k = 0.05 / price
-    # that is because base calculation in the DB is for the price 0.05 USD/KWth
-    # temporary vars:
-    prof_eqp = []
-    all_prof_eqp = []
-    max_all = []
-    min_all = []
-    ts_all = []
-    date_all = []
-    guess_all = []
-    response = []
+    def to_dict(timestamp, row):
+        return {
+            'timestamp': timestamp,
+            'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+            'guess_consumption': round(row['guess_consumption'], 2),
+            'max_consumption': round(row['max_consumption'], 2),
+            'min_consumption': round(row['min_consumption'], 2),
+        }
 
-    prof_th = pd.DataFrame(prof_threshold).sort_values(by=0)
-    prof_th = prof_th.drop(1, axis=1).set_index(0)
-    prof_th_ma = prof_th.rolling(window=14, min_periods=1).mean()
+    energy_consumption = EnergyConsumptionByTypes()
 
-    hashra = pd.DataFrame(hash_rate)
-    hashra = hashra.drop(1, axis=1).set_index(0)
-
-    # typed_avg_effciency = get_avg_effciency_by_types(miners) # @todo: uncomment this for S7/S9
-    for timestamp, row in prof_th_ma.iterrows():
-        # hash_rates = get_hash_rates(typed_hasrates, timestamp) # @todo: uncomment this for S7/S9
-        for miner in miners:
-            if timestamp > miner[1] and row[2] * k > miner[2]:
-                prof_eqp.append(miner[2]) # @todo: remove this for S7/S9
-                # @todo: uncomment this for S7/S9
-                # type = miner[5]
-                # if not type:
-                #     prof_eqp.append(miner[2])
-                # @todo: /uncomment this for S7/S9
-            # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
-        all_prof_eqp.append(prof_eqp)
-        try:
-            max_consumption = max(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.2
-            min_consumption = min(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.01
-            # @todo: remove this for S7/S9
-            if len(prof_eqp) == 0:
-                guess_consumption = 0
-            else:
-                guess_consumption = sum(prof_eqp) / len(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.1
-            # @todo: /remove this for S7/S9
-            # guess_consumption = get_guess_consumption(prof_eqp, hashra[2][timestamp], hash_rates, typed_avg_effciency) # @todo: uncomment this for S7/S9
-        except:  # in case if mining is not profitable (it is impossible to find MIN or MAX of empty list)
-            max_consumption = max_all[-1] if len(max_all) > 0 else 0
-            min_consumption = min_all[-1] if len(min_all) > 0 else 0
-            guess_consumption = guess_all[-1] if len(guess_all) > 0 else 0
-        max_all.append(max_consumption)
-        min_all.append(min_consumption)
-        guess_all.append(guess_consumption)
-        ts_all.append(timestamp)
-        date = datetime.utcfromtimestamp(timestamp).isoformat()
-        date_all.append(date)
-        prof_eqp = []
-
-    energy_df = pd.DataFrame(list(zip(max_all, min_all, guess_all)), index=ts_all, columns=['MAX', 'MIN', 'GUESS'])
-    energy_ma = energy_df.rolling(window=7, min_periods=1).mean()
-    max_ma = list(energy_ma['MAX'])
-    min_ma = list(energy_ma['MIN'])
-    guess_ma = list(energy_ma['GUESS'])
-
-    for day in range(0, len(ts_all)):
-        response.append({
-            'date': date_all[day],
-            'guess_consumption': round(guess_ma[day], 2),
-            'max_consumption': round(max_ma[day], 2),
-            'min_consumption': round(min_ma[day], 2),
-            'timestamp': ts_all[day],
-        })
-
-    value = jsonify(data=response)
-    return value
+    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
 
 
 @app.route("/api/max/<value>")

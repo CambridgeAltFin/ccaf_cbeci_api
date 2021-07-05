@@ -2,10 +2,8 @@ from typing import List, Dict, Union
 from flask import Blueprint, make_response, request
 import csv
 import io
-import psycopg2
 from datetime import datetime
-from config import config, start_date
-from services.energy_consumption import EnergyConsumption
+from services import EnergyConsumption, EnergyConsumptionByTypes
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
@@ -26,14 +24,9 @@ def get_data(version=None, price=0.05):
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
 
     def v1_1_0(price):
-        # @todo: implement
-        def get_energy_consumption_ma():
-            with psycopg2.connect(**config['blockchain_data']) as conn:
-                cursor = conn.cursor()
-                cursor.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
-                return cursor.fetchall()
+        energy_consumption_by_types = EnergyConsumptionByTypes()
 
-        return get_energy_consumption_ma()
+        return [to_dict(timestamp, row) for timestamp, row in energy_consumption_by_types.get_data(price)]
 
     func = locals().get(version.replace('.', '_'))
     if callable(func):

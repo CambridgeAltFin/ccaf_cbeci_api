@@ -32,7 +32,7 @@ def get_miners():
             'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type FROM miners WHERE is_active is true')
         return cursor.fetchall()
 
-
+# version: 1.0.5
 class EnergyConsumption(object):
     # that is because base calculation in the DB is for the price 0.05 USD/KWth
     default_price = 0.05
@@ -43,8 +43,8 @@ class EnergyConsumption(object):
             price_coefficient = self.default_price / price
 
             for miner in miners:
-                if timestamp > miner['unix_date_of_release'] and prof_threshold_value * price_coefficient > miner[
-                    'efficiency_j_gh']:
+                if timestamp > miner['unix_date_of_release']\
+                        and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                     profitability_equipment.append(miner['efficiency_j_gh'])
 
             return profitability_equipment

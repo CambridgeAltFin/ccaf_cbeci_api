@@ -1,4 +1,4 @@
-from extensions import cache
+# from .extensions import cache
 import calendar
 import psycopg2.extras
 from config import config
@@ -6,7 +6,7 @@ from config import config
 # =============================================================================
 # functions for loading data
 # =============================================================================
-@cache.memoize()
+# @cache.memoize()
 def load_typed_hasrates(table='hash_rate_by_types'):
     with psycopg2.connect(**config['blockchain_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -30,7 +30,7 @@ def get_hash_rates_by_miners_types(typed_hasrates, timestamp):
         hash_rates[miner_type] = hr[timestamp]['value']
     return hash_rates
 
-@cache.memoize()
+# @cache.memoize()
 def get_avg_effciency_by_miners_types(miners):
     miners_by_types = {}
     typed_avg_effciency = {}
@@ -46,7 +46,7 @@ def get_avg_effciency_by_miners_types(miners):
 
     return typed_avg_effciency
 
-# @todo: remove
+# @todo: replace this by 'get_avg_effciency_by_miners_types' and remove then
 def get_avg_effciency_by_miners_types_old(miners):
     miners_by_types = {}
     typed_avg_effciency = {}
@@ -61,7 +61,7 @@ def get_avg_effciency_by_miners_types_old(miners):
         typed_avg_effciency[t] = sum(efficiencies) / len(efficiencies)
 
     return typed_avg_effciency
-# @todo: remove
+# @todo: / replace this by 'get_avg_effciency_by_miners_types' and remove then
 
 def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
     if len(prof_eqp) == 0:

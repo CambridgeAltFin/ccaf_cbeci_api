@@ -2,30 +2,29 @@ from extensions import cache
 from config import config, start_date
 from typing import List, Dict, Union
 from datetime import datetime
+from helpers import load_typed_hasrates, get_avg_effciency_by_miners_types, get_hash_rates_by_miners_types, get_guess_consumption
 import psycopg2
 import psycopg2.extras
 import pandas as pd
 
-table_prefix = 'blockchain_info_'
-
-@cache.cached(key_prefix=f'actual-{table_prefix}prof_threshold')
+@cache.cached(key_prefix='actual-prof_threshold')
 def get_prof_thresholds():
     with psycopg2.connect(**config['blockchain_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cursor.execute(f'SELECT timestamp, date, value FROM {table_prefix}prof_threshold WHERE timestamp >= %s',
+        cursor.execute('SELECT timestamp, date, value FROM prof_threshold WHERE timestamp >= %s',
                        (start_date.timestamp(),))
         return cursor.fetchall()
 
 
-@cache.cached(key_prefix=f'actual-{table_prefix}hash_rate')
+@cache.cached(key_prefix='actual-hash_rate')
 def get_hash_rates():
     with psycopg2.connect(**config['blockchain_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cursor.execute(f'SELECT timestamp, date, value FROM {table_prefix}hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
+        cursor.execute('SELECT timestamp, date, value FROM hash_rate WHERE timestamp >= %s', (start_date.timestamp(),))
         return cursor.fetchall()
 
 
-@cache.cached(key_prefix=f'actual-{table_prefix}miners')
+@cache.cached(key_prefix='actual-miners')
 def get_miners():
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -33,8 +32,8 @@ def get_miners():
             'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type FROM miners WHERE is_active is true')
         return cursor.fetchall()
 
-# version: 1.0.5
-class EnergyConsumption(object):
+
+class EnergyConsumptionByTypes(object):
     # that is because base calculation in the DB is for the price 0.05 USD/KWth
     default_price = 0.05
 
@@ -46,12 +45,14 @@ class EnergyConsumption(object):
             for miner in miners:
                 if timestamp > miner['unix_date_of_release']\
                         and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                    profitability_equipment.append(miner['efficiency_j_gh'])
+                    if not miner['type']:
+                        profitability_equipment.append(miner['efficiency_j_gh'])
 
             return profitability_equipment
 
         def get_date_consumption(price: float, timestamp: int, prof_threshold_value: float
                                  ) -> Union[Dict[str, float], None]:
+            hash_rates = get_hash_rates_by_miners_types(typed_hasrates, timestamp)
             profitability_equipment = get_profitability_equipment(price, timestamp, prof_threshold_value)
             if len(profitability_equipment) == 0:
                 return {
@@ -65,8 +66,7 @@ class EnergyConsumption(object):
             max_consumption = max(profitability_equipment) * hash_rates_df['value'][timestamp] * 365.25 * 24 / 1e9 * 1.2
             min_consumption = min(profitability_equipment) * hash_rates_df['value'][
                 timestamp] * 365.25 * 24 / 1e9 * 1.01
-            guess_consumption = sum(profitability_equipment) / len(profitability_equipment) \
-                                * hash_rates_df['value'][timestamp] * 365.25 * 24 / 1e9 * 1.1
+            guess_consumption = get_guess_consumption(profitability_equipment, hash_rates_df['value'][timestamp], hash_rates, typed_avg_effciency)
 
             return {
                 'date': datetime.utcfromtimestamp(timestamp).isoformat(),
@@ -98,6 +98,8 @@ class EnergyConsumption(object):
         prof_thresholds = get_prof_thresholds()
         hash_rates = get_hash_rates()
         miners = get_miners()
+        typed_hasrates = load_typed_hasrates()
+        typed_avg_effciency = get_avg_effciency_by_miners_types(miners)
 
         hash_rates_df = pd.DataFrame(hash_rates).drop('date', axis=1).set_index('timestamp')
 

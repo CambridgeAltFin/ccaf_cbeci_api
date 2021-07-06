@@ -12,7 +12,6 @@ from logging.handlers import RotatingFileHandler
 from schema import SchemaError
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
-import pandas as pd
 from datetime import datetime
 import flask
 import requests
@@ -26,8 +25,7 @@ from dotenv import load_dotenv
 from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
-from helpers import get_guess_consumption, get_hash_rates_by_miners_types, get_avg_effciency_by_miners_types_old, load_typed_hasrates
-from services.energy_consumption import EnergyConsumption
+from helpers import load_typed_hasrates
 from services.energy_consumption_by_types import EnergyConsumptionByTypes
 
 load_dotenv(override=True)
@@ -220,7 +218,6 @@ def recalculate_data(value=None):
     energy_consumption = EnergyConsumptionByTypes()
 
     return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
-
 
 @app.route("/api/max/<value>")
 def recalculate_max(value):

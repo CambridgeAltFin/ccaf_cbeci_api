@@ -2,12 +2,10 @@ import logging
 import psycopg2
 import pandas as pd
 from datetime import datetime
-from dateutil import parser
+from pprint import pformat
+import requests as rq
 import click
 import yaml
-from api.helpers import get_guess_consumption, get_hash_rates_by_miners_types, get_avg_effciency_by_miners_types_old, load_typed_hasrates
-from api.data_source.coinmetrics import CoinMetrics
-from api.api.coinmetrics import CoinMetrics as ApiCoinMetrics
 
 config_path = 'CONFIG.yml'
 if config_path:
@@ -16,20 +14,34 @@ if config_path:
 else:
     config = {}
 
-DEFAULT_LOG_LEVEL = logging.INFO
+DEFAULT_LOG_LEVEL = 'INFO'
 DEFAULT_ELECTRICITY_PRICE = 0.05
 LOGGER = logging.getLogger()
+
+table_prefix = 'blockchain_info_'
+
+# comment
+
+def crawl(endpoint):
+    # Showing message that the scrapping started
+    LOGGER.info(f"{endpoint}: Scrapping as of {datetime.utcnow().isoformat()}")
+    # Querying data from DATA_API_URL
+    re = rq.get(f"https://api.blockchain.info/charts/{endpoint}?timespan=7years")
+    # Transforming reply into the object of 'dict' type
+    data = re.json()
+    LOGGER.debug(f"{endpoint}: Response:\n\n{pformat(data)}\n\n")
+    return [(int(row['x']), row['y']) for row in data['values']]
 
 
 def save_values(values, connection, table_name):
     # Creating cursor to work with DB
     cursor = connection.cursor()
     # Creating table. timestamp is a PRIMARY KEY, values are unique
-    cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name}"
+    cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_prefix}{table_name}"
                    f" (timestamp INT PRIMARY KEY, date TEXT, value REAL);")
     # Template of the query to paste a row to a table
-    insert_sql = f"INSERT INTO {table_name} (timestamp, date, value) " \
-                 f"VALUES (%s, %s, %s) ON CONFLICT ON CONSTRAINT {table_name}_pkey DO NOTHING;"
+    insert_sql = f"INSERT INTO {table_prefix}{table_name} (timestamp, date, value) " \
+                 f"VALUES (%s, %s, %s) ON CONFLICT ON CONSTRAINT {table_prefix}{table_name}_pkey DO NOTHING;"
     # Taking 'values' from the API reply and inputting rows one by one
     for timestamp, value in values:
         # The second column is going to be date in readable format
@@ -44,46 +56,49 @@ def save_values(values, connection, table_name):
         finally:
             connection.commit()
 
-@click.group(chain=True)
+
+# this is to change parameters from CLI
+@click.command()
+@click.option('--price', '-p', default=DEFAULT_ELECTRICITY_PRICE)
 @click.option('--log-level', '-l', default=DEFAULT_LOG_LEVEL)
-def cli(log_level):
+def main(log_level, price):
     # Logging
-    level = log_level.upper() if isinstance(log_level, str) else log_level
-    LOGGER.setLevel(level)
+    LOGGER.setLevel(log_level.upper())
     # Console outputs
     LOGGER.addHandler(logging.StreamHandler())
 
-# this is to change parameters from CLI
-@cli.command()
-@click.option('--price', '-p', default=DEFAULT_ELECTRICITY_PRICE)
-def hash_rate(price):
-    LOGGER.info('hash_rate called')
-
     with psycopg2.connect(**config['custom_data']) as connection2:
         with connection2.cursor() as c2:
-            c2.execute('SELECT * FROM miners WHERE is_active is true')
+            c2.execute("SELECT * FROM miners")
             miners = c2.fetchall()
 
     all_data = {}
     # Opening DB. When the 'with' block ends, connection will be closed
     with psycopg2.connect(**config['blockchain_data']) as connection:
-        data = CoinMetrics().get_values(start_date='2014-07-01')
-        for item in data:
-            if any(item[metric] is None for metric in ['difficulty', 'hash-rate', 'miners-revenue', 'market-price']):
-                continue
-            for metric in ['difficulty', 'hash-rate', 'miners-revenue', 'market-price']:
-                if metric in item:
-                    # this is because table name can't contain hyphens
-                    table_name = metric.replace('-', '_')
-                    value = item[metric]
-                    timestamp = item['timestamp']
+        for endpoint in ['market-price']:
+            # if you need more data, just list it here
+            values = crawl(endpoint)
+            values = values[:-1]
+            # this is because table name can't contain hyphens
+            table_name = endpoint.replace('-', '_')
+            save_values(values, connection, table_name)
+            for timestamp, value in values:
+                try:
+                    all_data[timestamp][endpoint] = value
+                except KeyError:
+                    all_data[timestamp] = {endpoint: value}
 
-                    save_values([(timestamp, value)], connection, table_name)
-
-                    if timestamp not in all_data:
-                        all_data[timestamp] = {}
-
-                    all_data[timestamp][metric] = value
+        for endpoint in ['difficulty', 'hash-rate', 'miners-revenue']:
+            # if you need more data, just list it here
+            values = crawl(endpoint)
+            # this is because table name can't contain hyphens
+            table_name = endpoint.replace('-', '_')
+            save_values(values, connection, table_name)
+            for timestamp, value in values:
+                try:
+                    all_data[timestamp][endpoint] = value
+                except KeyError:
+                    all_data[timestamp] = {endpoint: value}
 
         # =============================================================================
         #        # This is to create block reward time series
@@ -140,14 +155,14 @@ def hash_rate(price):
         LOGGER.info(f"energy-consumption: as of {datetime.utcnow().isoformat()}")
         with connection.cursor() as c:
             # Creating table. timestamp is a PRIMARY KEY, values are unique
-            c.execute("CREATE TABLE IF NOT EXISTS energy_consumption (timestamp "
+            c.execute(f"CREATE TABLE IF NOT EXISTS {table_prefix}energy_consumption (timestamp "
                       "INT PRIMARY KEY, date TEXT, max_consumption REAL, min_consumption REAL, "
                       "guess_consumption REAL, all_prof_eqp TEXT, all_prof_eqp_qty TEXT);")
             # Template of the query to paste a row to a table
-            insert_sql = "INSERT INTO energy_consumption (timestamp, date, max_consumption, " \
+            insert_sql = f"INSERT INTO {table_prefix}energy_consumption (timestamp, date, max_consumption, " \
                          "min_consumption, guess_consumption, all_prof_eqp, all_prof_eqp_qty) " \
                          "VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT ON CONSTRAINT " \
-                         "energy_consumption_pkey DO NOTHING;"
+                         f"{table_prefix}energy_consumption_pkey DO NOTHING;"
             prof_eqp = []  # temp var for list of profit. eqp efficiency
             prof_eqp_all = []  # list of lists of profit. eqp efficiency
             prof_eqp_qty = []  # temp var for the list of profit. eqp qty
@@ -160,35 +175,19 @@ def hash_rate(price):
             data_df = pd.DataFrame.from_dict(all_data, orient='index')
             data_ma = data_df.rolling(window=14, min_periods=1).mean()
 
-            typed_hasrates = load_typed_hasrates() # @todo: uncomment this for S7/S9
-            typed_avg_effciency = get_avg_effciency_by_miners_types_old(miners) # @todo: uncomment this for S7/S9
             for timestamp, data in all_data.items():
-                hash_rates = get_hash_rates_by_miners_types(typed_hasrates, timestamp) # @todo: uncomment this for S7/S9
                 for miner in miners:
                     if timestamp > miner[1] and data_ma['prof-threshold'][timestamp] > miner[2]:
                         # ^^current date and date of miner release ^^checks if miner is profitable;
                         # if yes, adds miner's efficiency and qty to the lists:
-                        # prof_eqp.append(miner[2]) # @todo: remove this for S7/S9
-                        # prof_eqp_qty.append(miner[3]) # @todo: remove this for S7/S9
-                        # @todo: uncomment this for S7/S9
-                        type = miner[5]
-                        if not type:
-                            prof_eqp.append(miner[2])
-                            prof_eqp_qty.append(miner[3])
-                        # @todo: uncomment this for S7/S9
+                        prof_eqp.append(miner[2])
+                        prof_eqp_qty.append(miner[3])
                 prof_eqp_qty_all.append(prof_eqp_qty)
                 prof_eqp_all.append(prof_eqp)
                 try:
-                    max_consumption = max(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.2
-                    min_consumption = min(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e9 * 1.01
-                    # @todo: remove this for S7/S9
-                    # if len(prof_eqp) == 0:
-                    #     guess_consumption = 0
-                    # else:
-                    #     guess_consumption = sum(prof_eqp) / len(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e+9 * 1.1
-                    # @todo: /remove this for S7/S9
-                    guess_consumption = get_guess_consumption(prof_eqp, data['hash-rate'], hash_rates,
-                                                              typed_avg_effciency)  # @todo: uncomment this for S7/S9
+                    max_consumption = max(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e+9 * 1.2
+                    min_consumption = min(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e+9 * 1.01
+                    guess_consumption = sum(prof_eqp) / len(prof_eqp) * data['hash-rate'] * 365.25 * 24 / 1e+9 * 1.1
                 # ====this=is=for=weighting===================================================
                 #                 weighted_sum = 0
                 #                 eqp_qty_this_day = 0
@@ -200,9 +199,9 @@ def hash_rate(price):
                 # ===========================================================================
                 except Exception as error:  # in case if mining is not profitable (impossible to find MAX of empty list)
                     LOGGER.warning(f"Mining was unprofitable at timestamp={timestamp}: '{error}'")
-                    max_consumption = max_all[-1] if len(max_all) > 0 else 0
-                    min_consumption = min_all[-1] if len(min_all) > 0 else 0
-                    guess_consumption = guess_all[-1] if len(guess_all) > 0 else 0
+                    max_consumption = max_all[-1]
+                    min_consumption = min_all[-1]
+                    guess_consumption = guess_all[-1]
                 max_all.append(max_consumption)
                 min_all.append(min_consumption)
                 guess_all.append(guess_consumption)
@@ -228,11 +227,11 @@ def hash_rate(price):
                                      index=ts_all, columns=['MAX', 'MIN', 'GUESS'])
             energy_ma = energy_df.rolling(window=7, min_periods=1).mean()
 
-            c.execute("CREATE TABLE IF NOT EXISTS energy_consumption_ma (timestamp INT PRIMARY KEY, "
+            c.execute(f"CREATE TABLE IF NOT EXISTS {table_prefix}energy_consumption_ma (timestamp INT PRIMARY KEY, "
                       "date TEXT, max_consumption REAL, min_consumption REAL, guess_consumption REAL);")
-            insert_sql = "INSERT INTO energy_consumption_ma (timestamp, date, max_consumption, " \
+            insert_sql = f"INSERT INTO {table_prefix}energy_consumption_ma (timestamp, date, max_consumption, " \
                          "min_consumption, guess_consumption) VALUES (%s, %s, %s, %s, %s) " \
-                         "ON CONFLICT ON CONSTRAINT energy_consumption_ma_pkey DO NOTHING;"
+                         f"ON CONFLICT ON CONSTRAINT {table_prefix}energy_consumption_ma_pkey DO NOTHING;"
 
             max_ma = list(energy_ma['MAX'])
             min_ma = list(energy_ma['MIN'])
@@ -257,50 +256,6 @@ def hash_rate(price):
 #             energy_ma.to_sql('energy_ma', eng, if_exists='replace')
 # =============================================================================
 
-@cli.command()
-def coinmetrics():
-    LOGGER.info('coinmetrics called')
-    with psycopg2.connect(**config['blockchain_data']) as connection:
-        cursor = connection.cursor()
-
-        def save_hasrate(type, time, value, asset='btc'):
-            table_name = 'hash_rate_by_types'
-            date = parser.parse(time).date()
-
-            # Template of the query to paste a row to a table
-            insert_sql = f"INSERT INTO {table_name} (type, asset, value, date) " \
-                         f"VALUES (%s, %s, %s, %s) ON CONFLICT ON CONSTRAINT {table_name}_date_ukey DO NOTHING;"
-            try:
-                cursor.execute("CREATE TABLE IF NOT EXISTS hash_rate_by_types ("
-                               "id serial NOT NULL,"
-                               "type text NOT NULL,"
-                               "value real NOT NULL,"
-                               "date date NOT NULL,"
-                               "created_at timestamp without time zone NOT NULL DEFAULT NOW(),"
-                               "asset text NOT NULL,"
-                               "CONSTRAINT hash_rate_by_types_pkey PRIMARY KEY (id),"
-                               "CONSTRAINT hash_rate_by_types_date_ukey UNIQUE (type, date)"
-                          ");")
-                cursor.execute(insert_sql, (type, asset, value, date))
-            except Exception as error:
-                LOGGER.exception(f"{table_name}: {str(error)}")
-            finally:
-                connection.commit()
-
-    api_coinmetrics = ApiCoinMetrics(api_key=config['api.coinmetrics.io']['api_key'])
-    start_time = datetime(year=2014, month=1, day=1)
-    metrics = {
-        's9': 'HashRate30dS9Pct',
-        's7': 'HashRate30dS7Pct'
-    }
-    for t, metric in metrics.items():
-        LOGGER.info(f"hash_rate_by_types (type: {t}): as of {datetime.utcnow().isoformat()}")
-        data = api_coinmetrics.timeseries().asset_metrics(metrics=metric, start_time=start_time)
-        df = pd.DataFrame(data).sort_values(by=['time'])
-
-        for row in df.itertuples(name='Metric'):
-            save_hasrate(type=t, asset=row.asset, time=row.time, value=float(getattr(row, metric)) / 100)
-
 
 if __name__ == '__main__':
-    cli()
+    main()

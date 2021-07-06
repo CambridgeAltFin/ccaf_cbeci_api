@@ -102,20 +102,20 @@ def mining_provinces():
 @bp.route('/mining_map_countries')
 def mining_map_countries():
     @cache.cached(key_prefix='all_mining_map_countries')
-    def get_mining_countries():
+    def get_mining_map_countries():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM mining_map_countries')
             return cursor.fetchall()
 
     response = []
-    mining_countries = get_mining_countries()
+    mining_map_countries = get_mining_map_countries()
 
-    for mining_country in mining_countries:
+    for mining_map_country in mining_map_countries:
         response.append({
-            'x': calendar.timegm(mining_country[3].timetuple()) * 1000,
-            'y': mining_country[2],
-            'name': mining_country[1]
+            'x': calendar.timegm(mining_map_country[3].timetuple()) * 1000,
+            'y': mining_map_country[2],
+            'name': mining_map_country[1]
         })
 
     return jsonify(data=response)
@@ -124,20 +124,20 @@ def mining_map_countries():
 @bp.route('/mining_map_provinces')
 def mining_map_provinces():
     @cache.cached(key_prefix='all_mining_map_provinces')
-    def get_mining_provinces():
+    def get_mining_map_provinces():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM mining_map_provinces')
             return cursor.fetchall()
 
     response = []
-    mining_provinces = get_mining_provinces()
+    mining_map_provinces = get_mining_map_provinces()
 
-    for mining_province in mining_provinces:
+    for mining_map_province in mining_map_provinces:
         response.append({
-            'x': calendar.timegm(mining_province[4].timetuple()) * 1000,
-            'y': mining_province[3],
-            'name': mining_province[1]
+            'x': calendar.timegm(mining_map_province[4].timetuple()) * 1000,
+            'y': mining_map_province[3],
+            'name': mining_map_province[1]
         })
 
     return jsonify(data=response)

@@ -78,7 +78,7 @@ def mining_countries(version=None):
     headers = {
         'date': 'Date',
         'name': 'Country',
-        'value': 'Value',
+        'value': 'Share of global hashrate',
     }
     rows = get_mining_countries()
     send_file_func = send_file(file_type=file_type)
@@ -94,8 +94,8 @@ def mining_provinces(version=None):
     headers = {
         'date': 'Date',
         'name': 'Province',
-        'value': 'Value',
-        'local_value': 'Local Value'
+        'value': 'Share of global hashrate',
+        'local_value': 'Share of Chinese hashrate'
     }
     rows = get_mining_provinces()
     send_file_func = send_file(file_type=file_type)

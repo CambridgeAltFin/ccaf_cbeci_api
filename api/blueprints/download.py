@@ -60,7 +60,7 @@ def download(version=None):
         'min_consumption': 'MIN',
         'guess_consumption': 'GUESS'
     }
-    rows = get_data(version, price)
+    rows = get_data(version, float(price))
     send_file_func = send_file(file_type)
 
     return send_file_func(headers, rows)

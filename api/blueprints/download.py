@@ -35,10 +35,13 @@ def get_data(version=None, price=0.05):
     raise NotImplementedError('Not Implemented')
 
 
-def send_file(file_type='csv'):
+def send_file(first_line=None, file_type='csv'):
     def send_csv(headers: Dict[str, str], rows: List[Dict[str, Union[str, int, float]]], filename='export.csv'):
         si = io.StringIO()
-        cw = csv.DictWriter(si, fieldnames=headers.keys())
+        keys = headers.keys()
+        cw = csv.DictWriter(si, fieldnames=keys)
+        if first_line is not None and len(keys) > 0:
+            cw.writerow({list(keys)[0]: first_line})
         cw.writerow(headers)
         cw.writerows(rows)
         output = make_response(si.getvalue())
@@ -61,6 +64,6 @@ def download(version=None):
         'guess_consumption': 'GUESS'
     }
     rows = get_data(version, float(price))
-    send_file_func = send_file(file_type)
+    send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh', file_type=file_type)
 
     return send_file_func(headers, rows)

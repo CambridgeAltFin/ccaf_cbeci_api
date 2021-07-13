@@ -69,6 +69,7 @@ def data(version=None):
 
     return send_file_func(headers, rows)
 
+
 @bp.route('/mining_countries')
 def mining_countries(version=None):
     if version != 'v1.1.0':
@@ -83,7 +84,8 @@ def mining_countries(version=None):
     rows = get_mining_countries()
     send_file_func = send_file(file_type=file_type)
 
-    return send_file_func(headers, rows)
+    return send_file_func(headers, list(map(lambda row: {**row, 'value': round(row['value'] * 100, 2)}, rows)))
+
 
 @bp.route('/mining_provinces')
 def mining_provinces(version=None):
@@ -94,10 +96,11 @@ def mining_provinces(version=None):
     headers = {
         'date': 'Date',
         'name': 'Province',
-        'value': 'Share of global hashrate',
+        # 'value': 'Share of global hashrate',
         'local_value': 'Share of Chinese hashrate'
     }
     rows = get_mining_provinces()
     send_file_func = send_file(file_type=file_type)
 
-    return send_file_func(headers, rows)
+    return send_file_func(headers,
+                          list(map(lambda row: {**row, 'local_value': round(row['local_value'] * 100, 2)}, rows)))

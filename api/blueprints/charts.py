@@ -1,7 +1,10 @@
 from flask import Blueprint, jsonify
 import psycopg2
+import calendar
 from config import config
 from extensions import cache
+import pandas as pd
+from queries import get_mining_countries, get_mining_provinces
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -40,10 +43,88 @@ def profitability_threshold():
     response = []
     prof_thresholds = get_prof_thresholds()
 
-    for prof_threshold in prof_thresholds:
+    df = pd.DataFrame(prof_thresholds, columns=['timestamp', 'date', 'value']).drop(columns=['timestamp'])
+    df['date'] = df['date'].astype('datetime64[ns]')
+    df_by_weeks = df.resample('W-MON', on='date', closed='left', label='left').mean()
+
+    for date, value in df_by_weeks.iterrows():
         response.append({
-            'x': prof_threshold[0] * 1000,
-            'y': prof_threshold[2]
+            'x': date.timestamp() * 1000,
+            'y': value.value
+        })
+
+    return jsonify(data=response)
+
+
+@bp.route('/mining_countries')
+def mining_countries():
+    response = []
+    mining_countries = get_mining_countries()
+
+    for mining_country in mining_countries:
+        response.append({
+            'x': calendar.timegm(mining_country['date'].timetuple()) * 1000,
+            'y': mining_country['value'],
+            'name': mining_country['name']
+        })
+
+    return jsonify(data=response)
+
+
+@bp.route('/mining_provinces')
+def mining_provinces():
+    response = []
+    mining_provinces = get_mining_provinces()
+
+    for mining_province in mining_provinces:
+        response.append({
+            'x': calendar.timegm(mining_province['date'].timetuple()) * 1000,
+            'y': mining_province['local_value'],
+            'name': mining_province['name']
+        })
+
+    return jsonify(data=response)
+
+
+@bp.route('/mining_map_countries')
+def mining_map_countries():
+    @cache.cached(key_prefix='all_mining_map_countries')
+    def get_mining_map_countries():
+        with psycopg2.connect(**config['custom_data']) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM mining_map_countries')
+            return cursor.fetchall()
+
+    response = []
+    mining_map_countries = get_mining_map_countries()
+
+    for mining_map_country in mining_map_countries:
+        response.append({
+            'x': calendar.timegm(mining_map_country[3].timetuple()) * 1000,
+            'y': mining_map_country[2],
+            'name': mining_map_country[1]
+        })
+
+    return jsonify(data=response)
+
+
+@bp.route('/mining_map_provinces')
+def mining_map_provinces():
+    @cache.cached(key_prefix='all_mining_map_provinces')
+    def get_mining_map_provinces():
+        with psycopg2.connect(**config['custom_data']) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM mining_map_provinces')
+            return cursor.fetchall()
+
+    response = []
+    mining_map_provinces = get_mining_map_provinces()
+
+    for mining_map_province in mining_map_provinces:
+        response.append({
+            'x': calendar.timegm(mining_map_province[4].timetuple()) * 1000,
+            'y': mining_map_province[3],
+            'name': mining_map_province[1]
         })
 
     return jsonify(data=response)

@@ -1,31 +1,53 @@
+# from .extensions import cache
 import calendar
+import psycopg2.extras
+from config import config
 
 # =============================================================================
 # functions for loading data
 # =============================================================================
-def load_typed_hasrates(cursor, table='hash_rate_by_types'):
-    typed_hasrates = {}
-    hash_rate_types = ['s7', 's9']
-    for hash_rate_type in hash_rate_types:
-        cursor.execute(f'SELECT type, value, date FROM {table} WHERE type = %s;', (hash_rate_type,))
-        data = cursor.fetchall()
-        formatted_data = {}
-        for row in data:
-            r = dict(zip(['type', 'value', 'date'], row))
-            formatted_data[calendar.timegm(r['date'].timetuple())] = r
-        typed_hasrates[hash_rate_type] = formatted_data
+# @cache.memoize()
+def load_typed_hasrates(table='hash_rate_by_types'):
+    with psycopg2.connect(**config['blockchain_data']) as conn:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        typed_hasrates = {}
+        hash_rate_types = ['s7', 's9']
+        for hash_rate_type in hash_rate_types:
+            cursor.execute(f'SELECT type, value, date FROM {table} WHERE type = %s;', (hash_rate_type,))
+            data = cursor.fetchall()
+            formatted_data = {}
+            for row in data:
+                formatted_data[calendar.timegm(row['date'].timetuple())] = row
+            typed_hasrates[hash_rate_type] = formatted_data
     return typed_hasrates
 
 # =============================================================================
 # functions for hash rate calculation
 # =============================================================================
-def get_hash_rates(typed_hasrates, timestamp):
+def get_hash_rates_by_miners_types(typed_hasrates, timestamp):
     hash_rates = {}
     for miner_type, hr in typed_hasrates.items():
         hash_rates[miner_type] = hr[timestamp]['value']
     return hash_rates
 
-def get_avg_effciency_by_types(miners):
+# @cache.memoize()
+def get_avg_effciency_by_miners_types(miners):
+    miners_by_types = {}
+    typed_avg_effciency = {}
+    for miner in miners:
+        type = miner['type']
+        if type:
+            if type not in miners_by_types:
+                miners_by_types[type] = []
+            miners_by_types[type].append(miner['efficiency_j_gh'])
+
+    for t, efficiencies in miners_by_types.items():
+        typed_avg_effciency[t] = sum(efficiencies) / len(efficiencies)
+
+    return typed_avg_effciency
+
+# @todo: replace this by 'get_avg_effciency_by_miners_types' and remove then
+def get_avg_effciency_by_miners_types_old(miners):
     miners_by_types = {}
     typed_avg_effciency = {}
     for miner in miners:
@@ -39,6 +61,7 @@ def get_avg_effciency_by_types(miners):
         typed_avg_effciency[t] = sum(efficiencies) / len(efficiencies)
 
     return typed_avg_effciency
+# @todo: / replace this by 'get_avg_effciency_by_miners_types' and remove then
 
 def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
     if len(prof_eqp) == 0:

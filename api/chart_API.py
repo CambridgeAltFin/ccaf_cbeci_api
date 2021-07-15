@@ -12,7 +12,6 @@ from logging.handlers import RotatingFileHandler
 from schema import SchemaError
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
-import pandas as pd
 from datetime import datetime
 import flask
 import requests
@@ -23,10 +22,11 @@ import csv
 import io
 import os
 from dotenv import load_dotenv
-from config import config
+from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
-from helpers import get_guess_consumption, get_hash_rates, get_avg_effciency_by_types, load_typed_hasrates
+from helpers import load_typed_hasrates
+from services.energy_consumption_by_types import EnergyConsumptionByTypes
 
 load_dotenv(override=True)
 
@@ -40,8 +40,6 @@ def get_limiter_flag():
 
     return val is not None and val.lower() not in ("0", "false", "no")
 
-start_date = datetime(year=2014, month=7, day=1)
-
 # loading data in cache of each worker:
 def load_data():
     with psycopg2.connect(**config['blockchain_data']) as conn:
@@ -52,7 +50,7 @@ def load_data():
         hash_rate = c.fetchall()
         c.execute('SELECT * FROM energy_consumption_ma WHERE timestamp >= %s', (start_date.timestamp(),))
         cons = c.fetchall()
-        typed_hasrates = load_typed_hasrates(c)
+    typed_hasrates = load_typed_hasrates()
     with psycopg2.connect(**config['custom_data']) as conn2:
         c2 = conn2.cursor()
         c2.execute('SELECT * FROM miners WHERE is_active is true')
@@ -111,9 +109,10 @@ def get_file_handler(filename):
 def create_app():
     app = Flask(__name__)
 
-    from blueprints import charts, contribute
+    from blueprints import charts, contribute, download
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
+    app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
 
     swaggerui_bp = get_swaggerui_blueprint(
         SWAGGER_URL,
@@ -147,7 +146,6 @@ if get_limiter_flag():
 prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
 lastupdate = time.time()
 lastupdate_power = time.time()
-cache = {}
 try:
     hashrate = get_hashrate()
 except Exception as err:
@@ -171,10 +169,13 @@ def bad_request(error):
 def bad_request(error):
     return make_response(jsonify(error=str(error)), 401)
 
-# cache:
+@app.errorhandler(NotImplementedError)
+def bad_request(error):
+    return make_response(jsonify(error=str(error)), 404)
+
 @app.before_request
 def before_request():
-    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, cache, typed_hasrates
+    global lastupdate, lastupdate_power, prof_threshold, hash_rate, miners, countries, cons, hashrate, typed_hasrates
     if time.time() - lastupdate > 3600:
         try:
             prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
@@ -182,7 +183,6 @@ def before_request():
             app.logger.exception(f"Getting data from DB err: {str(err)}")
             send_err_to_slack(err, 'DB')
         else:
-            cache = {}
             lastupdate = time.time()
     if time.time() - lastupdate_power > 45:
         try:
@@ -197,6 +197,7 @@ def before_request():
 
 @app.route('/api/data')
 @app.route('/api/data/<value>')
+@cache.memoize()
 def recalculate_data(value=None):
     try:
         if value is None:
@@ -205,83 +206,18 @@ def recalculate_data(value=None):
     except:
         return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
 
+    def to_dict(timestamp, row):
+        return {
+            'timestamp': timestamp,
+            'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+            'guess_consumption': round(row['guess_consumption'], 2),
+            'max_consumption': round(row['max_consumption'], 2),
+            'min_consumption': round(row['min_consumption'], 2),
+        }
 
-    if price in cache:
-        return cache[price]
+    energy_consumption = EnergyConsumptionByTypes()
 
-    k = 0.05 / price
-    # that is because base calculation in the DB is for the price 0.05 USD/KWth
-    # temporary vars:
-    prof_eqp = []
-    all_prof_eqp = []
-    max_all = []
-    min_all = []
-    ts_all = []
-    date_all = []
-    guess_all = []
-    response = []
-
-    prof_th = pd.DataFrame(prof_threshold).sort_values(by=0)
-    prof_th = prof_th.drop(1, axis=1).set_index(0)
-    prof_th_ma = prof_th.rolling(window=14, min_periods=1).mean()
-
-    hashra = pd.DataFrame(hash_rate)
-    hashra = hashra.drop(1, axis=1).set_index(0)
-
-    # typed_avg_effciency = get_avg_effciency_by_types(miners) # @todo: uncomment this for S7/S9
-    for timestamp, row in prof_th_ma.iterrows():
-        # hash_rates = get_hash_rates(typed_hasrates, timestamp) # @todo: uncomment this for S7/S9
-        for miner in miners:
-            if timestamp > miner[1] and row[2] * k > miner[2]:
-                prof_eqp.append(miner[2]) # @todo: remove this for S7/S9
-                # @todo: uncomment this for S7/S9
-                # type = miner[5]
-                # if not type:
-                #     prof_eqp.append(miner[2])
-                # @todo: /uncomment this for S7/S9
-            # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
-        all_prof_eqp.append(prof_eqp)
-        try:
-            max_consumption = max(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.2
-            min_consumption = min(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.01
-            # @todo: remove this for S7/S9
-            if len(prof_eqp) == 0:
-                guess_consumption = 0
-            else:
-                guess_consumption = sum(prof_eqp) / len(prof_eqp) * hashra[2][timestamp] * 365.25 * 24 / 1e9 * 1.1
-            # @todo: /remove this for S7/S9
-            # guess_consumption = get_guess_consumption(prof_eqp, hashra[2][timestamp], hash_rates, typed_avg_effciency) # @todo: uncomment this for S7/S9
-        except:  # in case if mining is not profitable (it is impossible to find MIN or MAX of empty list)
-            max_consumption = max_all[-1] if len(max_all) > 0 else 0
-            min_consumption = min_all[-1] if len(min_all) > 0 else 0
-            guess_consumption = guess_all[-1] if len(guess_all) > 0 else 0
-        max_all.append(max_consumption)
-        min_all.append(min_consumption)
-        guess_all.append(guess_consumption)
-        ts_all.append(timestamp)
-        date = datetime.utcfromtimestamp(timestamp).isoformat()
-        date_all.append(date)
-        prof_eqp = []
-
-    energy_df = pd.DataFrame(list(zip(max_all, min_all, guess_all)), index=ts_all, columns=['MAX', 'MIN', 'GUESS'])
-    energy_ma = energy_df.rolling(window=7, min_periods=1).mean()
-    max_ma = list(energy_ma['MAX'])
-    min_ma = list(energy_ma['MIN'])
-    guess_ma = list(energy_ma['GUESS'])
-
-    for day in range(0, len(ts_all)):
-        response.append({
-            'date': date_all[day],
-            'guess_consumption': round(guess_ma[day], 2),
-            'max_consumption': round(max_ma[day], 2),
-            'min_consumption': round(min_ma[day], 2),
-            'timestamp': ts_all[day],
-        })
-
-    value = jsonify(data=response)
-    cache[price] = value
-    return value
-
+    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
 
 @app.route("/api/max/<value>")
 def recalculate_max(value):
@@ -337,15 +273,16 @@ def recalculate_guess(value):
 def countries_btc():
     tup2dict = {a:[c,d,b] for a,b,c,d,e,f in countries}
     tup2dict['Bitcoin'][0] = round(cons[-1][4],2)
-    dictsort = sorted(tup2dict.items(), key = lambda i: i[1][0], reverse=True)
+    dictsort = sorted(tup2dict.items(), key = lambda i: -1 if i[1][0] is None else i[1][0], reverse=True)
     response = []
     for item in dictsort:
+         electricity_consumption = 0 if item[1][0] is None else item[1][0]
          response.append({
             'country': item[0],
             'code': item[1][2],
-            'y': item[1][0],
+            'y': electricity_consumption,
             'x': dictsort.index(item)+1,
-            'bitcoin_percentage': round(item[1][0]/round(cons[-1][4], 2)*100, 2),
+            'bitcoin_percentage': round(electricity_consumption/round(cons[-1][4], 2)*100, 2),
             'logo': item[1][1]
             })
     for item in response:

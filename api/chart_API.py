@@ -21,12 +21,14 @@ import psycopg2
 import csv
 import io
 import os
+from services.firebase import init_app as init_firebase_app
 from dotenv import load_dotenv
 from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
 from helpers import load_typed_hasrates
 from services.energy_consumption_by_types import EnergyConsumptionByTypes
+from services.realtime_collection import realtime_collections
 
 load_dotenv(override=True)
 
@@ -109,8 +111,12 @@ def get_file_handler(filename):
 def create_app():
     app = Flask(__name__)
 
-    from blueprints import charts, contribute, download
+    from blueprints import charts, contribute, download, text_pages, reports, sponsors
+
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
+    app.register_blueprint(text_pages.bp, url_prefix='/api/text_pages')
+    app.register_blueprint(reports.bp, url_prefix='/api/reports')
+    app.register_blueprint(sponsors.bp, url_prefix='/api/sponsors')
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
     app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
 
@@ -141,6 +147,9 @@ if get_limiter_flag():
         default_limits=["12000 per day", "300 per 10 minutes", "15 per 10 seconds"],
         default_limits_exempt_when=limits_exempt_when
     )
+
+init_firebase_app(cert=os.path.abspath(f"../storage/firebase/service-account-cert.{os.environ.get('PROJECT_ID')}.json"))
+realtime_collections.init()
 
 # initialisation of cache vars:
 prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()

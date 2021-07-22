@@ -34,7 +34,7 @@ jobs:
           git checkout $SHA
           ln -s ${{ secrets.DEMO_API_PROJECT_PATH }}/.env .env
           ln -s ${{ secrets.DEMO_API_PROJECT_PATH }}/CONFIG.yml CONFIG.yml
-          ln -s ${{ secrets.DEMO_PROJECT_PATH }}/service-account-cert.ccaf-afea-test.json src/storage/firebase/service-account-cert.ccaf-afea-test.json
+          ln -s ${{ secrets.DEMO_PROJECT_PATH }}/service-account-cert.ccaf-afea-test.json storage/firebase/service-account-cert.ccaf-afea-test.json
           poetry install
           rm -rf ${{ secrets.DEMO_API_PROJECT_PATH }}/actual
           ln -s ${{ secrets.DEMO_API_PROJECT_PATH }}/releases/$SHA ${{ secrets.DEMO_API_PROJECT_PATH }}/actual

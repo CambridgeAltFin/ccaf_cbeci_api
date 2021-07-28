@@ -9,12 +9,3 @@ def get_config(config_path):
 config = get_config(os.path.join(os.path.dirname(__file__), '..', 'CONFIG.yml'))
 
 start_date = datetime(year=2014, month=7, day=1)
-
-BUCKETS = {
-    'default': os.environ.get("DEFAULT_BUCKET")
-}
-
-FOLDERS = {
-    'reports': 'reports',
-    'sponsors': 'sponsors'
-}

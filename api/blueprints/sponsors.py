@@ -1,16 +1,19 @@
+import os
 import datetime
-from config import BUCKETS, FOLDERS
 from flask import Blueprint, jsonify, request, abort
 from firebase_admin import storage
 from services.realtime_collection import realtime_collections, Collections
 
 bp = Blueprint('sponsors', __name__, url_prefix='/sponsors')
 
+BUCKET = os.environ.get("DEFAULT_BUCKET")
+FOLDER = 'sponsors'
+
 def to_obj(doc):
     doc_copy = doc.copy()
     doc_copy['fileurl'] = [
-        storage.bucket(BUCKETS['default']) \
-            .blob(f'{FOLDERS["sponsors"]}/{doc["filename"]}') \
+        storage.bucket(BUCKET) \
+            .blob(f'{FOLDER}/{doc["filename"]}') \
             .generate_signed_url(
             expiration=datetime.timedelta(days=1),
         )

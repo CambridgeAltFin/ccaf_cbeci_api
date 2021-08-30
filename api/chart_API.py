@@ -29,6 +29,7 @@ from extensions import cache
 from helpers import load_typed_hasrates
 from services.energy_consumption_by_types import EnergyConsumptionByTypes
 from services.realtime_collection import realtime_collections
+from forms.feedback_form import FeedbackForm
 
 load_dotenv(override=True)
 
@@ -303,12 +304,16 @@ def countries_btc():
 @app.route("/api/feedback", methods=['POST'])
 def feedback():
     content = flask.request.json
+    form = FeedbackForm(content)
+    if not form.valid():
+        return jsonify(errors=form.get_errors()), 422
     with psycopg2.connect(**config['custom_data']) as conn:
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS feedback (timestamp INT PRIMARY KEY," 
                   "name TEXT, organisation TEXT, email TEXT, message TEXT);")
         insert_sql = "INSERT INTO feedback (timestamp, name, organisation, email, message) VALUES (%s, %s, %s, %s, %s)"
         name = content['name']
+        content['organisation'] = content['organisation'] if content['organisation'] else None
         organisation = content['organisation']
         email = content['email']
         message = content['message']

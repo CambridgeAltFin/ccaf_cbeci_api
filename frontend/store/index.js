@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import axios from 'axios'
-import _ from 'lodash'
 import Cookies from 'js-cookie'
 import * as contentAPI from '~/api/content.js'
 

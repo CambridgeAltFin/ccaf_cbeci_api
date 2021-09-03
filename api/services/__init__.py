@@ -1,2 +1,3 @@
 from .energy_consumption import EnergyConsumption
 from .energy_consumption_by_types import EnergyConsumptionByTypes
+from .energy_consumption_power_by_types import EnergyConsumptionPowerByTypes

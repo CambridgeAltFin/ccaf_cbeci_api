@@ -26,7 +26,7 @@ from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
 from helpers import load_typed_hasrates
-from services.energy_consumption_by_types import EnergyConsumptionByTypes
+from services.energy_consumption_power_by_types import EnergyConsumptionPowerByTypes
 
 load_dotenv(override=True)
 
@@ -210,12 +210,12 @@ def recalculate_data(value=None):
         return {
             'timestamp': timestamp,
             'date': datetime.utcfromtimestamp(timestamp).isoformat(),
-            'guess_consumption': round(row['guess_consumption'], 2),
-            'max_consumption': round(row['max_consumption'], 2),
-            'min_consumption': round(row['min_consumption'], 2),
+            'guess_consumption': round(row['guess_power'], 2),
+            'max_consumption': round(row['max_power'], 2),
+            'min_consumption': round(row['min_power'], 2),
         }
 
-    energy_consumption = EnergyConsumptionByTypes()
+    energy_consumption = EnergyConsumptionPowerByTypes()
 
     return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
 

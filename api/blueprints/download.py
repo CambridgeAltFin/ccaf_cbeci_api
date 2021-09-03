@@ -3,8 +3,10 @@ from flask import Blueprint, make_response, request
 import csv
 import io
 from datetime import datetime
-from services import EnergyConsumption, EnergyConsumptionByTypes
+from services import EnergyConsumption, EnergyConsumptionByTypes, EnergyConsumptionPowerByTypes
 from queries import get_mining_countries, get_mining_provinces
+from packaging.version import parse as version_parse
+
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
@@ -28,6 +30,23 @@ def get_data(version=None, price=0.05):
         energy_consumption_by_types = EnergyConsumptionByTypes()
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption_by_types.get_data(price)]
+
+    def v1_1_1(price):
+        def to_dict_extended(timestamp, row):
+            return {
+                'timestamp': timestamp,
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'guess_consumption': row['guess_consumption'],
+                'max_consumption': row['max_consumption'],
+                'min_consumption': row['min_consumption'],
+                'guess_power': row['guess_power'],
+                'max_power': row['max_power'],
+                'min_power': row['min_power']
+            }
+
+        energy_consumption_by_types = EnergyConsumptionPowerByTypes()
+
+        return [to_dict_extended(timestamp, row) for timestamp, row in energy_consumption_by_types.get_data(price)]
 
     func = locals().get(version.replace('.', '_'))
     if callable(func):
@@ -64,6 +83,15 @@ def data(version=None):
         'min_consumption': 'MIN',
         'guess_consumption': 'GUESS'
     }
+
+    if version_parse(version) >= version_parse('v1.1.1'):
+        headers['max_consumption'] = 'annualised consumption MAX'
+        headers['min_consumption'] = 'annualised consumption MIN'
+        headers['guess_consumption'] = 'annualised consumption GUESS'
+        headers['max_power'] = 'power MAX'
+        headers['min_power'] = 'power MIN'
+        headers['guess_power'] = 'power GUESS'
+
     rows = get_data(version, float(price))
     send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh', file_type=file_type)
 
@@ -72,7 +100,7 @@ def data(version=None):
 
 @bp.route('/mining_countries')
 def mining_countries(version=None):
-    if version != 'v1.1.0':
+    if version_parse(version) < version_parse('v1.1.0'):
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -89,7 +117,7 @@ def mining_countries(version=None):
 
 @bp.route('/mining_provinces')
 def mining_provinces(version=None):
-    if version != 'v1.1.0':
+    if version_parse(version) < version_parse('v1.1.0'):
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')

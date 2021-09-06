@@ -60,7 +60,6 @@ jobs:
         export INSTANCE_TEMPLATE=cbeci-prod-template-${{ steps.vars.outputs.sha_short }}
         export INSTANCE_GROUP=cbeci-prod-group
         
-        
         gcloud compute images create $MACHINE_IMAGE --project=$PROJECT --family=$FAMILY --source-disk=$SOURCE_DISK --source-disk-zone=$ZONE --labels=env=prod,cbeci-prod-image=1 --storage-location=$STORAGE_LOCATION --force
         gcloud --quiet beta compute --project=$PROJECT instance-templates create $INSTANCE_TEMPLATE --machine-type=e2-medium --network=projects/ccaf-afea/global/networks/default --network-tier=PREMIUM --metadata="env=prod,cbeci-prod-web=1,startup-script=crontab -u cbeci -r" --maintenance-policy=MIGRATE --service-account=756071129183-compute@developer.gserviceaccount.com --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append --tags=http-server,https-server --image=$MACHINE_IMAGE --image-project=$PROJECT --boot-disk-size=32GB --boot-disk-type=pd-balanced --boot-disk-device-name=$INSTANCE_TEMPLATE --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
         gcloud compute instance-groups managed set-instance-template $INSTANCE_GROUP --project=$PROJECT --template=$INSTANCE_TEMPLATE --zone=$ZONE

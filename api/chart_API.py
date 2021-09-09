@@ -12,6 +12,7 @@ from logging.handlers import RotatingFileHandler
 from schema import SchemaError
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from datetime import datetime
 import flask
 import requests
@@ -111,6 +112,10 @@ def get_file_handler(filename):
 
 def create_app():
     app = Flask(__name__)
+
+    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+        '/cbeci': app
+    })
 
     from blueprints import charts, contribute, download, text_pages, reports, sponsors
 
@@ -514,6 +519,7 @@ This API enables participating mining pools to share geolocational data on their
         }
     }
     return jsonify(swag)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', use_reloader=True)

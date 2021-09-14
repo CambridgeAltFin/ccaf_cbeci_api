@@ -49,18 +49,17 @@ class EnergyConsumptionPowerByTypes(object):
         self.hash_rates_df = pd.DataFrame(self.hash_rates).drop('date', axis=1).set_index('timestamp')
 
     def get_data(self, price: float):
-        prof_thresholds_df = pd.DataFrame(self.prof_thresholds) \
-            .sort_values(by='timestamp') \
-            .drop('date', axis=1) \
-            .set_index('timestamp')
-        prof_thresholds_ma_df = prof_thresholds_df.rolling(window=14, min_periods=1).mean()
+        return self._get_energy_dataframe(price).iterrows()
 
-        consumptions = [self.get_date_consumption(price, timestamp, row['value']) for timestamp, row in
-                        prof_thresholds_ma_df.iterrows()]
-        smooth_consumptions = self.smooth_consumptions(consumptions)
-
-        energy_df = pd.DataFrame(smooth_consumptions).sort_values(by='timestamp').set_index('timestamp') \
-            .rolling(window=7, min_periods=1).mean()
+    def get_monthly_data(self, price: float):
+        energy_df = self._get_energy_dataframe(price)
+        energy_df.reset_index(inplace=True)
+        energy_df['date'] = pd.to_datetime(energy_df['timestamp'], unit='s')
+        energy_df.drop(columns=['timestamp'])
+        energy_df.set_index('date', inplace=True)
+        energy_df = energy_df.groupby(pd.Grouper(freq='M')).sum().round(2)
+        energy_df['guess_power'] = energy_df['guess_power'].apply(lambda x: x * 24)
+        energy_df['cumulative_guess_power'] = energy_df['guess_power'].cumsum()
 
         return energy_df.iterrows()
 
@@ -141,3 +140,19 @@ class EnergyConsumptionPowerByTypes(object):
                 'date': consumption['date'],
             })
         return smooth_data
+
+    def _get_energy_dataframe(self, price: float):
+        prof_thresholds_df = pd.DataFrame(self.prof_thresholds) \
+            .sort_values(by='timestamp') \
+            .drop('date', axis=1) \
+            .set_index('timestamp')
+        prof_thresholds_ma_df = prof_thresholds_df.rolling(window=14, min_periods=1).mean()
+
+        consumptions = [self.get_date_consumption(price, timestamp, row['value']) for timestamp, row in
+                        prof_thresholds_ma_df.iterrows()]
+        smooth_consumptions = self.smooth_consumptions(consumptions)
+
+        energy_df = pd.DataFrame(smooth_consumptions).sort_values(by='timestamp').set_index('timestamp') \
+            .rolling(window=7, min_periods=1).mean()
+
+        return energy_df

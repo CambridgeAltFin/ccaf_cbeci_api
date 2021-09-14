@@ -85,12 +85,16 @@ def data(version=None):
     }
 
     if version_parse(version) >= version_parse('v1.1.1'):
-        headers['max_consumption'] = 'annualised consumption MAX'
-        headers['min_consumption'] = 'annualised consumption MIN'
-        headers['guess_consumption'] = 'annualised consumption GUESS'
-        headers['max_power'] = 'power MAX'
-        headers['min_power'] = 'power MIN'
-        headers['guess_power'] = 'power GUESS'
+        headers = {
+            'timestamp': 'Timestamp',
+            'date': 'Date and Time',
+            'max_power': 'power MAX, GW',
+            'min_power': 'power MIN, GW',
+            'guess_power': 'power GUESS, GW',
+            'max_consumption': 'annualised consumption MAX, TWh',
+            'min_consumption': 'annualised consumption MIN, TWh',
+            'guess_consumption': 'annualised consumption GUESS, TWh'
+        }
 
     rows = get_data(version, float(price))
     send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh', file_type=file_type)

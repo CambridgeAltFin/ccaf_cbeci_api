@@ -219,6 +219,29 @@ def recalculate_data(value=None):
 
     return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
 
+
+@app.route('/api/data/monthly')
+@app.route('/api/data/monthly/<value>')
+@cache.memoize()
+def recalculate_monthly_data(value=None):
+    try:
+        if value is None:
+            value = request.args.get('p')
+        price = float(value)
+    except:
+        return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
+
+    def to_dict(date, row):
+        return {
+            'month': date.strftime('%Y-%m'),
+            'value': round(row['guess_power'], 2),
+            'cumulative_value': round(row['cumulative_guess_power'], 2),
+        }
+
+    energy_consumption = EnergyConsumptionPowerByTypes()
+
+    return jsonify(data=[to_dict(date, row) for date, row in energy_consumption.get_monthly_data(price)])
+
 @app.route("/api/max/<value>")
 def recalculate_max(value):
     price = float(value)

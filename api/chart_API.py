@@ -32,6 +32,8 @@ from services.realtime_collection import realtime_collections
 from forms.feedback_form import FeedbackForm
 from services.energy_consumption_power_by_types import EnergyConsumptionPowerByTypes
 
+#test github actions
+
 load_dotenv(override=True)
 
 LOG_LEVEL = logging.INFO

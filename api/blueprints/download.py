@@ -3,7 +3,7 @@ from flask import Blueprint, make_response, request
 import csv
 import io
 from datetime import datetime
-from services import EnergyConsumption, EnergyConsumptionByTypes, EnergyConsumptionPowerByTypes
+from services import EnergyConsumption, EnergyConsumptionByTypes, EnergyAnalytic
 from queries import get_mining_countries, get_mining_provinces
 from packaging.version import parse as version_parse
 
@@ -44,9 +44,9 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
-        energy_consumption_by_types = EnergyConsumptionPowerByTypes()
+        energy_analytic = EnergyAnalytic()
 
-        return [to_dict_extended(timestamp, row) for timestamp, row in energy_consumption_by_types.get_data(price)]
+        return [to_dict_extended(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
 
     func = locals().get(version.replace('.', '_'))
     if callable(func):

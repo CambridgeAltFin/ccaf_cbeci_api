@@ -26,7 +26,8 @@ from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
 from helpers import load_typed_hasrates
-from services.energy_consumption_power_by_types import EnergyConsumptionPowerByTypes
+from services.energy_analytic import EnergyAnalytic
+from pandas._libs.tslibs.timestamps import Timestamp
 
 load_dotenv(override=True)
 
@@ -215,9 +216,9 @@ def recalculate_data(value=None):
             'min_consumption': round(row['min_power'], 2),
         }
 
-    energy_consumption = EnergyConsumptionPowerByTypes()
+    energy_analytic = EnergyAnalytic()
 
-    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
+    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)])
 
 
 @app.route('/api/data/monthly')
@@ -231,16 +232,18 @@ def recalculate_monthly_data(value=None):
     except:
         return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
 
-    def to_dict(date, row):
+    def to_dict(date: Timestamp, row):
         return {
+            'timestamp': int(date.timestamp()),
             'month': date.strftime('%Y-%m'),
             'value': round(row['guess_power'], 2),
             'cumulative_value': round(row['cumulative_guess_power'], 2),
         }
 
-    energy_consumption = EnergyConsumptionPowerByTypes()
+    energy_analytic = EnergyAnalytic()
 
-    return jsonify(data=[to_dict(date, row) for date, row in energy_consumption.get_monthly_data(price)])
+    return jsonify(data=[to_dict(date, row) for date, row in energy_analytic.get_monthly_data(price)])
+
 
 @app.route("/api/max/<value>")
 def recalculate_max(value):

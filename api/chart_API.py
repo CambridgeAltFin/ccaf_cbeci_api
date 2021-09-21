@@ -27,10 +27,12 @@ from dotenv import load_dotenv
 from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
-from helpers import load_typed_hasrates
 from services.realtime_collection import realtime_collections
 from forms.feedback_form import FeedbackForm
-from services.energy_consumption_power_by_types import EnergyConsumptionPowerByTypes
+from helpers import load_typed_hasrates, get_profitable_equipment_efficiency, get_hash_rates_by_miners_types, \
+    get_avg_effciency_by_miners_types
+from services.energy_analytic import EnergyAnalytic, get_miners
+from services.energy_calculation_service import EnergyCalculationService
 
 
 load_dotenv(override=True)
@@ -231,9 +233,9 @@ def recalculate_data(value=None):
             'min_consumption': round(row['min_power'], 2),
         }
 
-    energy_consumption = EnergyConsumptionPowerByTypes()
+    energy_analytic = EnergyAnalytic()
 
-    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
+    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)])
 
 
 @app.route('/api/data/monthly')
@@ -249,17 +251,20 @@ def recalculate_monthly_data(value=None):
 
     def to_dict(date, row):
         return {
+            'timestamp': int(date.timestamp()),
             'month': date.strftime('%Y-%m'),
-            'value': round(row['guess_power'], 2),
-            'cumulative_value': round(row['cumulative_guess_power'], 2),
+            'value': round(row['guess_consumption'], 2),
+            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
         }
 
-    energy_consumption = EnergyConsumptionPowerByTypes()
+    energy_analytic = EnergyAnalytic()
 
-    return jsonify(data=[to_dict(date, row) for date, row in energy_consumption.get_monthly_data(price)])
+    return jsonify(data=[to_dict(date, row) for date, row in energy_analytic.get_monthly_data(price)])
+
 
 @app.route("/api/max/<value>")
-def recalculate_max(value):
+@app.route("/api/power/max/<value>")
+def recalculate_power_max(value):
     price = float(value)
     k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
     prof_eqp = []   # temp var for the list of profitable equipment efficiency at any given moment
@@ -274,7 +279,8 @@ def recalculate_max(value):
 
 
 @app.route("/api/min/<value>")
-def recalculate_min(value):
+@app.route("/api/power/min/<value>")
+def recalculate_power_min(value):
     price = float(value)
     k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
     prof_eqp = []  # temp var for the list of profitable equipment efficiency at any given moment
@@ -289,7 +295,8 @@ def recalculate_min(value):
 
 
 @app.route("/api/guess/<value>")
-def recalculate_guess(value):
+@app.route("/api/power/guess/<value>")
+def recalculate_power_guess(value):
     price = float(value)
     k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
     prof_eqp = []   # temp var for the list of profitable equipment efficiency at any given moment
@@ -302,11 +309,45 @@ def recalculate_guess(value):
     except:
         guess_consumption = 'mining is not profitable'
     return jsonify(guess_consumption)
-# =============================================================================
-# @app.route("/api/countries", methods=['GET','POST'])
-# def countries_old():
-#     jsonify(data=countries)
-# =============================================================================
+
+
+@app.route("/api/consumption/max/<value>")
+def recalculate_consumption_max(value):
+    energy_calculator = EnergyCalculationService()
+    try:
+        prof_eqp = get_profitable_equipment_efficiency(prof_threshold, miners, float(value))
+        max_consumption = energy_calculator.max_consumption(prof_eqp, hashrate)
+    except:
+        max_consumption = 'mining is not profitable'
+    return jsonify(max_consumption)
+
+
+@app.route("/api/consumption/min/<value>")
+def recalculate_consumption_min(value):
+    energy_calculator = EnergyCalculationService()
+    try:
+        prof_eqp = get_profitable_equipment_efficiency(prof_threshold, miners, float(value))
+        min_consumption = energy_calculator.min_consumption(prof_eqp, hashrate)
+    except:
+        min_consumption = 'mining is not profitable'
+    return jsonify(min_consumption)
+
+
+@app.route("/api/consumption/guess/<value>")
+def recalculate_consumption_guess(value):
+    energy_calculator = EnergyCalculationService()
+    try:
+        prof_eqp = get_profitable_equipment_efficiency(prof_threshold, miners, float(value))
+        guess_consumption = energy_calculator.guess_consumption(
+            prof_eqp,
+            hashrate,
+            get_hash_rates_by_miners_types(typed_hasrates, prof_threshold[-1][0]),
+            get_avg_effciency_by_miners_types(get_miners())
+        )
+    except:
+        guess_consumption = 'mining is not profitable'
+    return jsonify(guess_consumption)
+
 
 @app.route("/api/countries")
 def countries_btc():

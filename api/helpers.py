@@ -70,3 +70,13 @@ def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
     for t, hr in hash_rates.items():
         guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)
     return guess_consumption * hash_rate * 365.25 * 24 / 1e9 * 1.1
+
+
+def get_profitable_equipment_efficiency(prof_threshold, miners, price: float) -> list:
+    k = 0.05 / price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
+    prof_eqp = []  # temp var for the list of profitable equipment efficiency at any given moment
+    for miner in miners:
+        if prof_threshold[-1][0] > miner[1] and prof_threshold[-1][2] * k > miner[2]:
+            prof_eqp.append(miner[2])
+        # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
+    return prof_eqp

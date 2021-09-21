@@ -236,8 +236,8 @@ def recalculate_monthly_data(value=None):
         return {
             'timestamp': int(date.timestamp()),
             'month': date.strftime('%Y-%m'),
-            'value': round(row['guess_power'], 2),
-            'cumulative_value': round(row['cumulative_guess_power'], 2),
+            'value': round(row['guess_consumption'], 2),
+            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
         }
 
     energy_analytic = EnergyAnalytic()

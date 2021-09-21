@@ -66,8 +66,8 @@ class EnergyAnalytic(object):
         energy_df.drop(columns=['timestamp'])
         energy_df.set_index('date', inplace=True)
         energy_df = energy_df.groupby(pd.Grouper(freq='M')).sum()
-        energy_df['guess_power'] = energy_df['guess_power'].apply(lambda x: x * 24 / 1000).round(2)
-        energy_df['cumulative_guess_power'] = energy_df['guess_power'].cumsum()
+        energy_df['guess_consumption'] = energy_df['guess_power'].apply(lambda x: x * 24 / 1000).round(2)
+        energy_df['cumulative_guess_consumption'] = energy_df['guess_consumption'].cumsum()
 
         return energy_df.iterrows()
 

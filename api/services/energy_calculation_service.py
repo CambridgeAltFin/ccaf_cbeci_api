@@ -15,7 +15,7 @@ class EnergyCalculationService:
     def max_consumption(self, profitability_equipment, hash_rate: float) -> float:
         return max(profitability_equipment) * hash_rate * self.avg_days_in_year * self.hours_in_day / 1e9 * self.max_coefficient
 
-    def guess_consumption(self, profitability_equipment, hash_rate: float, hash_rates, typed_avg_efficiency) -> float:
+    def guess_consumption(self, profitability_equipment, hash_rate: float, hash_rates=None, typed_avg_efficiency=None) -> float:
         return self._calculate_guess(
             profitability_equipment,
             hash_rates,
@@ -39,8 +39,9 @@ class EnergyCalculationService:
         guess_consumption = self._get_avg(profitability_equipment)
         if guess_consumption == 0:
             return 0
-        for t, hr in hash_rates.items():
-            guess_consumption += hr * typed_avg_efficiency.get(t.lower(), 0)
+        if hash_rates is not None and typed_avg_efficiency is not None:
+            for t, hr in hash_rates.items():
+                guess_consumption += hr * typed_avg_efficiency.get(t.lower(), 0)
         return guess_consumption
 
     @staticmethod

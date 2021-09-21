@@ -155,6 +155,7 @@ class EnergyAnalytic(object):
         data = [
             self.get_date_metrics(price, timestamp, row['value'], metrics) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
         ]
+        print(data[-1])
         smooth_data = self.smooth_data(data)
 
         energy_df = pd.DataFrame(smooth_data).sort_values(by='timestamp').set_index('timestamp') \

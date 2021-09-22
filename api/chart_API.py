@@ -25,10 +25,8 @@ from dotenv import load_dotenv
 from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
-from helpers import load_typed_hasrates, get_profitable_equipment_efficiency, get_hash_rates_by_miners_types, \
-    get_avg_effciency_by_miners_types
-from services.energy_analytic import EnergyAnalytic, get_miners
-from services.energy_calculation_service import EnergyCalculationService
+from helpers import load_typed_hasrates
+from services.energy_analytic import EnergyAnalytic
 
 load_dotenv(override=True)
 
@@ -248,86 +246,68 @@ def recalculate_monthly_data(value=None):
 
 @app.route("/api/max/<value>")
 @app.route("/api/power/max/<value>")
+@cache.memoize()
 def recalculate_power_max(value):
-    price = float(value)
-    k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
-    prof_eqp = []   # temp var for the list of profitable equipment efficiency at any given moment
-    for miner in miners:
-        if prof_threshold[-1][0]>miner[1] and prof_threshold[-1][2]*k>miner[2]: prof_eqp.append(miner[2])
-        # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
+    energy_analytic = EnergyAnalytic()
     try:
-        max_consumption = max(prof_eqp)*hashrate*1.2/1e6
+        max_power = energy_analytic.get_actual_data(float(value))['max_power']
     except:
-        max_consumption = 'mining is not profitable'
-    return jsonify(max_consumption)
+        max_power = 'mining is not profitable'
+    return jsonify(max_power)
 
 
 @app.route("/api/min/<value>")
 @app.route("/api/power/min/<value>")
+@cache.memoize()
 def recalculate_power_min(value):
-    price = float(value)
-    k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
-    prof_eqp = []  # temp var for the list of profitable equipment efficiency at any given moment
-    for miner in miners:
-        if prof_threshold[-1][0]>miner[1] and prof_threshold[-1][2]*k>miner[2]: prof_eqp.append(miner[2])
-        # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
+    energy_analytic = EnergyAnalytic()
     try:
-        min_consumption = min(prof_eqp)*hashrate*1.01/1e6
+        min_power = energy_analytic.get_actual_data(float(value))['min_power']
     except:
-        min_consumption = 'mining is not profitable'
-    return jsonify(min_consumption)
+        min_power = 'mining is not profitable'
+    return jsonify(min_power)
 
 
 @app.route("/api/guess/<value>")
 @app.route("/api/power/guess/<value>")
+@cache.memoize()
 def recalculate_power_guess(value):
-    price = float(value)
-    k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
-    prof_eqp = []   # temp var for the list of profitable equipment efficiency at any given moment
-
-    for miner in miners:
-        if prof_threshold[-1][0]>miner[1] and prof_threshold[-1][2]*k>miner[2]: prof_eqp.append(miner[2])
-        # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
+    energy_analytic = EnergyAnalytic()
     try:
-        guess_consumption = sum(prof_eqp)/len(prof_eqp)*hashrate*1.10/1e6
+        guess_power = energy_analytic.get_actual_data(float(value))['guess_power']
     except:
-        guess_consumption = 'mining is not profitable'
-    return jsonify(guess_consumption)
+        guess_power = 'mining is not profitable'
+    return jsonify(guess_power)
 
 
 @app.route("/api/consumption/max/<value>")
+@cache.memoize()
 def recalculate_consumption_max(value):
-    energy_calculator = EnergyCalculationService()
+    energy_analytic = EnergyAnalytic()
     try:
-        prof_eqp = get_profitable_equipment_efficiency(prof_threshold, miners, float(value))
-        max_consumption = energy_calculator.max_consumption(prof_eqp, hashrate)
+        max_consumption = energy_analytic.get_actual_data(float(value))['max_consumption']
     except:
         max_consumption = 'mining is not profitable'
     return jsonify(max_consumption)
 
 
 @app.route("/api/consumption/min/<value>")
+@cache.memoize()
 def recalculate_consumption_min(value):
-    energy_calculator = EnergyCalculationService()
+    energy_analytic = EnergyAnalytic()
     try:
-        prof_eqp = get_profitable_equipment_efficiency(prof_threshold, miners, float(value))
-        min_consumption = energy_calculator.min_consumption(prof_eqp, hashrate)
+        min_consumption = energy_analytic.get_actual_data(float(value))['min_consumption']
     except:
         min_consumption = 'mining is not profitable'
     return jsonify(min_consumption)
 
 
 @app.route("/api/consumption/guess/<value>")
+@cache.memoize()
 def recalculate_consumption_guess(value):
-    energy_calculator = EnergyCalculationService()
+    energy_analytic = EnergyAnalytic()
     try:
-        prof_eqp = get_profitable_equipment_efficiency(prof_threshold, miners, float(value))
-        guess_consumption = energy_calculator.guess_consumption(
-            prof_eqp,
-            hashrate,
-            get_hash_rates_by_miners_types(typed_hasrates, prof_threshold[-1][0]),
-            get_avg_effciency_by_miners_types(get_miners())
-        )
+        guess_consumption = energy_analytic.get_actual_data(float(value))['guess_consumption']
     except:
         guess_consumption = 'mining is not profitable'
     return jsonify(guess_consumption)

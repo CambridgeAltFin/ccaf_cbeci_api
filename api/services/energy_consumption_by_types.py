@@ -1,5 +1,5 @@
 from extensions import cache
-from config import config, start_date
+from config import config
 from typing import List, Dict, Union
 from datetime import datetime
 from helpers import load_typed_hasrates, get_avg_effciency_by_miners_types, get_hash_rates_by_miners_types, get_guess_consumption
@@ -7,7 +7,10 @@ import psycopg2
 import psycopg2.extras
 import pandas as pd
 
-@cache.cached(key_prefix='actual-prof_threshold')
+start_date = datetime(year=2014, month=7, day=1)
+
+
+@cache.cached(key_prefix='1.1.0-prof_threshold')
 def get_prof_thresholds():
     with psycopg2.connect(**config['blockchain_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -16,7 +19,7 @@ def get_prof_thresholds():
         return cursor.fetchall()
 
 
-@cache.cached(key_prefix='actual-hash_rate')
+@cache.cached(key_prefix='1.1.0-hash_rate')
 def get_hash_rates():
     with psycopg2.connect(**config['blockchain_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -24,7 +27,7 @@ def get_hash_rates():
         return cursor.fetchall()
 
 
-@cache.cached(key_prefix='actual-miners')
+@cache.cached(key_prefix='1.1.0-miners')
 def get_miners():
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -43,7 +46,7 @@ class EnergyConsumptionByTypes(object):
             price_coefficient = self.default_price / price
 
             for miner in miners:
-                if timestamp > miner['unix_date_of_release']\
+                if timestamp > miner['unix_date_of_release'] \
                         and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                     if not miner['type']:
                         profitability_equipment.append(miner['efficiency_j_gh'])
@@ -66,7 +69,8 @@ class EnergyConsumptionByTypes(object):
             max_consumption = max(profitability_equipment) * hash_rates_df['value'][timestamp] * 365.25 * 24 / 1e9 * 1.2
             min_consumption = min(profitability_equipment) * hash_rates_df['value'][
                 timestamp] * 365.25 * 24 / 1e9 * 1.01
-            guess_consumption = get_guess_consumption(profitability_equipment, hash_rates_df['value'][timestamp], hash_rates, typed_avg_effciency)
+            guess_consumption = get_guess_consumption(profitability_equipment, hash_rates_df['value'][timestamp],
+                                                      hash_rates, typed_avg_effciency)
 
             return {
                 'date': datetime.utcfromtimestamp(timestamp).isoformat(),

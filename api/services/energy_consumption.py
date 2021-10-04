@@ -1,5 +1,5 @@
 from extensions import cache
-from config import config, start_date
+from config import config
 from typing import List, Dict, Union
 from datetime import datetime
 import psycopg2
@@ -7,6 +7,9 @@ import psycopg2.extras
 import pandas as pd
 
 table_prefix = 'blockchain_info_'
+
+start_date = datetime(year=2014, month=7, day=1)
+
 
 @cache.cached(key_prefix=f'actual-{table_prefix}prof_threshold')
 def get_prof_thresholds():

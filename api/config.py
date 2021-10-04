@@ -10,4 +10,4 @@ def get_config(config_path):
 
 config = get_config(os.path.join(os.path.dirname(__file__), '..', 'CONFIG.yml'))
 
-start_date = datetime(year=2009, month=1, day=1)
+start_date = datetime(year=2010, month=7, day=18)

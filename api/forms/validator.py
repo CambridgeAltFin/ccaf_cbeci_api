@@ -8,7 +8,7 @@ class Validator:
     def email(self, value, attr: None) -> bool or str:
         split_result = value.split('@')
 
-        if len(split_result) != 2 or len(split_result[1].split('.')) != 2:
+        if len(split_result) != 2 or len(split_result[1].split('.')) < 2:
             return 'Must be a valid email'
         return False
 

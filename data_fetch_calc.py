@@ -67,7 +67,7 @@ def hash_rate(price):
     all_data = {}
     # Opening DB. When the 'with' block ends, connection will be closed
     with psycopg2.connect(**config['blockchain_data']) as connection:
-        data = CoinMetrics().get_values(start_date='2014-07-01')
+        data = CoinMetrics().get_values(start_date='2009-01-01')
         for item in data:
             if any(item[metric] is None for metric in ['difficulty', 'hash-rate', 'miners-revenue', 'market-price']):
                 continue
@@ -288,7 +288,7 @@ def coinmetrics():
                 connection.commit()
 
     api_coinmetrics = ApiCoinMetrics(api_key=config['api.coinmetrics.io']['api_key'])
-    start_time = datetime(year=2014, month=1, day=1)
+    start_time = datetime(year=2009, month=1, day=1)
     metrics = {
         's9': 'HashRate30dS9Pct',
         's7': 'HashRate30dS7Pct'

@@ -12,6 +12,7 @@ from logging.handlers import RotatingFileHandler
 from schema import SchemaError
 from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from datetime import datetime
 import flask
 import requests
@@ -21,10 +22,12 @@ import psycopg2
 import csv
 import io
 import os
+from services.firebase import init_app as init_firebase_app
 from dotenv import load_dotenv
 from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
+from services.realtime_collection import realtime_collections
 from helpers import load_typed_hasrates
 from forms.feedback_form import FeedbackForm
 from services.energy_analytic import EnergyAnalytic
@@ -36,10 +39,12 @@ LOG_LEVEL = logging.INFO
 SWAGGER_URL = '/api/docs/contribute'
 SWAGGER_SPEC_URL = '/api/docs/spec'
 
+
 def get_limiter_flag():
     val = os.environ.get("LIMITER_ENABLED")
 
     return val is not None and val.lower() not in ("0", "false", "no")
+
 
 # loading data in cache of each worker:
 def load_data():
@@ -76,13 +81,16 @@ def send_err_to_slack(err, name):
     except:
         pass # not the best practice but we want API working even if Slack msg failed for any reason
 
+
 def get_request_ip():
     return request.headers.get('X-Real-Ip') or get_remote_address()
+
 
 def limits_exempt_when():
     exempt_ip = os.environ.get("RATELIMIT_EXEMPT_IP")
 
     return exempt_ip is not None and exempt_ip.lower() not in ("0", "false", "no") and get_request_ip() == exempt_ip
+
 
 def get_file_handler(filename):
     file_handler = RotatingFileHandler(filename, maxBytes=10 * 1024 * 1024, backupCount=5)  # mb * kb * b
@@ -107,11 +115,20 @@ def get_file_handler(filename):
 
     return file_handler
 
+
 def create_app():
     app = Flask(__name__)
 
-    from blueprints import charts, contribute, download
+    app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+        '/cbeci': app
+    })
+
+    from blueprints import charts, contribute, download, text_pages, reports, sponsors
+
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
+    app.register_blueprint(text_pages.bp, url_prefix='/api/text_pages')
+    app.register_blueprint(reports.bp, url_prefix='/api/reports')
+    app.register_blueprint(sponsors.bp, url_prefix='/api/sponsors')
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
     app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
 
@@ -125,6 +142,7 @@ def create_app():
     app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
 
     return app
+
 
 app = create_app()
 cache.init_app(app)
@@ -143,6 +161,9 @@ if get_limiter_flag():
         default_limits_exempt_when=limits_exempt_when
     )
 
+init_firebase_app(cert=os.path.abspath(f"../storage/firebase/service-account-cert.{os.environ.get('PROJECT_ID')}.json"))
+realtime_collections.init()
+
 # initialisation of cache vars:
 prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()
 lastupdate = time.time()
@@ -154,6 +175,7 @@ except Exception as err:
     logging.exception(str(err))
     send_err_to_slack(err, 'INIT HASHRATE')
 
+
 @app.errorhandler(429)
 def ratelimit_handler(e):
     app.logger.info(f"{str(e)} - IP: {get_request_ip()}")
@@ -162,17 +184,22 @@ def ratelimit_handler(e):
         , 429
     )
 
+
 @app.errorhandler(SchemaError)
 def bad_request(error):
     return make_response(jsonify(error=str(error)), 422)\
+
+
 
 @app.errorhandler(AuthenticationError)
 def bad_request(error):
     return make_response(jsonify(error=str(error)), 401)
 
+
 @app.errorhandler(NotImplementedError)
 def bad_request(error):
     return make_response(jsonify(error=str(error)), 404)
+
 
 @app.before_request
 def before_request():
@@ -523,6 +550,7 @@ def download_report():
 # 
 # =============================================================================
 
+
 @app.route(SWAGGER_SPEC_URL)
 def spec():
     swag = swagger(app)
@@ -549,6 +577,7 @@ This API enables participating mining pools to share geolocational data on their
         }
     }
     return jsonify(swag)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', use_reloader=True)

@@ -26,8 +26,8 @@ from config import config, start_date
 from decorators.auth import AuthenticationError
 from extensions import cache
 from helpers import load_typed_hasrates
-from services.energy_consumption_by_types import EnergyConsumptionByTypes
 from forms.feedback_form import FeedbackForm
+from services.energy_analytic import EnergyAnalytic
 
 load_dotenv(override=True)
 
@@ -211,64 +211,108 @@ def recalculate_data(value=None):
         return {
             'timestamp': timestamp,
             'date': datetime.utcfromtimestamp(timestamp).isoformat(),
-            'guess_consumption': round(row['guess_consumption'], 2),
-            'max_consumption': round(row['max_consumption'], 2),
-            'min_consumption': round(row['min_consumption'], 2),
+            'guess_consumption': round(row['guess_power'], 2),
+            'max_consumption': round(row['max_power'], 2),
+            'min_consumption': round(row['min_power'], 2),
         }
 
-    energy_consumption = EnergyConsumptionByTypes()
+    energy_analytic = EnergyAnalytic()
 
-    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)])
+    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)])
+
+
+@app.route('/api/data/monthly')
+@app.route('/api/data/monthly/<value>')
+@cache.memoize()
+def recalculate_monthly_data(value=None):
+    try:
+        if value is None:
+            value = request.args.get('p')
+        price = float(value)
+    except:
+        return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
+
+    def to_dict(date, row):
+        return {
+            'timestamp': int(date.timestamp()),
+            'month': date.strftime('%Y-%m'),
+            'value': round(row['guess_consumption'], 2),
+            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
+        }
+
+    energy_analytic = EnergyAnalytic()
+
+    return jsonify(data=[to_dict(date, row) for date, row in energy_analytic.get_monthly_data(price)])
+
 
 @app.route("/api/max/<value>")
-def recalculate_max(value):
-    price = float(value)
-    k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
-    prof_eqp = []   # temp var for the list of profitable equipment efficiency at any given moment
-    for miner in miners:
-        if prof_threshold[-1][0]>miner[1] and prof_threshold[-1][2]*k>miner[2]: prof_eqp.append(miner[2])
-        # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
+@app.route("/api/power/max/<value>")
+@cache.memoize()
+def recalculate_power_max(value):
+    energy_analytic = EnergyAnalytic()
     try:
-        max_consumption = max(prof_eqp)*hashrate*1.2/1e6
+        max_power = energy_analytic.get_actual_data(float(value))['max_power']
+    except:
+        max_power = 'mining is not profitable'
+    return jsonify(max_power)
+
+
+@app.route("/api/min/<value>")
+@app.route("/api/power/min/<value>")
+@cache.memoize()
+def recalculate_power_min(value):
+    energy_analytic = EnergyAnalytic()
+    try:
+        min_power = energy_analytic.get_actual_data(float(value))['min_power']
+    except:
+        min_power = 'mining is not profitable'
+    return jsonify(min_power)
+
+
+@app.route("/api/guess/<value>")
+@app.route("/api/power/guess/<value>")
+@cache.memoize()
+def recalculate_power_guess(value):
+    energy_analytic = EnergyAnalytic()
+    try:
+        guess_power = energy_analytic.get_actual_data(float(value))['guess_power']
+    except:
+        guess_power = 'mining is not profitable'
+    return jsonify(guess_power)
+
+
+@app.route("/api/consumption/max/<value>")
+@cache.memoize()
+def recalculate_consumption_max(value):
+    energy_analytic = EnergyAnalytic()
+    try:
+        max_consumption = energy_analytic.get_actual_data(float(value))['max_consumption']
     except:
         max_consumption = 'mining is not profitable'
     return jsonify(max_consumption)
 
 
-@app.route("/api/min/<value>")
-def recalculate_min(value):
-    price = float(value)
-    k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
-    prof_eqp = []  # temp var for the list of profitable equipment efficiency at any given moment
-    for miner in miners:
-        if prof_threshold[-1][0]>miner[1] and prof_threshold[-1][2]*k>miner[2]: prof_eqp.append(miner[2])
-        # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
+@app.route("/api/consumption/min/<value>")
+@cache.memoize()
+def recalculate_consumption_min(value):
+    energy_analytic = EnergyAnalytic()
     try:
-        min_consumption = min(prof_eqp)*hashrate*1.01/1e6
+        min_consumption = energy_analytic.get_actual_data(float(value))['min_consumption']
     except:
         min_consumption = 'mining is not profitable'
     return jsonify(min_consumption)
 
 
-@app.route("/api/guess/<value>")
-def recalculate_guess(value):
-    price = float(value)
-    k = 0.05/price  # that is because base calculations in the DB is for the price 0.05 USD/KWth
-    prof_eqp = []   # temp var for the list of profitable equipment efficiency at any given moment
-
-    for miner in miners:
-        if prof_threshold[-1][0]>miner[1] and prof_threshold[-1][2]*k>miner[2]: prof_eqp.append(miner[2])
-        # ^^current date miner release date ^^checks if miner is profit. ^^if yes, adds miner's efficiency to the list
+@app.route("/api/consumption/guess/<value>")
+@cache.memoize()
+def recalculate_consumption_guess(value):
+    energy_analytic = EnergyAnalytic()
     try:
-        guess_consumption = sum(prof_eqp)/len(prof_eqp)*hashrate*1.10/1e6
+        guess_consumption = energy_analytic.get_actual_data(float(value))['guess_consumption']
     except:
         guess_consumption = 'mining is not profitable'
     return jsonify(guess_consumption)
-# =============================================================================
-# @app.route("/api/countries", methods=['GET','POST'])
-# def countries_old():
-#     jsonify(data=countries)
-# =============================================================================
+
 
 @app.route("/api/countries")
 def countries_btc():

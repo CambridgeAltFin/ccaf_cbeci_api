@@ -3,8 +3,11 @@ from flask import Blueprint, make_response, request
 import csv
 import io
 from datetime import datetime
-from services import EnergyConsumption, EnergyConsumptionByTypes
+from services import EnergyConsumption, EnergyConsumptionByTypes, EnergyAnalytic
 from queries import get_mining_countries, get_mining_provinces
+from packaging.version import parse as version_parse
+from calendar import month_name
+
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
@@ -29,11 +32,41 @@ def get_data(version=None, price=0.05):
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption_by_types.get_data(price)]
 
+    def v1_1_1(price):
+        def to_dict(timestamp, row):
+            return {
+                'timestamp': timestamp,
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'guess_consumption': row['guess_consumption'],
+                'max_consumption': row['max_consumption'],
+                'min_consumption': row['min_consumption'],
+                'guess_power': row['guess_power'],
+                'max_power': row['max_power'],
+                'min_power': row['min_power']
+            }
+
+        energy_analytic = EnergyAnalytic()
+
+        return [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
+
     func = locals().get(version.replace('.', '_'))
     if callable(func):
         return func(price)
 
     raise NotImplementedError('Not Implemented')
+
+
+def get_monthly_data(version, price=.05):
+    def to_dict(date, row):
+        return {
+            'month': month_name[date.month] + date.strftime(' %Y'),
+            'value': round(row['guess_consumption'], 2),
+            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
+        }
+
+    energy_analytic = EnergyAnalytic()
+
+    return [to_dict(date, row) for date, row in energy_analytic.get_monthly_data(price)]
 
 
 def send_file(first_line=None, file_type='csv'):
@@ -64,7 +97,40 @@ def data(version=None):
         'min_consumption': 'MIN',
         'guess_consumption': 'GUESS'
     }
+
+    if version_parse(version) >= version_parse('v1.1.1'):
+        headers = {
+            'timestamp': 'Timestamp',
+            'date': 'Date and Time',
+            'max_power': 'power MAX, GW',
+            'min_power': 'power MIN, GW',
+            'guess_power': 'power GUESS, GW',
+            'max_consumption': 'annualised consumption MAX, TWh',
+            'min_consumption': 'annualised consumption MIN, TWh',
+            'guess_consumption': 'annualised consumption GUESS, TWh'
+        }
+
     rows = get_data(version, float(price))
+    send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh', file_type=file_type)
+
+    return send_file_func(headers, rows)
+
+
+@bp.route('/data/monthly')
+def data_monthly(version=None):
+    if version_parse(version) < version_parse('v1.1.1'):
+        raise NotImplementedError('Not Implemented')
+
+    file_type = request.args.get('file_type', 'csv')
+    price = request.args.get('price', 0.05)
+
+    headers = {
+        'month': 'Month',
+        'value': 'Monthly consumption, TWh',
+        'cumulative_value': 'Cumulative consumption, TWh',
+    }
+
+    rows = get_monthly_data(version, float(price))
     send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh', file_type=file_type)
 
     return send_file_func(headers, rows)
@@ -72,7 +138,7 @@ def data(version=None):
 
 @bp.route('/mining_countries')
 def mining_countries(version=None):
-    if version != 'v1.1.0':
+    if version_parse(version) < version_parse('v1.1.0'):
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -89,7 +155,7 @@ def mining_countries(version=None):
 
 @bp.route('/mining_provinces')
 def mining_provinces(version=None):
-    if version != 'v1.1.0':
+    if version_parse(version) < version_parse('v1.1.0'):
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')

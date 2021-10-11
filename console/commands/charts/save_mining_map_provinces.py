@@ -14,7 +14,6 @@ def handle(filename):
 
         cursor = connection.cursor()
         for row in reader:
-            print(row)
             save(cursor, row)
 
 

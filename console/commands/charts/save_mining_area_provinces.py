@@ -16,7 +16,6 @@ def handle(filename, version):
 
         cursor = connection.cursor()
         for row in reader:
-            print(row)
             save(cursor, row, version)
 
 

@@ -71,6 +71,21 @@ def mining_countries():
     return jsonify(data=response)
 
 
+@bp.route('/absolute_mining_countries')
+def absolute_mining_countries():
+    response = []
+    mining_countries = get_mining_countries()
+
+    for mining_country in mining_countries:
+        response.append({
+            'x': calendar.timegm(mining_country['date'].timetuple()) * 1000,
+            'y': mining_country['absolute_value'],
+            'name': mining_country['name']
+        })
+
+    return jsonify(data=response)
+
+
 @bp.route('/mining_provinces')
 def mining_provinces():
     response = []

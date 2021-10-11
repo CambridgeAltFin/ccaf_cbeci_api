@@ -170,3 +170,23 @@ def mining_provinces(version=None):
 
     return send_file_func(headers,
                           list(map(lambda row: {**row, 'local_value': round(row['local_value'] * 100, 2)}, rows)))
+
+
+@bp.route('/absolute_mining_countries')
+def absolute_mining_countries(version=None):
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    file_type = request.args.get('file_type', 'csv')
+    headers = {
+        'date': 'Date',
+        'name': 'Country',
+        'absolute_value': 'Estimated absolute hashrate'
+    }
+    rows = get_mining_countries(version[1:])
+    send_file_func = send_file(file_type=file_type)
+
+    return send_file_func(
+        headers,
+        list(map(lambda row: {**row, 'absolute_value': row['absolute_value']}, rows))
+    )

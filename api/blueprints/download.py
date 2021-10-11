@@ -118,7 +118,7 @@ def data(version=None):
 
 @bp.route('/data/monthly')
 def data_monthly(version=None):
-    if version_parse(version) < version_parse('v1.1.1'):
+    if version != 'v1.1.1':
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -138,7 +138,7 @@ def data_monthly(version=None):
 
 @bp.route('/mining_countries')
 def mining_countries(version=None):
-    if version_parse(version) < version_parse('v1.1.0'):
+    if version not in ['v1.1.0', 'v1.1.1']:
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -147,7 +147,7 @@ def mining_countries(version=None):
         'name': 'Country',
         'value': 'Share of global hashrate',
     }
-    rows = get_mining_countries()
+    rows = get_mining_countries(version[1:])
     send_file_func = send_file(file_type=file_type)
 
     return send_file_func(headers, list(map(lambda row: {**row, 'value': round(row['value'] * 100, 2)}, rows)))
@@ -155,7 +155,7 @@ def mining_countries(version=None):
 
 @bp.route('/mining_provinces')
 def mining_provinces(version=None):
-    if version_parse(version) < version_parse('v1.1.0'):
+    if version not in ['v1.1.0', 'v1.1.1']:
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -165,8 +165,28 @@ def mining_provinces(version=None):
         # 'value': 'Share of global hashrate',
         'local_value': 'Share of Chinese hashrate'
     }
-    rows = get_mining_provinces()
+    rows = get_mining_provinces(version[1:])
     send_file_func = send_file(file_type=file_type)
 
     return send_file_func(headers,
                           list(map(lambda row: {**row, 'local_value': round(row['local_value'] * 100, 2)}, rows)))
+
+
+@bp.route('/absolute_mining_countries')
+def absolute_mining_countries(version=None):
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    file_type = request.args.get('file_type', 'csv')
+    headers = {
+        'date': 'Date',
+        'name': 'Country',
+        'absolute_value': 'Estimated absolute hashrate'
+    }
+    rows = get_mining_countries(version[1:])
+    send_file_func = send_file(file_type=file_type)
+
+    return send_file_func(
+        headers,
+        list(map(lambda row: {**row, 'absolute_value': row['absolute_value']}, rows))
+    )

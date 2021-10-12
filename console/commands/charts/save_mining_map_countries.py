@@ -5,7 +5,7 @@ import psycopg2
 from config import config
 
 
-@click.command(name='save:mining-map-countries')
+@click.command(name='charts:save:mining-map-countries')
 @click.argument('filename')
 def handle(filename):
     with open(filename) as file, psycopg2.connect(**config['custom_data']) as connection:

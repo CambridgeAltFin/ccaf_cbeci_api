@@ -6,7 +6,7 @@ import psycopg2
 from config import config
 
 
-@click.command(name='save:mining-area-provinces')
+@click.command(name='charts:save:mining-area-provinces')
 @click.option('-v', '--version', default='1.0.0')
 @click.argument('filename')
 def handle(filename, version):

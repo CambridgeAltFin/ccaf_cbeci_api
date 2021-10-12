@@ -142,15 +142,34 @@ def mining_countries(version=None):
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
-    headers = {
-        'date': 'Date',
-        'name': 'Country',
-        'value': 'Share of global hashrate',
-    }
+
     rows = get_mining_countries(version[1:])
     send_file_func = send_file(file_type=file_type)
 
-    return send_file_func(headers, list(map(lambda row: {**row, 'value': round(row['value'] * 100, 2)}, rows)))
+    if version == 'v1.1.0':
+        headers = {
+            'date': 'Date',
+            'name': 'Country',
+            'value': 'Share of global hashrate',
+        }
+
+        return send_file_func(headers, list(map(lambda row: {**row, 'value': round(row['value'] * 100, 2)}, rows)))
+
+    headers = {
+        'date': 'date',
+        'name': 'country',
+        'value': 'monthly_hashrate_%',
+        'absolute_value': 'monthly_absolute_hashrate_EH/S',
+    }
+
+    return send_file_func(
+        headers,
+        list(map(lambda row: {
+            **row,
+            'value': str(round(row['value'] * 100, 2)) + '%' if row['value'] else '0%',
+            'absolute_value': round(row['absolute_value'], 2) if row['absolute_value'] is not None else 0
+        }, rows))
+    )
 
 
 @bp.route('/mining_provinces')
@@ -188,5 +207,5 @@ def absolute_mining_countries(version=None):
 
     return send_file_func(
         headers,
-        list(map(lambda row: {**row, 'absolute_value': row['absolute_value']}, rows))
+        rows
     )

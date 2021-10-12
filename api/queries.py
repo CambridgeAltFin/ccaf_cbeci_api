@@ -10,7 +10,7 @@ def get_mining_countries(version=None):
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         version_subquery = version_query('mining_area_countries', version)
         cursor.execute(
-            'SELECT * FROM mining_area_countries WHERE version = ({version_sql}) ORDER BY id'.format(version_sql=version_subquery[0]),
+            'SELECT m.*, c.code FROM mining_area_countries AS m LEFT JOIN countries AS c ON c.id = m.country_id WHERE m.version = ({version_sql}) ORDER BY m.date, m.value DESC'.format(version_sql=version_subquery[0]),
             version_subquery[1]
         )
         return cursor.fetchall()

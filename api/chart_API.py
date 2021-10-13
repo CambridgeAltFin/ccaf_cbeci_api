@@ -352,7 +352,7 @@ def recalculate_consumption_guess(value):
 
 @app.route("/api/countries")
 def countries_btc():
-    tup2dict = {a:[c,d,b] for a,b,c,d,e,f in countries}
+    tup2dict = {a:[c,d,b] for a,b,c,d,e,f,g in countries}
     tup2dict['Bitcoin'][0] = round(cons[-1][4],2)
     dictsort = sorted(tup2dict.items(), key = lambda i: -1 if i[1][0] is None else i[1][0], reverse=True)
     response = []

@@ -65,7 +65,24 @@ def mining_countries():
         response.append({
             'x': calendar.timegm(mining_country['date'].timetuple()) * 1000,
             'y': mining_country['value'],
-            'name': mining_country['name']
+            'name': mining_country['name'],
+            'code': mining_country['code']
+        })
+
+    return jsonify(data=response)
+
+
+@bp.route('/absolute_mining_countries')
+def absolute_mining_countries():
+    response = []
+    mining_countries = get_mining_countries()
+
+    for mining_country in mining_countries:
+        response.append({
+            'x': calendar.timegm(mining_country['date'].timetuple()) * 1000,
+            'y': mining_country['absolute_value'],
+            'name': mining_country['name'],
+            'code': mining_country['code']
         })
 
     return jsonify(data=response)
@@ -92,7 +109,7 @@ def mining_map_countries():
     def get_mining_map_countries():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM mining_map_countries')
+            cursor.execute('SELECT m.*, c.code FROM mining_map_countries AS m JOIN countries AS c ON c.id = m.country_id ORDER BY m.date, c.code')
             return cursor.fetchall()
 
     response = []
@@ -102,7 +119,8 @@ def mining_map_countries():
         response.append({
             'x': calendar.timegm(mining_map_country[3].timetuple()) * 1000,
             'y': mining_map_country[2],
-            'name': mining_map_country[1]
+            'name': mining_map_country[1],
+            'code': mining_map_country[5]
         })
 
     return jsonify(data=response)

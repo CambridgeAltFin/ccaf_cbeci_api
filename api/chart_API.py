@@ -14,6 +14,7 @@ from flask_swagger import swagger
 from flask_swagger_ui import get_swaggerui_blueprint
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from datetime import datetime
+from sentry_sdk.integrations.flask import FlaskIntegration
 import flask
 import requests
 import logging
@@ -22,6 +23,7 @@ import psycopg2
 import csv
 import io
 import os
+import sentry_sdk
 from services.firebase import init_app as init_firebase_app
 from dotenv import load_dotenv
 from config import config, start_date
@@ -118,6 +120,13 @@ def get_file_handler(filename):
 
 def create_app():
     app = Flask(__name__)
+
+    if os.environ.get('SENTRY_DSN'):
+        sentry_sdk.init(
+            dsn=os.environ.get('SENTRY_DSN'),
+            integrations=[FlaskIntegration()],
+            environment=os.environ.get('SENTRY_ENV', 'production')
+        )
 
     app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
         '/cbeci': app

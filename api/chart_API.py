@@ -412,6 +412,10 @@ def feedback():
             }
 
             date_for_ms = datetime.utcfromtimestamp(timestamp).isoformat()
+            facts = []
+            if organisation:
+                facts.append({'name': 'Organisation:', 'value': organisation})
+            facts.append({'name': 'Email:', 'value': email})
             ms_d = {
                 "summary": "CBECI feedback received",
                 "themeColor": "FFB81C",
@@ -421,16 +425,7 @@ def feedback():
                         "activityTitle": name,
                         "activitySubtitle": date_for_ms,
                         "activityImage": "https://i.ibb.co/0B6NSnK/user.jpg",
-                        "facts": [
-                            {
-                                "name": "Organisation:",
-                                "value": organisation
-                            },
-                            {
-                                "name": "Email:",
-                                "value": email
-                            }
-                        ],
+                        "facts": facts,
                         "text": message
                     }
                 ]

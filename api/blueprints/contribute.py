@@ -8,12 +8,14 @@ from decorators import validators, auth
 
 bp = Blueprint('contribute', __name__, url_prefix='/contribute')
 
+
 @cache.cached(key_prefix='all_countries')
 def get_countries():
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM countries')
         return cursor.fetchall()
+
 
 def datetime_validate(date_text):
     try:
@@ -22,6 +24,7 @@ def datetime_validate(date_text):
         return True
     except ValueError:
         return False
+
 
 schema = Schema({
     'data': [
@@ -36,6 +39,7 @@ schema = Schema({
         }
     ]
 }, ignore_extra_keys=True)
+
 
 @bp.route('/miners_geo_distribution', methods=('POST',))
 @auth.bearer()

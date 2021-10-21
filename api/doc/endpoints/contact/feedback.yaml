@@ -1,0 +1,46 @@
+post:
+  summary: Contact
+  deprecated: true
+  tags:
+    - Contact
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Feedback.yaml"
+          required:
+            - email
+            - message
+            - name
+            - is_confirmed
+
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "../../schemas/Feedback.yaml"
+              error:
+                type: string
+                example: ""
+              status:
+                type: string
+                example: success
+    422:
+      description: Unprocessable entity
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                type: object
+                properties:
+                  field:
+                    type: array
+                    items:
+                      type: string

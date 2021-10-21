@@ -4,7 +4,7 @@ Created on Thu May 16 14:24:16 2019
 
 @author: Anton
 """
-from flask import Flask, jsonify, make_response, request, has_request_context
+from flask import Flask, jsonify, make_response, request, has_request_context, send_from_directory
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -150,6 +150,9 @@ def create_app():
         }
     )
     app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
+
+    doc_bp = get_swaggerui_blueprint('/doc', '/doc/spec/index.yaml', blueprint_name='doc')
+    app.register_blueprint(doc_bp, url_prefix='/doc')
 
     return app
 
@@ -449,6 +452,12 @@ This API enables participating mining pools to share geolocational data on their
         }
     }
     return jsonify(swag)
+
+
+@app.route('/doc/spec/<path:path>')
+def doc(path):
+    print(path)
+    return send_from_directory('doc', path)
 
 
 if __name__ == '__main__':

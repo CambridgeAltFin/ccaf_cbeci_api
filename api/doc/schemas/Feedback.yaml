@@ -1,0 +1,12 @@
+type: object
+properties:
+  email:
+    type: string
+  name:
+    type: string
+  message:
+    type: string
+  organisation:
+    type: string
+  is_confirmed:
+    type: boolean

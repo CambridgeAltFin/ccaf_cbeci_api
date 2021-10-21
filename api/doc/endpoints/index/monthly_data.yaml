@@ -1,0 +1,27 @@
+get:
+  summary: Total Bitcoin electricity consumption
+  tags:
+    - Index
+  parameters:
+    - in: path
+      name: price
+      schema:
+        type: number
+      required: false
+    - in: query
+      name: p
+      schema:
+        type: number
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "../../schemas/MonthlyData.yaml"

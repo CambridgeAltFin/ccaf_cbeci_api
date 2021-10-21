@@ -3,6 +3,7 @@ import calendar
 import psycopg2.extras
 from config import config
 
+
 # =============================================================================
 # functions for loading data
 # =============================================================================
@@ -21,6 +22,7 @@ def load_typed_hasrates(table='hash_rate_by_types'):
             typed_hasrates[hash_rate_type] = formatted_data
     return typed_hasrates
 
+
 # =============================================================================
 # functions for hash rate calculation
 # =============================================================================
@@ -29,6 +31,7 @@ def get_hash_rates_by_miners_types(typed_hasrates, timestamp):
     for miner_type, hr in typed_hasrates.items():
         hash_rates[miner_type] = hr[timestamp]['value']
     return hash_rates
+
 
 # @cache.memoize()
 def get_avg_effciency_by_miners_types(miners):
@@ -46,6 +49,7 @@ def get_avg_effciency_by_miners_types(miners):
 
     return typed_avg_effciency
 
+
 # @todo: replace this by 'get_avg_effciency_by_miners_types' and remove then
 def get_avg_effciency_by_miners_types_old(miners):
     miners_by_types = {}
@@ -62,6 +66,7 @@ def get_avg_effciency_by_miners_types_old(miners):
 
     return typed_avg_effciency
 # @todo: / replace this by 'get_avg_effciency_by_miners_types' and remove then
+
 
 def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
     if len(prof_eqp) == 0:

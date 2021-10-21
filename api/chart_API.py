@@ -63,7 +63,7 @@ def load_data():
         c2 = conn2.cursor()
         c2.execute('SELECT * FROM miners WHERE is_active is true')
         miners=c2.fetchall()
-        c2.execute('SELECT * FROM countries')
+        c2.execute('SELECT country, code, electricity_consumption, country_flag FROM countries')
         countries=c2.fetchall()
     return prof_threshold, hash_rate, miners, countries, cons, typed_hasrates
 
@@ -132,7 +132,7 @@ def create_app():
         '/cbeci': app
     })
 
-    from blueprints import charts, contribute, download, text_pages, reports, sponsors
+    from blueprints import charts, contribute, download, text_pages, reports, sponsors, data
 
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(text_pages.bp, url_prefix='/api/text_pages')
@@ -140,6 +140,7 @@ def create_app():
     app.register_blueprint(sponsors.bp, url_prefix='/api/sponsors')
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
     app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
+    app.register_blueprint(data.bp, url_prefix='/api/data')
 
     swaggerui_bp = get_swaggerui_blueprint(
         SWAGGER_URL,
@@ -232,55 +233,6 @@ def before_request():
             lastupdate_power = time.time()
 
 
-@app.route('/api/data')
-@app.route('/api/data/<value>')
-@cache.memoize()
-def recalculate_data(value=None):
-    try:
-        if value is None:
-            value = request.args.get('p')
-        price = float(value)
-    except:
-        return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
-
-    def to_dict(timestamp, row):
-        return {
-            'timestamp': timestamp,
-            'date': datetime.utcfromtimestamp(timestamp).isoformat(),
-            'guess_consumption': round(row['guess_power'], 2),
-            'max_consumption': round(row['max_power'], 2),
-            'min_consumption': round(row['min_power'], 2),
-        }
-
-    energy_analytic = EnergyAnalytic()
-
-    return jsonify(data=[to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)])
-
-
-@app.route('/api/data/monthly')
-@app.route('/api/data/monthly/<value>')
-@cache.memoize()
-def recalculate_monthly_data(value=None):
-    try:
-        if value is None:
-            value = request.args.get('p')
-        price = float(value)
-    except:
-        return "Welcome to the CBECI API data endpoint. To get bitcoin electricity consumption estimate timeseries, specify electricity price parameter 'p' (in USD), for example /api/data?p=0.05"
-
-    def to_dict(date, row):
-        return {
-            'timestamp': int(date.timestamp()),
-            'month': date.strftime('%Y-%m'),
-            'value': round(row['guess_consumption'], 2),
-            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
-        }
-
-    energy_analytic = EnergyAnalytic()
-
-    return jsonify(data=[to_dict(date, row) for date, row in energy_analytic.get_monthly_data(price)])
-
-
 @app.route("/api/max/<value>")
 @app.route("/api/power/max/<value>")
 @cache.memoize()
@@ -352,20 +304,20 @@ def recalculate_consumption_guess(value):
 
 @app.route("/api/countries")
 def countries_btc():
-    tup2dict = {a:[c,d,b] for a,b,c,d,e,f,g in countries}
-    tup2dict['Bitcoin'][0] = round(cons[-1][4],2)
-    dictsort = sorted(tup2dict.items(), key = lambda i: -1 if i[1][0] is None else i[1][0], reverse=True)
+    tup2dict = {country: [consumption, flag, code] for country, code, consumption, flag in countries}
+    tup2dict['Bitcoin'][0] = round(cons[-1][4], 2)
+    dictsort = sorted(tup2dict.items(), key=lambda i: -1 if i[1][0] is None else i[1][0], reverse=True)
     response = []
     for item in dictsort:
-         electricity_consumption = 0 if item[1][0] is None else item[1][0]
-         response.append({
+        electricity_consumption = 0 if item[1][0] is None else item[1][0]
+        response.append({
             'country': item[0],
             'code': item[1][2],
             'y': electricity_consumption,
             'x': dictsort.index(item)+1,
             'bitcoin_percentage': round(electricity_consumption/round(cons[-1][4], 2)*100, 2),
             'logo': item[1][1]
-            })
+        })
     for item in response:
         if item['country'] == "Bitcoin":
             item['color'] = "#ffb81c"
@@ -469,90 +421,6 @@ def download_report():
         output.headers["Content-Disposition"] = "attachment; filename=export.csv"
         output.headers["Content-type"] = "text/csv"
         return output
-# =============================================================================
-# # ====== test endpoints ahead =========================================
-# @app.route('/api/new/data/<value>')
-# def recalculate_data_new(value):
-#     price = float(value)
-# 
-# #    if price in cache:
-# #        return cache[price]
-# 
-#     k = 0.05 / price
-#     # that is because base calculation in the DB is for the price 0.05 USD/KWth
-#     # temporary vars:
-#     prof_eqp = []
-#     all_prof_eqp = []
-#     max_all = []
-#     min_all = []
-#     ts_all = []
-#     date_all = []
-#     guess_all = []
-#     response = []
-# 
-#     for i in range(0, len(prof_threshold)):
-#         for miner in miners:
-#             if prof_threshold[i][0] > miner[1] and prof_threshold[i][2] * k > miner[2]:
-#                 prof_eqp.append(miner[2])
-#             # ^^current date miner release date ^^checks if miner is profit. ^^adds miner's efficiency to the list
-#         all_prof_eqp.append(prof_eqp)
-#         try:
-#             max_consumption = max(prof_eqp) * hash_rate[i][2] * 365.25 * 24 / 1e9 * 1.2
-#             min_consumption = min(prof_eqp) * hash_rate[i][2] * 365.25 * 24 / 1e9 * 1.01
-#             guess_consumption = sum(prof_eqp) / len(prof_eqp) * hash_rate[i][2] * 365.25 * 24 / 1e9 * 1.1
-#         except:  # in case if mining is not profitable (it is impossible to find MIN or MAX of empty list)
-#             max_consumption = max_all[-1]
-#             min_consumption = min_all[-1]
-#             guess_consumption = guess_all[-1]
-#         max_all.append(max_consumption)
-#         min_all.append(min_consumption)
-#         guess_all.append(guess_consumption)
-#         timestamp = prof_threshold[i][0]
-#         ts_all.append(timestamp)
-#         date = prof_threshold[i][1]
-#         date_all.append(date)
-#         prof_eqp = []
-# 
-#     energy_df = pd.DataFrame(list(zip(max_all, min_all, guess_all)), index=ts_all, columns=['MAX', 'MIN', 'GUESS'])
-#     energy_ma = energy_df.rolling(window=7, min_periods=1).mean()
-#     max_ma = list(energy_ma['MAX'])
-#     min_ma = list(energy_ma['MIN'])
-#     guess_ma = list(energy_ma['GUESS'])
-# 
-#     for day in range(0, len(ts_all)):
-#         response.append({
-#             'g': round(guess_ma[day], 2),
-#             'x': round(max_ma[day], 2),
-#             'n': round(min_ma[day], 2),
-#             't': ts_all[day],
-#         })
-# 
-# #    value = jsonify(data=response)
-# #    cache[price] = value
-# #    return value
-#     return jsonify(data=response)
-# 
-# 
-# @app.route("/api/new/countries", methods=['GET', 'POST'])
-# def countries_btc_new():
-#     tup2dict = {a: [c, d, b] for a, b, c, d in countries}
-#     tup2dict['Bitcoin'][0] = round(cons[-1][4],2)
-#     dictsort = sorted(tup2dict.items(), key=lambda i: i[1][0], reverse=True)
-#     response = []
-#     for item in dictsort:
-#          response.append({
-#             'c': item[0],
-#             'y': item[1][0],
-#             'x': dictsort.index(item)+1,
-#             'p': round(item[1][0]/round(cons[-1][4], 2)*100, 2),
-#             'l': item[1][2]
-#             })
-#     for item in response:
-#         if item['c'] == "Bitcoin":
-#             item['color'] = "#ffb81c"
-#     return jsonify(response)
-# 
-# =============================================================================
 
 
 @app.route(SWAGGER_SPEC_URL)

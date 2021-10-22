@@ -457,7 +457,7 @@ This API enables participating mining pools to share geolocational data on their
 @app.route('/api/docs/spec/<path:path>')
 def doc(path):
     print(path)
-    return send_from_directory('doc', path)
+    return send_from_directory('docs', path)
 
 
 if __name__ == '__main__':

@@ -7,8 +7,6 @@ servers:
     description: Main (production) server
   - url: https://demo.ccaf.io/cbeci/api
     description: Demo server for testing
-schemes:
-  - https
 tags:
   - name: Index
   - name: Charts

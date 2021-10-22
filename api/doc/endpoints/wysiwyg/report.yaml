@@ -18,3 +18,9 @@ get:
             properties:
               data:
                 $ref: "../../schemas/Report.yaml"
+    404:
+      description: Successful operation
+      content:
+        text/plain:
+          schema:
+            type: string

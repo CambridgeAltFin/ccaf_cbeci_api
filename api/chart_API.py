@@ -144,15 +144,15 @@ def create_app():
 
     swaggerui_bp = get_swaggerui_blueprint(
         SWAGGER_URL,
-        SWAGGER_SPEC_URL,
+        '/cbeci' + SWAGGER_SPEC_URL,
         config={
             'app_name': "Cbeci API"
         }
     )
     app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
 
-    doc_bp = get_swaggerui_blueprint('/api/doc', '/api/doc/spec/index.yaml', blueprint_name='doc')
-    app.register_blueprint(doc_bp, url_prefix='/api/doc')
+    doc_bp = get_swaggerui_blueprint('/api/docs', '/cbeci/api/docs/spec/index.yaml', blueprint_name='docs')
+    app.register_blueprint(doc_bp, url_prefix='/api/docs')
 
     return app
 
@@ -454,7 +454,7 @@ This API enables participating mining pools to share geolocational data on their
     return jsonify(swag)
 
 
-@app.route('/api/doc/spec/<path:path>')
+@app.route('/api/docs/spec/<path:path>')
 def doc(path):
     print(path)
     return send_from_directory('doc', path)

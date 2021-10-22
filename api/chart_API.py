@@ -143,7 +143,7 @@ def create_app():
     app.register_blueprint(data.bp, url_prefix='/api/data')
 
     swaggerui_bp = get_swaggerui_blueprint(
-        SWAGGER_URL,
+        '/cbeci' + SWAGGER_URL,
         '/cbeci' + SWAGGER_SPEC_URL,
         config={
             'app_name': "Cbeci API"
@@ -151,7 +151,7 @@ def create_app():
     )
     app.register_blueprint(swaggerui_bp, url_prefix=SWAGGER_URL)
 
-    doc_bp = get_swaggerui_blueprint('/api/docs', '/cbeci/api/docs/spec/index.yaml', blueprint_name='docs')
+    doc_bp = get_swaggerui_blueprint('/cbeci/api/docs', '/cbeci/api/docs/spec/index.yaml', blueprint_name='docs')
     app.register_blueprint(doc_bp, url_prefix='/api/docs')
 
     return app

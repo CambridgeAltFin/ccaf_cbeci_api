@@ -1,0 +1,22 @@
+get:
+  summary: List of Sponsors
+  tags:
+    - WYSIWYG
+  parameters:
+    - in: query
+      name: project
+      schema:
+        type: string
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "../../schemas/Sponsor.yaml"

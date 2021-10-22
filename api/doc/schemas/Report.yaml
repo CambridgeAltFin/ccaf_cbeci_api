@@ -1,0 +1,22 @@
+type: object
+properties:
+  id:
+    type: string
+  is_active:
+    type: boolean
+  name:
+    type: string
+  order_position:
+    type: integer
+  project:
+    type: string
+  filename:
+    type: string
+  fileurl:
+    type: array
+    items:
+      type: string
+  original_filename:
+    type: string
+  src:
+    type: string

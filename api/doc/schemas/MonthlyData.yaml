@@ -1,0 +1,10 @@
+type: object
+properties:
+  timestamp:
+    type: integer
+  month:
+    type: string
+  value:
+    type: number
+  cumulative_value:
+    type: number

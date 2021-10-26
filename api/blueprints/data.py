@@ -4,6 +4,7 @@ from extensions import cache
 from services.energy_analytic import EnergyAnalytic
 from resources.data import DataResource, MonthlyDataResource, StatsResource
 from decorators import price
+from decorators.cache_control import cache_control
 
 bp = Blueprint('data', __name__, url_prefix='data')
 
@@ -11,6 +12,7 @@ bp = Blueprint('data', __name__, url_prefix='data')
 @bp.route('/')
 @bp.route('/<value>')
 @price.get_price()
+@cache_control()
 @cache.memoize()
 def data(value):
     energy_analytic = EnergyAnalytic()
@@ -20,6 +22,7 @@ def data(value):
 @bp.route('monthly/')
 @bp.route('monthly/<value>')
 @price.get_price()
+@cache_control()
 @cache.memoize()
 def monthly_data(value):
     energy_analytic = EnergyAnalytic()
@@ -29,6 +32,7 @@ def monthly_data(value):
 @bp.route('stats/')
 @bp.route('stats/<value>')
 @price.get_price()
+@cache_control()
 @cache.memoize()
 def stats(value):
     energy_analytic = EnergyAnalytic()

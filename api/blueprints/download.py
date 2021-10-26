@@ -7,6 +7,7 @@ from services import EnergyConsumption, EnergyConsumptionByTypes, EnergyAnalytic
 from queries import get_mining_countries, get_mining_provinces
 from packaging.version import parse as version_parse
 from calendar import month_name
+from decorators.cache_control import cache_control
 
 
 bp = Blueprint('download', __name__, url_prefix='/download')
@@ -87,6 +88,7 @@ def send_file(first_line=None, file_type='csv'):
 
 
 @bp.route('/data')
+@cache_control()
 def data(version=None):
     file_type = request.args.get('file_type', 'csv')
     price = request.args.get('price', 0.05)
@@ -117,6 +119,7 @@ def data(version=None):
 
 
 @bp.route('/data/monthly')
+@cache_control()
 def data_monthly(version=None):
     if version != 'v1.1.1':
         raise NotImplementedError('Not Implemented')
@@ -137,6 +140,7 @@ def data_monthly(version=None):
 
 
 @bp.route('/mining_countries')
+@cache_control()
 def mining_countries(version=None):
     if version not in ['v1.1.0', 'v1.1.1']:
         raise NotImplementedError('Not Implemented')
@@ -173,6 +177,7 @@ def mining_countries(version=None):
 
 
 @bp.route('/mining_provinces')
+@cache_control()
 def mining_provinces(version=None):
     if version not in ['v1.1.0', 'v1.1.1']:
         raise NotImplementedError('Not Implemented')
@@ -192,6 +197,7 @@ def mining_provinces(version=None):
 
 
 @bp.route('/absolute_mining_countries')
+@cache_control()
 def absolute_mining_countries(version=None):
     if version != 'v1.1.1':
         raise NotImplementedError('Not Implemented')

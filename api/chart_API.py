@@ -28,6 +28,7 @@ from services.firebase import init_app as init_firebase_app
 from dotenv import load_dotenv
 from config import config, start_date
 from decorators.auth import AuthenticationError
+from decorators.cache_control import cache_control
 from extensions import cache
 from services.realtime_collection import realtime_collections
 from helpers import load_typed_hasrates
@@ -238,6 +239,7 @@ def before_request():
 
 @app.route("/api/max/<value>")
 @app.route("/api/power/max/<value>")
+@cache_control()
 @cache.memoize()
 def recalculate_power_max(value):
     energy_analytic = EnergyAnalytic()
@@ -250,6 +252,7 @@ def recalculate_power_max(value):
 
 @app.route("/api/min/<value>")
 @app.route("/api/power/min/<value>")
+@cache_control()
 @cache.memoize()
 def recalculate_power_min(value):
     energy_analytic = EnergyAnalytic()
@@ -262,6 +265,7 @@ def recalculate_power_min(value):
 
 @app.route("/api/guess/<value>")
 @app.route("/api/power/guess/<value>")
+@cache_control()
 @cache.memoize()
 def recalculate_power_guess(value):
     energy_analytic = EnergyAnalytic()
@@ -273,6 +277,7 @@ def recalculate_power_guess(value):
 
 
 @app.route("/api/consumption/max/<value>")
+@cache_control()
 @cache.memoize()
 def recalculate_consumption_max(value):
     energy_analytic = EnergyAnalytic()
@@ -284,6 +289,7 @@ def recalculate_consumption_max(value):
 
 
 @app.route("/api/consumption/min/<value>")
+@cache_control()
 @cache.memoize()
 def recalculate_consumption_min(value):
     energy_analytic = EnergyAnalytic()
@@ -295,6 +301,7 @@ def recalculate_consumption_min(value):
 
 
 @app.route("/api/consumption/guess/<value>")
+@cache_control()
 @cache.memoize()
 def recalculate_consumption_guess(value):
     energy_analytic = EnergyAnalytic()
@@ -306,6 +313,7 @@ def recalculate_consumption_guess(value):
 
 
 @app.route("/api/countries")
+@cache_control()
 def countries_btc():
     tup2dict = {country: [consumption, flag, code] for country, code, consumption, flag in countries}
     tup2dict['Bitcoin'][0] = round(cons[-1][4], 2)

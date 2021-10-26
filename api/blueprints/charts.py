@@ -5,11 +5,13 @@ from config import config
 from extensions import cache
 import pandas as pd
 from queries import get_mining_countries, get_mining_provinces
+from decorators.cache_control import cache_control
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
 
 @bp.route('/mining_equipment_efficiency')
+@cache_control()
 def mining_equipment_efficiency():
     @cache.cached(key_prefix='all_miners')
     def get_miners():
@@ -32,6 +34,7 @@ def mining_equipment_efficiency():
 
 
 @bp.route('/profitability_threshold')
+@cache_control()
 def profitability_threshold():
     @cache.cached(key_prefix='all_prof_threshold')
     def get_prof_thresholds():
@@ -57,6 +60,7 @@ def profitability_threshold():
 
 
 @bp.route('/mining_countries')
+@cache_control()
 def mining_countries():
     response = []
     mining_countries = get_mining_countries()
@@ -73,6 +77,7 @@ def mining_countries():
 
 
 @bp.route('/absolute_mining_countries')
+@cache_control()
 def absolute_mining_countries():
     response = []
     mining_countries = get_mining_countries()
@@ -89,6 +94,7 @@ def absolute_mining_countries():
 
 
 @bp.route('/mining_provinces')
+@cache_control()
 def mining_provinces():
     response = []
     mining_provinces = get_mining_provinces()
@@ -104,6 +110,7 @@ def mining_provinces():
 
 
 @bp.route('/mining_map_countries')
+@cache_control()
 def mining_map_countries():
     @cache.cached(key_prefix='all_mining_map_countries')
     def get_mining_map_countries():
@@ -127,6 +134,7 @@ def mining_map_countries():
 
 
 @bp.route('/mining_map_provinces')
+@cache_control()
 def mining_map_provinces():
     @cache.cached(key_prefix='all_mining_map_provinces')
     def get_mining_map_provinces():

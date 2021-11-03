@@ -9,7 +9,8 @@ def cache_control():
         @wraps(f)
         def decorated_function(*args, **kwargs):
             response = f(*args, **kwargs)  # type: Response
-            response.headers.add('Cache-Control', 'public,max-age=%d' % int(env.get('CACHE_CONTROL', 300)))
+            if type(response) != str:
+                response.headers.add('Cache-Control', 'public,max-age=%d' % int(env.get('CACHE_CONTROL', 300)))
             return response
         return decorated_function
     return decorator

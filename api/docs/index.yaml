@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Cbeci API
+  version: 1.0
+servers:
+  - url: https://cbeci.org/api
+    description: Main (production) server
+  - url: https://demo.ccaf.io/cbeci/api
+    description: Demo server for testing
+tags:
+  - name: Index
+  - name: Charts
+  - name: Download
+  - name: WYSIWYG
+  - name: Contact
+paths:
+  /data/{price}:
+    $ref: "./endpoints/index/data.yaml"
+  /data/monthly/{price}:
+    $ref: "./endpoints/index/monthly_data.yaml"
+  /data/stats/{price}:
+    $ref: "./endpoints/index/data_stats.yaml"
+
+  /max/{price}:
+    $ref: "./endpoints/index/max_power.yaml"
+  /power/max/{price}:
+    $ref: "./endpoints/index/max_power.yaml"
+  /min/{price}:
+    $ref: "./endpoints/index/min_power.yaml"
+  /power/min/{price}:
+    $ref: "./endpoints/index/min_power.yaml"
+  /guess/{price}:
+    $ref: "./endpoints/index/guess_power.yaml"
+  /power/guess/{price}:
+    $ref: "./endpoints/index/guess_power.yaml"
+
+  /consumption/max/{price}:
+    $ref: "./endpoints/index/max_consumption.yaml"
+  /consumption/min/{price}:
+    $ref: "./endpoints/index/min_consumption.yaml"
+  /consumption/guess/{price}:
+    $ref: "./endpoints/index/guess_consumption.yaml"
+
+  /charts/mining_equipment_efficiency:
+    $ref: "./endpoints/charts/miners.yaml"
+  /charts/profitability_threshold:
+    $ref: "./endpoints/charts/profitability_threshold.yaml"
+  /charts/mining_countries:
+    $ref: "./endpoints/charts/mining_countries.yaml"
+  /charts/absolute_mining_countries:
+    $ref: "./endpoints/charts/absolute_mining_countries.yaml"
+  /charts/mining_provinces:
+    $ref: "./endpoints/charts/mining_provinces.yaml"
+  /charts/mining_map_countries:
+    $ref: "./endpoints/charts/mining_map_countries.yaml"
+  /charts/mining_map_provinces:
+    $ref: "./endpoints/charts/mining_map_provinces.yaml"
+
+  /{version}/download/data:
+    $ref: "./endpoints/download/data.yaml"
+  /{version}/download/data/monthly:
+    $ref: "./endpoints/download/monthly_data.yaml"
+  /{version}/download/mining_countries:
+    $ref: "./endpoints/download/mining_countries.yaml"
+  /{version}/download/mining_provinces:
+    $ref: "./endpoints/download/mining_provinces.yaml"
+
+  /text_pages:
+    $ref: "./endpoints/wysiwyg/text_pages.yaml"
+  /text_pages/{id}:
+    $ref: "./endpoints/wysiwyg/text_page.yaml"
+  /reports:
+    $ref: "./endpoints/wysiwyg/reports.yaml"
+  /reports/{id}:
+    $ref: "./endpoints/wysiwyg/report.yaml"
+  /sponsors:
+    $ref: "./endpoints/wysiwyg/sponsors.yaml"
+  /sponsors/{id}:
+    $ref: "./endpoints/wysiwyg/sponsor.yaml"
+
+  /feedback:
+    $ref: "./endpoints/contact/feedback.yaml"

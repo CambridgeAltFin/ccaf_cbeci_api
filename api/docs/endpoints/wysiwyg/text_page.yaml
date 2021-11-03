@@ -1,0 +1,26 @@
+get:
+  summary: Text Page
+  tags:
+    - WYSIWYG
+  parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+      required: true
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "../../schemas/TextPage.yaml#/full"
+    404:
+      description: Successful operation
+      content:
+        text/plain:
+          schema:
+            type: string

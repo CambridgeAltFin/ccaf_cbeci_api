@@ -1,0 +1,65 @@
+short:
+  type: object
+  properties:
+    id:
+      type: string
+    is_active:
+      type: boolean
+    title:
+      type: string
+    parent:
+      type: string
+
+full:
+  type: object
+  properties:
+    id:
+      type: string
+    is_active:
+      type: boolean
+    title:
+      type: string
+    parent:
+      type: string
+    commands:
+      type: array
+      items:
+        type: string
+    content:
+      type: string
+    icon:
+      type: string
+    modals:
+      type: object
+      properties:
+        id:
+          type: object
+          properties:
+            name:
+              type: string
+            text:
+              type: string
+    project:
+      type: string
+    accordions:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+          title:
+            type: string
+          items:
+            type: array
+            items:
+              type: object
+              properties:
+                order_position:
+                  type: integer
+                text:
+                  type: string
+                title:
+                  type: string
+                id:
+                  type: string

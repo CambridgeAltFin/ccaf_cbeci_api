@@ -4,6 +4,7 @@ from extensions import cache
 import psycopg2
 from config import config
 
+
 @cache.cached(key_prefix='all_api_tokens')
 def get_api_tokens():
     with psycopg2.connect(**config['custom_data']) as conn:
@@ -11,8 +12,10 @@ def get_api_tokens():
         cursor.execute('SELECT * FROM api_tokens WHERE is_active is TRUE')
         return cursor.fetchall()
 
+
 class AuthenticationError(Exception):
     pass
+
 
 def bearer(header='Authorization'):
     def decorator(f):

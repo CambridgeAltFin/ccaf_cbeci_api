@@ -1,0 +1,14 @@
+type: object
+properties:
+  guess_consumption:
+    type: number
+  max_consumption:
+    type: number
+  min_consumption:
+    type: number
+  guess_power:
+    type: number
+  max_power:
+    type: number
+  min_power:
+    type: number

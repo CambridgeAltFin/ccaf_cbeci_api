@@ -17,11 +17,11 @@ def index():
         return doc.get('is_active') == True and doc.get('project') == project
 
     def doc_to_dict(doc):
-        copy = doc.copy()
+        copy = {}
 
-        for prop in ['content', 'commands', 'modals', 'panels', 'updatedAt', 'updatedBy']:
-            if prop in copy:
-                del copy[prop]
+        for prop in ['id', 'is_active', 'title', 'parent']:
+            if prop in doc:
+                copy[prop] = doc[prop]
 
         return copy
 

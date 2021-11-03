@@ -1,0 +1,27 @@
+get:
+  summary: List of Text Pages
+  tags:
+    - WYSIWYG
+  parameters:
+    - in: query
+      name: project
+      schema:
+        type: string
+      required: false
+    - in: query
+      name: parent
+      schema:
+        type: string
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "../../schemas/TextPage.yaml#/short"

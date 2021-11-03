@@ -23,7 +23,7 @@ def to_obj(doc):
 
 @bp.route('/')
 def index():
-    project = request.args.get('project', 'cbeci')
+    project = request.args.get('project', 'global')
     docs = realtime_collections.collections[Collections.REPORTS].get()
 
     def docs_filter(doc):

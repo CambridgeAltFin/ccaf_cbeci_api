@@ -1,0 +1,18 @@
+get:
+  summary: Max consumption
+  deprecated: true
+  tags:
+    - Index
+  parameters:
+    - in: path
+      name: price
+      schema:
+        type: number
+      required: true
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/plain:
+          schema:
+            type: number

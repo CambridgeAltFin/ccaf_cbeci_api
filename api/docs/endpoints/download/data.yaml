@@ -1,0 +1,35 @@
+get:
+  summary: Historical Bitcoin network power demand
+  tags:
+    - Download
+  parameters:
+    - in: path
+      name: version
+      schema:
+        type: string
+        enum:
+          - v1.1.1
+          - v1.1.0
+          - v1.0.5
+      required: true
+    - in: query
+      name: price
+      schema:
+        type: number
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/csv:
+          schema:
+            type: string
+    404:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

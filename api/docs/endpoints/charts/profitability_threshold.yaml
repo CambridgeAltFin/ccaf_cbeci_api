@@ -1,0 +1,21 @@
+get:
+  summary: Profitability Threshold
+  tags:
+    - Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    x:
+                      type: integer
+                    y:
+                      type: number

@@ -1,0 +1,12 @@
+type: object
+properties:
+  timestamp:
+    type: integer
+  date:
+    type: string
+  guess_consumption:
+    type: number
+  max_consumption:
+    type: number
+  min_consumption:
+    type: number

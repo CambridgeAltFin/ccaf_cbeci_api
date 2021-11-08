@@ -1,6 +1,7 @@
 
 from flask import Response
 
+import csv
 import json
 
 
@@ -24,5 +25,17 @@ def item_has_keys(item: dict, keys: list) -> bool:
         return False
     for key in keys:
         if key not in item:
+            return False
+    return True
+
+
+def response_is_csv(response: Response) -> bool:
+    return response.headers.get('content-type') == 'text/csv'
+
+
+def csv_has_headers(response: Response, columns: list, row_i: int = 0) -> bool:
+    reader = csv.reader(response.data.decode('utf-8').split('\n'))
+    for col in list(reader)[row_i]:
+        if col not in columns:
             return False
     return True

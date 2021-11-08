@@ -38,6 +38,8 @@ jobs:
           ln -s ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/CONFIG.yml CONFIG.yml
           ln -s ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/service-account-cert.ccaf-afea.json storage/firebase/service-account-cert.ccaf-afea.json
           poetry install
+          cd api
+          poetry run pytest tests
           rm -rf ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/actual
           ln -s ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/releases/$SHA ${{ secrets.PRODUCTION_API_PROJECT_PATH }}/actual
           sudo /usr/sbin/service cbeci_api restart

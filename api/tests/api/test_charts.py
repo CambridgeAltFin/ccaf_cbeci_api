@@ -43,7 +43,7 @@ def test_charts_endpoint_mining_provinces(client):
     response = client.get('/cbeci/api/charts/mining_provinces')  # type: Response
     assert response_is_successful(response)
     assert response_has_data_list(response)
-    assert response_data_item_has_keys(response, ['name', 'x', 'y'])
+    assert response_data_item_has_keys(response, ['name1', 'x', 'y'])
 
 
 @pytest.mark.usefixtures('client')

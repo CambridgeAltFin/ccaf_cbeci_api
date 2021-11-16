@@ -6,6 +6,8 @@ from extensions import cache
 import pandas as pd
 from queries import get_mining_countries, get_mining_provinces
 from decorators.cache_control import cache_control
+from components.gas_emission.gas_emission_factory import EmissionIntensityServiceFactory
+from resources.gas_emission.bitcoin_emission_intensity import BitcoinEmissionIntensityChartPoint
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -154,3 +156,10 @@ def mining_map_provinces():
         })
 
     return jsonify(data=response)
+
+
+@bp.route('/bitcoin_emission_intensity')
+@cache_control()
+def bitcoin_emission_intensity():
+    service = EmissionIntensityServiceFactory.create()
+    return jsonify(data=[BitcoinEmissionIntensityChartPoint(point) for point in service.get_bitcoin_emission_intensity()])

@@ -48,41 +48,30 @@ class EnergyAnalytic(object):
         self.typed_hash_rates = load_typed_hasrates()
         self.typed_avg_efficiency = get_avg_effciency_by_miners_types(self.miners)
         self.hash_rates_df = pd.DataFrame(self.hash_rates).drop('date', axis=1).set_index('timestamp')
-        self.cache_timeout = 24 * 60 * 60
         self.metrics = ['min_consumption', 'max_consumption', 'guess_consumption', 'min_power', 'max_power', 'guess_power']
 
     def get_data(self, price: float):
-        @cache.cached(key_prefix=self._get_cache_key(f'get_data_{price}'), timeout=self.cache_timeout)
-        def get_from_cache():
-            return self._get_energy_dataframe(price, self.metrics)
-
-        return get_from_cache().iterrows()
+        return self._get_energy_dataframe(price, self.metrics).iterrows()
 
     def get_monthly_data(self, price: float):
-        @cache.cached(key_prefix=self._get_cache_key(f'get_monthly_data_{price}'), timeout=self.cache_timeout)
-        def get_from_cache():
-            today = datetime.utcnow().date()
-            start_of_month = datetime(today.year, today.month, 1, tzinfo=tz.tzutc())
+        today = datetime.utcnow().date()
+        start_of_month = datetime(today.year, today.month, 1, tzinfo=tz.tzutc())
 
-            energy_df = self._get_energy_dataframe(price, ['guess_power'])
-            energy_df = energy_df.loc[energy_df.index < int(start_of_month.timestamp())]
+        energy_df = self._get_energy_dataframe(price, ['guess_power'])
+        energy_df = energy_df.loc[energy_df.index < int(start_of_month.timestamp())]
 
-            energy_df.reset_index(inplace=True)
-            energy_df['date'] = pd.to_datetime(energy_df['timestamp'], unit='s')
-            energy_df.drop(columns=['timestamp'])
-            energy_df.set_index('date', inplace=True)
-            energy_df = energy_df.groupby(pd.Grouper(freq='M')).sum()
-            energy_df['guess_consumption'] = energy_df['guess_power'].apply(lambda x: x * 24 / 1000).round(2)
-            energy_df['cumulative_guess_consumption'] = energy_df['guess_consumption'].cumsum()
-            return energy_df
+        energy_df.reset_index(inplace=True)
+        energy_df['date'] = pd.to_datetime(energy_df['timestamp'], unit='s')
+        energy_df.drop(columns=['timestamp'])
+        energy_df.set_index('date', inplace=True)
+        energy_df = energy_df.groupby(pd.Grouper(freq='M')).sum()
+        energy_df['guess_consumption'] = energy_df['guess_power'].apply(lambda x: x * 24 / 1000).round(2)
+        energy_df['cumulative_guess_consumption'] = energy_df['guess_consumption'].cumsum()
 
-        return get_from_cache().iterrows()
+        return energy_df.iterrows()
 
     def get_actual_data(self, price: float):
-        @cache.cached(key_prefix=self._get_cache_key(f'get_actual_data_{price}'), timeout=self.cache_timeout)
-        def get_from_cache():
-            return self._get_energy_dataframe(price, self.metrics)
-        return get_from_cache().iloc[-1]
+        return self._get_energy_dataframe(price, self.metrics).iloc[-1]
 
     def _get_profitability_equipment(self, price: float, timestamp: int, prof_threshold_value: float) -> List[float]:
         profitability_equipment = []

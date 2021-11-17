@@ -38,19 +38,115 @@ def handle(directory):
 
         df = get_hashrate_share(cursor)
         df2, historical_elec, post_elec = get_electricity_estimates(cursor)
-        china_coefficient = get_china_map(cursor, df, df3, directory)
+        china_coefficient, china_powermix = get_china_map(cursor, df, df3, directory)
 
         his_graph_data = historical_co2_coefficient(historical_elec, df3)
-        save_co2_coefficient(his_graph_data, emission_intensity_service.HISTORICAL)
+        # save_co2_coefficient(his_graph_data, emission_intensity_service.HISTORICAL)
 
         df3 = df3.replace({'Entity': {'Iran': 'Iran, Islamic Rep.', 'Russia': 'Russian Federation', 'World': 'Other',
                                       'China': 'Mainland China', 'Germany': 'Germany *', 'Ireland': 'Ireland *'}})
 
         df4 = estimated_co2_coefficient(df, df2, df3, china_coefficient)
-        save_co2_coefficient(df4, emission_intensity_service.ESTIMATED)
+        # save_co2_coefficient(df4, emission_intensity_service.ESTIMATED)
 
         df5 = provisional_co2_coefficient(post_elec)
-        save_co2_coefficient(df5, emission_intensity_service.PROVISIONAL)
+        # save_co2_coefficient(df5, emission_intensity_service.PROVISIONAL)
+
+        energy_mix_to_merge = df3[['Entity', 'Year', 'Share of Coal', 'Share of Gas', 'Share of Oil',
+                                   'Share of Nuclear', 'Share of Hydro', 'Share of Wind', 'Share of Solar',
+                                   'Share of Other renewable']]
+        hashrate = df.copy()
+        hashrate['Year'] = hashrate['Date'].str.extract(r'^(\d{4})')
+        hashrate['Year'] = hashrate['Year'].astype('int')
+
+        china_powermix['Weighted Share of Coal'] = china_powermix['Share of Coal'] * china_powermix[
+            'Percentage Share of Chinese hashrate']
+        china_powermix['Weighted Share of Nuclear'] = china_powermix['Share of Nuclear'] * china_powermix[
+            'Percentage Share of Chinese hashrate']
+        china_powermix['Weighted Share of Hydro'] = china_powermix['Share of Hydro'] * china_powermix[
+            'Percentage Share of Chinese hashrate']
+        china_powermix['Weighted Share of Wind'] = china_powermix['Share of Wind'] * china_powermix[
+            'Percentage Share of Chinese hashrate']
+        china_powermix['Weighted Share of Solar'] = china_powermix['Share of Solar'] * china_powermix[
+            'Percentage Share of Chinese hashrate']
+
+        china_powermix_monthly = china_powermix.groupby(['Year', 'Month'], as_index=False)[
+            ['Weighted Share of Coal', 'Weighted Share of Nuclear',
+             'Weighted Share of Hydro',
+             'Weighted Share of Wind',
+             'Weighted Share of Solar']].sum()
+        china_powermix_monthly['merge_date'] = pd.to_datetime(
+            china_powermix_monthly['Year'].astype('str') + '-' + china_powermix_monthly['Month'].astype('str') + '-01')
+        china_powermix_monthly.drop(['Year', 'Month'], axis=1, inplace=True)
+
+        hashrate_merge = pd.merge(hashrate, energy_mix_to_merge, how='left',
+                                  left_on=['Year', 'Country Equivalent'], right_on=['Year', 'Entity'])
+        hashrate_merge = hashrate_merge.sort_values(['Country Equivalent', 'Date'])
+        hashrate_merge = hashrate_merge.reset_index(drop=True)
+        hashrate_merge = hashrate_merge.fillna(method='ffill')
+
+        hashrate_merge_china = hashrate_merge[hashrate_merge['Country'] == 'Mainland China']
+        hashrate_merge_china = hashrate_merge_china.iloc[:, 0:9]
+        hashrate_merge_china['merge_date'] = pd.to_datetime(hashrate_merge_china['Date'] + '-01')
+        hashrate_merge_china = pd.merge(hashrate_merge_china, china_powermix_monthly, how='left', on='merge_date')
+
+        hashrate_merge_china['Entity'] = hashrate_merge_china['Country']
+        hashrate_merge_china.drop('merge_date', axis=1, inplace=True)
+        hashrate_merge_china.drop('Share of Coal', axis=1, inplace=True)
+        hashrate_merge_china.rename({
+            'Weighted Share of Coal': 'Share of Coal',
+            'Weighted Share of Nuclear': 'Share of Nuclear',
+            'Weighted Share of Hydro': 'Share of Hydro',
+            'Weighted Share of Wind': 'Share of Wind',
+            'Weighted Share of Solar': 'Share of Solar'
+        }, axis=1, inplace=True)
+
+        hashrate_merge = hashrate_merge[hashrate_merge['Country'] != 'Mainland China']
+        hashrate_merge = hashrate_merge.append(hashrate_merge_china, ignore_index=True)
+        hashrate_merge = hashrate_merge.fillna(0)
+
+        power_source_share = ['Share of Coal', 'Share of Gas', 'Share of Oil',
+                              'Share of Nuclear', 'Share of Hydro', 'Share of Wind', 'Share of Solar',
+                              'Share of Other renewable']
+        for power in power_source_share:
+            hashrate_merge["Weighted " + power] = hashrate_merge['Share of global hashrate'] / 100 * hashrate_merge[
+                power]
+
+        weighted_source_share = []
+        for power in power_source_share:
+            weighted_source_share.append("Weighted " + power)
+
+        monthly_bitcoin_energy_mix = hashrate_merge.groupby('Date')[weighted_source_share].sum()
+        monthly_bitcoin_energy_mix.sum(axis=1)
+        monthly_bitcoin_energy_mix = monthly_bitcoin_energy_mix.reset_index(drop=False)
+        monthly_bitcoin_energy_mix['Date'] = pd.to_datetime(monthly_bitcoin_energy_mix['Date'] + '-01')
+        monthly_bitcoin_energy_mix['Year'] = monthly_bitcoin_energy_mix['Date'].dt.year
+        yearly_bitcoin_energy_mix = monthly_bitcoin_energy_mix.groupby('Year')[weighted_source_share].mean()
+        yearly_bitcoin_energy_mix.sum(axis=1)
+
+        g_monthly_bitcoin_energy_mix = pd.melt(monthly_bitcoin_energy_mix, id_vars='Date', value_vars=weighted_source_share,
+                                               var_name='Power Source', value_name='Power Source Share')
+        g_monthly_bitcoin_energy_mix['Power Source'] = g_monthly_bitcoin_energy_mix['Power Source'].str.extract(
+            'Weighted Share of (.+)')
+
+        for i, row in g_monthly_bitcoin_energy_mix.iterrows():
+            cursor.execute('insert into power_sources (type, name, value, timestamp, date) VALUES (%s, %s, %s, %s, %s)',
+                           ('monthly', row['Power Source'], round(row['Power Source Share'], 6), row['Date'].timestamp(), row['Date']))
+
+        yearly_bitcoin_energy_mix = yearly_bitcoin_energy_mix.reset_index(drop=False)
+        graph_bitcoin_energy_mix = pd.melt(yearly_bitcoin_energy_mix, id_vars='Year', value_vars=weighted_source_share,
+                                           var_name='Power Source', value_name='Power Source Share')
+        ## reformat
+        graph_bitcoin_energy_mix['Power Source'] = graph_bitcoin_energy_mix['Power Source'].str.extract(
+            'Weighted Share of (.+)')
+        graph_bitcoin_energy_mix['Year'] = pd.to_datetime(graph_bitcoin_energy_mix['Year'].astype('str') + '-01-01')
+        graph_bitcoin_energy_mix = graph_bitcoin_energy_mix.sort_values(['Year', 'Power Source Share'],
+                                                                        ascending=[True, False])
+        graph_bitcoin_energy_mix['Power Source Share'] = round(graph_bitcoin_energy_mix['Power Source Share'] * 100, 2)
+
+        for i, row in graph_bitcoin_energy_mix.iterrows():
+            cursor.execute('insert into power_sources (type, name, value, timestamp, date) VALUES (%s, %s, %s, %s, %s)',
+                           ('yearly', row['Power Source'], round(row['Power Source Share'], 6), row['Year'].timestamp(), row['Year']))
 
 
 def hashrate_filter(country_name, manual_adjust_country_list):
@@ -134,7 +230,7 @@ def get_china_map(cursor, df, df3, directory):
     china_coefficient['Country'] = 'Mainland China'
     china_coefficient.rename({'Weighted_CO2_Coef': 'CO2_Coef'}, axis=1, inplace=True)
     china_coefficient = china_coefficient[['Date', 'CO2_Coef', 'Country']]
-    return china_coefficient
+    return china_coefficient, china_powermix
 
 
 def get_hashrate_share(cursor):
@@ -176,7 +272,7 @@ def get_electricity_mix(path):
 
 
 def get_electricity_estimates(cursor):
-    sql = 'select e.timestamp "Timestamp", e.date "Date and Time", e.max_power "power MAX, GW", e.min_power "power MIN, GW", e.guess_power "power GUESS, GW", e.max_consumption "annualised consumption MAX, TWh", e.min_consumption "annualised consumption MIN, TWh", e.guess_consumption "annualised consumption GUESS, TWh" from electricity_consumption_estimates e where e.cents = 5'
+    sql = 'select e.timestamp "Timestamp", e.date "Date and Time", e.max_power "power MAX, GW", e.min_power "power MIN, GW", e.guess_power "power GUESS, GW", e.max_consumption "annualised consumption MAX, TWh", e.min_consumption "annualised consumption MIN, TWh", e.guess_consumption "annualised consumption GUESS, TWh" from energy_consumptions e where e.price = \'0.05\''
     cursor.execute(sql)
     data = cursor.fetchall()
     df2 = pd.DataFrame(data)
@@ -190,7 +286,7 @@ def get_electricity_estimates(cursor):
 
 
 def get_cumulative_electricity_consumed(cursor):
-    sql = 'select c.date "Month", c.monthly_consumption "Monthly consumption, TWh", c.cumulative_consumption "Cumulative consumption, TWh" from cumulative_electricity_consumption_estimates c where c.cents = 5'
+    sql = 'select c.date "Month", c.monthly_consumption "Monthly consumption, TWh", c.cumulative_consumption "Cumulative consumption, TWh" from cumulative_energy_consumptions c where c.price = \'0.05\''
     cursor.execute(sql)
     ele_cum = pd.DataFrame(cursor.fetchall())
     ele_cum['Month'] = pd.to_datetime(ele_cum['Month'])

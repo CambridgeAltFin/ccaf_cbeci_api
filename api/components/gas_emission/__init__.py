@@ -1,1 +1,1 @@
-from .gas_emission_factory import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory
+from .gas_emission_factory import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory, PowerMixServiceFactory

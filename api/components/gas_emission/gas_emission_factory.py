@@ -1,4 +1,5 @@
 
+from components.gas_emission.power_mix_service import PowerMixService
 from components.energy_consumption import EnergyConsumptionServiceFactory
 from components.gas_emission.gas_emission_repository import GasEmissionRepository
 from components.gas_emission.emission_intensity_service import EmissionIntensityService
@@ -23,4 +24,12 @@ class GreenhouseGasEmissionServiceFactory:
         return GreenhouseGasEmissionService(
             repository=GasEmissionRepositoryFactory.create(),
             energy_consumption=EnergyConsumptionServiceFactory.create()
+        )
+
+
+class PowerMixServiceFactory:
+    @staticmethod
+    def create():
+        return PowerMixService(
+            repository=GasEmissionRepositoryFactory.create(),
         )

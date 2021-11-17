@@ -43,6 +43,14 @@ class GasEmissionRepository:
               'WHERE price = %s'
         return self._run_select_query(sql, (str(price),))
 
+    def get_monthly_bitcoin_power_mix(self):
+        sql = "SELECT timestamp, to_char(date, 'YYYY-MM') AS month, name, value FROM power_sources WHERE type = 'monthly'"
+        return self._run_select_query(sql)
+
+    def get_yearly_bitcoin_power_mix(self):
+        sql = "SELECT timestamp, to_char(date, 'YYYY') AS year, name, value FROM power_sources WHERE type = 'yearly'"
+        return self._run_select_query(sql)
+
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None):
         with psycopg2.connect(**config['custom_data']) as conn:

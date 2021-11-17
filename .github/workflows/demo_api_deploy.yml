@@ -41,3 +41,17 @@ jobs:
           rm -rf ${{ secrets.DEMO_API_PROJECT_PATH }}/actual
           ln -s ${{ secrets.DEMO_API_PROJECT_PATH }}/releases/$SHA ${{ secrets.DEMO_API_PROJECT_PATH }}/actual
           sudo /usr/sbin/service demo.cbeci_api restart
+    - name: Remove failed release
+      uses: appleboy/ssh-action@master
+      if: failure()
+      env:
+        SHA: ${{ github.sha }}
+      with:
+        host: ${{ secrets.DEMO_SERVER_HOST }}
+        username: atlas
+        port: 22
+        envs: SHA
+        script_stop: true
+        key: ${{ secrets.DEMO_CBECI_USER_KEY }}
+        script: |
+          rm -rf ${{ secrets.DEMO_API_PROJECT_PATH }}/releases/$SHA

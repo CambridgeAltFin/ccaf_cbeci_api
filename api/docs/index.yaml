@@ -55,6 +55,16 @@ paths:
     $ref: "./endpoints/charts/mining_map_countries.yaml"
   /charts/mining_map_provinces:
     $ref: "./endpoints/charts/mining_map_provinces.yaml"
+  /charts/bitcoin_emission_intensity:
+    $ref: "./endpoints/charts/bitcoin_emission_intensity.yaml"
+  /charts/bitcoin_greenhouse_gas_emissions/{price}:
+    $ref: "./endpoints/charts/bitcoin_greenhouse_gas_emissions.yaml"
+  /charts/total_bitcoin_greenhouse_gas_emissions/{price}:
+    $ref: "./endpoints/charts/total_bitcoin_greenhouse_gas_emissions.yaml"
+  /charts/monthly_bitcoin_power_mix:
+    $ref: "./endpoints/charts/monthly_bitcoin_power_mix.yaml"
+  /charts/yearly_bitcoin_power_mix:
+    $ref: "./endpoints/charts/yearly_bitcoin_power_mix.yaml"
 
   /{version}/download/data:
     $ref: "./endpoints/download/data.yaml"

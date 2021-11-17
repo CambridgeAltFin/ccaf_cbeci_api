@@ -9,6 +9,7 @@ from decorators.cache_control import cache_control
 from resources.gas_emission.bitcoin_emission_intensity import BitcoinEmissionIntensityChartPoint
 from components.gas_emission import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory
 from resources.gas_emission.bitcoin_greenhouse_gas_emission import BitcoinGreenhouseGasEmissionChartPoint
+from resources.gas_emission.total_bitcoin_greenhouse_gas_emission import TotalBitcoinGreenhouseGasEmissionChartPoint
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -167,9 +168,19 @@ def bitcoin_emission_intensity():
     return jsonify(data=[BitcoinEmissionIntensityChartPoint(point) for point in service.get_bitcoin_emission_intensity()])
 
 
+@bp.route('/bitcoin_greenhouse_gas_emissions')
 @bp.route('/bitcoin_greenhouse_gas_emissions/<price>')
 @cache_control()
 @cache.memoize()
 def bitcoin_greenhouse_gas_emissions(price=0.05):
     service = GreenhouseGasEmissionServiceFactory.create()
     return jsonify(data=[BitcoinGreenhouseGasEmissionChartPoint(point) for point in service.get_greenhouse_gas_emissions(float(price))])
+
+
+@bp.route('/total_bitcoin_greenhouse_gas_emissions')
+@bp.route('/total_bitcoin_greenhouse_gas_emissions/<price>')
+@cache_control()
+@cache.memoize()
+def total_bitcoin_greenhouse_gas_emissions(price=0.05):
+    service = GreenhouseGasEmissionServiceFactory.create()
+    return jsonify(data=[TotalBitcoinGreenhouseGasEmissionChartPoint(point) for point in service.get_total_greenhouse_gas_emissions(float(price))])

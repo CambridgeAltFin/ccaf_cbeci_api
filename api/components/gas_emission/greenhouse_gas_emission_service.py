@@ -105,3 +105,26 @@ class GreenhouseGasEmissionService:
         df = df.append(prov_max, ignore_index=True)
 
         return df
+
+    def get_total_greenhouse_gas_emissions(self, price: float):
+        return self.repository.get_total_greenhouse_gas_emissions(price) \
+            if self.is_calculated(price) \
+            else self.calc_total_greenhouse_gas_emissions(price).to_dict('records')
+
+    def calc_total_greenhouse_gas_emissions(self, price: float):
+        def to_dict(date, row):
+            row['date'] = date.strftime('%Y-%m-%d')
+            return row
+
+        energy_cumulative = pd.DataFrame([to_dict(date, row) for date, row in self.energy_consumption.get_monthly_data(price)])
+        energy_cumulative['date'] = pd.to_datetime(energy_cumulative['date'])
+        energy_cumulative['timestamp'] = energy_cumulative['date'].values.astype(np.int64) // 10 ** 9
+        energy_cumulative['month'] = pd.to_datetime(energy_cumulative['date'].dt.year.astype('str') + '-' + energy_cumulative['date'].dt.month.astype('str'))
+        co2_coefficients = pd.DataFrame(self.repository.get_total_global_co2_coefficients())
+        co2_coefficients['month'] = pd.to_datetime(co2_coefficients['month'])
+
+        pivot = energy_cumulative.merge(co2_coefficients, how='inner', on='month')
+        pivot['v'] = (pivot['guess_consumption'] * 10 ** 9 * pivot['co2_coef']) / 10 ** 12
+        pivot['cumulative_v'] = pivot['v'].cumsum()
+
+        return pivot[['timestamp', 'date', 'v', 'cumulative_v']]

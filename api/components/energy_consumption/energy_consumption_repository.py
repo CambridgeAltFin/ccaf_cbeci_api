@@ -13,6 +13,11 @@ class EnergyConsumptionRepository:
               'WHERE price = %s'
         return self._run_select_query(sql, (str(price),))
 
+    def get_cumulative_energy_consumptions(self, price: float) -> list:
+        sql = 'SELECT timestamp, date, monthly_consumption::float guess_consumption, cumulative_consumption::float cumulative_guess_consumption FROM cumulative_energy_consumptions ' \
+              'WHERE price = %s'
+        return self._run_select_query(sql, (str(price),))
+
     def get_prof_thresholds(self):
         sql = 'SELECT timestamp, date, value FROM prof_threshold WHERE timestamp >= %s'
         return self._run_select_query(sql, (start_date.timestamp(),), Connection.blockchain_data)

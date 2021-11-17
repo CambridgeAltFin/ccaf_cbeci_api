@@ -19,7 +19,9 @@ class EnergyConsumptionService(object):
         self.metrics = ['min_consumption', 'max_consumption', 'guess_consumption', 'min_power', 'max_power', 'guess_power']
 
     def get_data(self, price: float):
-        return map(lambda x: (x['timestamp'], x), self.repository.get_energy_consumptions(price)) if self.is_calculated(price) else self.calc_data(price)
+        return map(lambda row: (row['timestamp'], row), self.repository.get_energy_consumptions(price)) \
+            if self.is_calculated(price) \
+            else self.calc_data(price)
 
     def is_calculated(self, price: float) -> bool:
         return int(price * 100) in range(1, 21)
@@ -28,6 +30,11 @@ class EnergyConsumptionService(object):
         return self._get_energy_dataframe(price, self.metrics).iterrows()
 
     def get_monthly_data(self, price: float):
+        return map(lambda row: (datetime.combine(row['date'], datetime.min.time()), row), self.repository.get_cumulative_energy_consumptions(price)) \
+            if self.is_calculated(price) \
+            else self.calc_monthly_data(price)
+
+    def calc_monthly_data(self, price: float):
         today = datetime.utcnow().date()
         start_of_month = datetime(today.year, today.month, 1, tzinfo=tz.tzutc())
 

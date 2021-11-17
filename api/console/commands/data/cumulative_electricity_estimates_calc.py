@@ -1,7 +1,6 @@
 
-from services.energy_analytic import EnergyAnalytic
 from config import config
-from datetime import datetime
+from components.energy_consumption import EnergyConsumptionServiceFactory
 
 import click
 import psycopg2
@@ -13,7 +12,7 @@ def handle():
         cursor = connection.cursor()
         cursor.execute('TRUNCATE cumulative_electricity_consumption_estimates')
 
-        service = EnergyAnalytic()
+        service = EnergyConsumptionServiceFactory.create()
         for cents in range(1, 21):
             insert = 'INSERT INTO cumulative_electricity_consumption_estimates (timestamp,cents,date,monthly_consumption,cumulative_consumption) VALUES '
             values = []

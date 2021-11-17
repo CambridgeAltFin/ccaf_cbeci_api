@@ -33,7 +33,7 @@ from extensions import cache
 from services.realtime_collection import realtime_collections
 from helpers import load_typed_hasrates
 from forms.feedback_form import FeedbackForm
-from services.energy_analytic import EnergyAnalytic
+from components.energy_consumption import EnergyConsumptionServiceFactory
 
 load_dotenv(override=True)
 
@@ -242,9 +242,9 @@ def before_request():
 @cache_control()
 @cache.memoize()
 def recalculate_power_max(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        max_power = energy_analytic.get_actual_data(float(value))['max_power']
+        max_power = energy_consumption_service.get_actual_data(float(value))['max_power']
     except:
         max_power = 'mining is not profitable'
     return jsonify(max_power)
@@ -255,9 +255,9 @@ def recalculate_power_max(value):
 @cache_control()
 @cache.memoize()
 def recalculate_power_min(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        min_power = energy_analytic.get_actual_data(float(value))['min_power']
+        min_power = energy_consumption_service.get_actual_data(float(value))['min_power']
     except:
         min_power = 'mining is not profitable'
     return jsonify(min_power)
@@ -268,9 +268,9 @@ def recalculate_power_min(value):
 @cache_control()
 @cache.memoize()
 def recalculate_power_guess(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        guess_power = energy_analytic.get_actual_data(float(value))['guess_power']
+        guess_power = energy_consumption_service.get_actual_data(float(value))['guess_power']
     except:
         guess_power = 'mining is not profitable'
     return jsonify(guess_power)
@@ -280,9 +280,9 @@ def recalculate_power_guess(value):
 @cache_control()
 @cache.memoize()
 def recalculate_consumption_max(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        max_consumption = energy_analytic.get_actual_data(float(value))['max_consumption']
+        max_consumption = energy_consumption_service.get_actual_data(float(value))['max_consumption']
     except:
         max_consumption = 'mining is not profitable'
     return jsonify(max_consumption)
@@ -292,9 +292,9 @@ def recalculate_consumption_max(value):
 @cache_control()
 @cache.memoize()
 def recalculate_consumption_min(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        min_consumption = energy_analytic.get_actual_data(float(value))['min_consumption']
+        min_consumption = energy_consumption_service.get_actual_data(float(value))['min_consumption']
     except:
         min_consumption = 'mining is not profitable'
     return jsonify(min_consumption)
@@ -304,9 +304,9 @@ def recalculate_consumption_min(value):
 @cache_control()
 @cache.memoize()
 def recalculate_consumption_guess(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        guess_consumption = energy_analytic.get_actual_data(float(value))['guess_consumption']
+        guess_consumption = energy_consumption_service.get_actual_data(float(value))['guess_consumption']
     except:
         guess_consumption = 'mining is not profitable'
     return jsonify(guess_consumption)

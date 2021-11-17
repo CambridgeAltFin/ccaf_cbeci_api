@@ -1,6 +1,5 @@
 
 import click
-import datetime
 
 from components.gas_emission.gas_emission_factory import EmissionIntensityServiceFactory
 
@@ -8,4 +7,4 @@ from components.gas_emission.gas_emission_factory import EmissionIntensityServic
 @click.command(name='charts:calc:bitcoin-emission-intensity')
 def handle():
     service = EmissionIntensityServiceFactory.create()
-    service.create_provisional_point(datetime.datetime.now())
+    service.create_provisional_points()

@@ -28,7 +28,7 @@ emission_intensity_service = EmissionIntensityServiceFactory.create()
 monthly_globalw_CO2_Coeff = {}
 
 
-@click.command(name='data:calc:carbon-emission')
+@click.command(name='data:calc:co2-coefficient')
 @click.argument('directory')
 def handle(directory):
     df3 = get_electricity_mix(join(directory, 'per-capita-electricity-source-stacked.csv'))
@@ -49,7 +49,8 @@ def handle(directory):
         df4 = estimated_co2_coefficient(df, df2, df3, china_coefficient)
         save_co2_coefficient(df4, emission_intensity_service.ESTIMATED)
 
-        save_co2_coefficient(provisional_co2_coefficient(post_elec), emission_intensity_service.PROVISIONAL)
+        df5 = provisional_co2_coefficient(post_elec)
+        save_co2_coefficient(df5, emission_intensity_service.PROVISIONAL)
 
 
 def hashrate_filter(country_name, manual_adjust_country_list):

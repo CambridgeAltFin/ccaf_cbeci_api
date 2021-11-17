@@ -3,7 +3,8 @@ from flask import Blueprint, make_response, request
 import csv
 import io
 from datetime import datetime
-from services import EnergyConsumption, EnergyConsumptionByTypes, EnergyAnalytic
+from services import EnergyConsumption, EnergyConsumptionByTypes
+from components.energy_consumption import EnergyConsumptionServiceFactory
 from queries import get_mining_countries, get_mining_provinces
 from packaging.version import parse as version_parse
 from calendar import month_name
@@ -46,9 +47,9 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
-        energy_analytic = EnergyAnalytic()
+        energy_consumption = EnergyConsumptionServiceFactory.create()
 
-        return [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
+        return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
 
     func = locals().get(version.replace('.', '_'))
     if callable(func):
@@ -65,9 +66,9 @@ def get_monthly_data(version, price=.05):
             'cumulative_value': round(row['cumulative_guess_consumption'], 2),
         }
 
-    energy_analytic = EnergyAnalytic()
+    energy_consumption = EnergyConsumptionServiceFactory.create()
 
-    return [to_dict(date, row) for date, row in energy_analytic.get_monthly_data(price)]
+    return [to_dict(date, row) for date, row in energy_consumption.get_monthly_data(price)]
 
 
 def send_file(first_line=None, file_type='csv'):

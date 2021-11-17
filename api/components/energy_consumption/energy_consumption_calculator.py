@@ -1,6 +1,6 @@
 
 
-class EnergyCalculationService:
+class EnergyConsumptionCalculator:
 
     def __init__(self):
         self.avg_days_in_year = 365.25

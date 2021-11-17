@@ -16,3 +16,8 @@ DEFAULT_ELECTRICITY_PRICE = 0.05
 
 map_start_date = '2019-09-01'
 map_end_date = '2021-09-01'
+
+
+class Connection:
+    custom_data = 'custom_data'
+    blockchain_data = 'blockchain_data'

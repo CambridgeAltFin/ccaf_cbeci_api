@@ -9,14 +9,14 @@ from datetime import datetime
 class GasEmissionRepository:
 
     def get_global_co2_coefficients(self):
-        sql = 'SELECT t.timestamp, t.co2_coef, t.name FROM co2_coefficients t'
+        sql = 'SELECT t.timestamp, t.date, t.co2_coef, t.name FROM co2_coefficients t'
         co2_coefficients = self._run_select_query(sql)
         return co2_coefficients
 
-    def get_newest_co2_coefficient(self) -> float:
-        sql = 'SELECT t.co2_coef FROM co2_coefficients t ORDER BY t.timestamp DESC LIMIT 1'
+    def get_newest_co2_coefficient(self) -> dict:
+        sql = 'SELECT t.timestamp, t.date, t.co2_coef FROM co2_coefficients t ORDER BY t.timestamp DESC LIMIT 1'
         result = self._run_select_query(sql)
-        return result[0].get('co2_coef')
+        return result[0]
 
     def create_co2_coefficient_record(self, date: str, co2_coefficient: float, coefficient_type: str):
         sql = 'INSERT INTO co2_coefficients (timestamp, date, co2_coef, name) VALUES (%s, %s, %s, %s) ' \
@@ -27,6 +27,11 @@ class GasEmissionRepository:
             sql,
             (timestamp, date, co2_coefficient, coefficient_type, co2_coefficient, coefficient_type, timestamp)
         )
+
+    def get_greenhouse_gas_emissions(self, price):
+        sql = 'SELECT name, timestamp, value FROM greenhouse_gas_emissions ' \
+              'WHERE price = %s'
+        return self._run_select_query(sql, (str(price),))
 
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None):

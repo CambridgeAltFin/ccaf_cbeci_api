@@ -1,0 +1,28 @@
+get:
+  summary: Implied Emission Intensity Factor
+  tags:
+    - Download
+  parameters:
+    - in: path
+      name: version
+      schema:
+        type: string
+        enum:
+          - v1.1.1
+      required: true
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/csv:
+          schema:
+            type: string
+    404:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

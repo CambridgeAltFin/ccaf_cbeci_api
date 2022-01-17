@@ -3,7 +3,7 @@ info:
   title: Cbeci API
   version: 1.0
 servers:
-  - url: https://cbeci.org/api
+  - url: https://ccaf.io/cbeci/api
     description: Main (production) server
   - url: https://demo.ccaf.io/cbeci/api
     description: Demo server for testing
@@ -74,6 +74,16 @@ paths:
     $ref: "./endpoints/download/mining_countries.yaml"
   /{version}/download/mining_provinces:
     $ref: "./endpoints/download/mining_provinces.yaml"
+  /{version}/download/bitcoin_greenhouse_gas_emissions:
+    $ref: "./endpoints/download/bitcoin_greenhouse_gas_emissions.yaml"
+  /{version}/download/total_bitcoin_greenhouse_gas_emissions:
+    $ref: "./endpoints/download/total_bitcoin_greenhouse_gas_emissions.yaml"
+  /{version}/download/bitcoin_emission_intensity:
+    $ref: "./endpoints/download/bitcoin_emission_intensity.yaml"
+  /{version}/download/monthly_bitcoin_power_mix:
+    $ref: "./endpoints/download/monthly_bitcoin_power_mix.yaml"
+  /{version}/download/yearly_bitcoin_power_mix:
+    $ref: "./endpoints/download/yearly_bitcoin_power_mix.yaml"
 
   /text_pages:
     $ref: "./endpoints/wysiwyg/text_pages.yaml"

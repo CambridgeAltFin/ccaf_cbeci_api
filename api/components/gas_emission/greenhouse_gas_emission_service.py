@@ -32,27 +32,18 @@ class GreenhouseGasEmissionService:
             if self.is_calculated(price) \
             else self.calc_greenhouse_gas_emissions(price).to_dict('records')
 
+    def get_flat_greenhouse_gas_emissions(self, price: float):
+        return self.repository.get_flat_greenhouse_gas_emissions(price) \
+            if self.is_calculated(price) \
+            else self.calc_flat_greenhouse_gas_emissions(price).to_dict('records')
+
     @staticmethod
     def is_calculated(price: float) -> bool:
         return int(price * 100) in range(1, 21)
 
     def calc_greenhouse_gas_emissions(self, price: float) -> pd.DataFrame:
-        def to_dict(timestamp, row):
-            row['date'] = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d')
-            return row
+        pivot = self.join_energy_consumption_to_co2_coefficients(price)
 
-        energy_consumption = pd.DataFrame([to_dict(timestamp, row) for timestamp, row in self.energy_consumption.get_data(price)])
-        co2_coefficients = pd.DataFrame(self.repository.get_global_co2_coefficients())
-
-        energy_consumption['date'] = pd.to_datetime(energy_consumption['date'])
-        co2_coefficients['date'] = pd.to_datetime(co2_coefficients['date'])
-        pivot = pd.merge(energy_consumption, co2_coefficients, how='inner', on='date')
-
-        pivot['max_co2'] = (pivot['guess_consumption'] * 10 ** 9 * Co2Statistic.coal()) / 10 ** 12  # 10**6 = conversion to tons and 10**9 # conversion from twh to kwh
-        pivot['min_co2'] = (pivot['guess_consumption'] * 10 ** 9 * Co2Statistic.hydro()) / 10 ** 12
-        pivot['guess_co2'] = (pivot['guess_consumption'] * 10 ** 9 * pivot['co2_coef']) / 10 ** 12
-
-        pivot['timestamp'] = pivot['date'].values.astype(np.int64) // 10 ** 9
         his = pivot[pivot['name'] == EmissionIntensityService.HISTORICAL]
         est = pivot[pivot['name'] == EmissionIntensityService.ESTIMATED]
         prov = pivot[pivot['name'] == EmissionIntensityService.PROVISIONAL]
@@ -105,6 +96,31 @@ class GreenhouseGasEmissionService:
         df = df.append(prov_max, ignore_index=True)
 
         return df
+
+    def calc_flat_greenhouse_gas_emissions(self, price: float) -> pd.DataFrame:
+        result = self.join_energy_consumption_to_co2_coefficients(price)[['date', 'min_co2', 'guess_co2', 'max_co2', 'timestamp']]
+        result['date'] = result['date'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+        return result
+
+    def join_energy_consumption_to_co2_coefficients(self, price: float) -> pd.DataFrame:
+        def to_dict(timestamp, row):
+            row['date'] = datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d')
+            return row
+
+        energy_consumption = pd.DataFrame([to_dict(timestamp, row) for timestamp, row in self.energy_consumption.get_data(price)])
+        co2_coefficients = pd.DataFrame(self.repository.get_global_co2_coefficients())
+
+        energy_consumption['date'] = pd.to_datetime(energy_consumption['date'])
+        co2_coefficients['date'] = pd.to_datetime(co2_coefficients['date'])
+        pivot = pd.merge(energy_consumption, co2_coefficients, how='inner', on='date')
+
+        pivot['max_co2'] = (pivot['guess_consumption'] * 10 ** 9 * Co2Statistic.coal()) / 10 ** 12  # 10**6 = conversion to tons and 10**9 # conversion from twh to kwh
+        pivot['min_co2'] = (pivot['guess_consumption'] * 10 ** 9 * Co2Statistic.hydro()) / 10 ** 12
+        pivot['guess_co2'] = (pivot['guess_consumption'] * 10 ** 9 * pivot['co2_coef']) / 10 ** 12
+
+        pivot['timestamp'] = pivot['date'].values.astype(np.int64) // 10 ** 9
+
+        return pivot
 
     def get_total_greenhouse_gas_emissions(self, price: float):
         return self.repository.get_total_greenhouse_gas_emissions(price) \

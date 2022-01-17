@@ -38,17 +38,28 @@ class GasEmissionRepository:
               'WHERE price = %s'
         return self._run_select_query(sql, (str(price),))
 
+    def get_flat_greenhouse_gas_emissions(self, price):
+        sql = "SELECT timestamp, to_char(MAX(DATE), 'YYYY-MM-DD\"T\"HH24:MI:SS') AS date " \
+              ", MAX(CASE WHEN name = ANY (ARRAY ['Historical Hydro-only', 'Hydro-only', 'Provisional Hydro-only']) THEN value END) AS min_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY ['Historical Estimated', 'Estimated', 'Provisional Estimated']) THEN value END) AS guess_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY ['Historical Coal-only', 'Coal-only', 'Provisional Coal-only']) THEN value END) AS max_co2 " \
+              "FROM greenhouse_gas_emissions " \
+              "WHERE greenhouse_gas_emissions.price = %s " \
+              "GROUP BY greenhouse_gas_emissions.timestamp " \
+              "ORDER BY timestamp"
+        return self._run_select_query(sql, (str(price),))
+
     def get_total_greenhouse_gas_emissions(self, price):
         sql = 'SELECT date, timestamp, value AS v, cumulative_value AS cumulative_v FROM cumulative_greenhouse_gas_emissions ' \
               'WHERE price = %s'
         return self._run_select_query(sql, (str(price),))
 
     def get_monthly_bitcoin_power_mix(self):
-        sql = "SELECT timestamp, to_char(date, 'YYYY-MM') AS month, name, value FROM power_sources WHERE type = 'monthly'"
+        sql = "SELECT timestamp, to_char(date, 'YYYY-MM') AS month, name, value FROM power_sources WHERE type = 'monthly' ORDER BY name, timestamp"
         return self._run_select_query(sql)
 
     def get_yearly_bitcoin_power_mix(self):
-        sql = "SELECT timestamp, to_char(date, 'YYYY') AS year, name, value FROM power_sources WHERE type = 'yearly'"
+        sql = "SELECT timestamp, to_char(date, 'YYYY') AS year, name, value FROM power_sources WHERE type = 'yearly' ORDER BY name, timestamp"
         return self._run_select_query(sql)
 
     @staticmethod

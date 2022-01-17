@@ -3,6 +3,9 @@ from flask import Blueprint, make_response, request
 import csv
 import io
 from datetime import datetime
+
+from components.gas_emission import GreenhouseGasEmissionServiceFactory, EmissionIntensityServiceFactory, \
+    PowerMixServiceFactory
 from services import EnergyConsumption, EnergyConsumptionByTypes
 from components.energy_consumption import EnergyConsumptionServiceFactory
 from queries import get_mining_countries, get_mining_provinces
@@ -215,4 +218,137 @@ def absolute_mining_countries(version=None):
     return send_file_func(
         headers,
         rows
+    )
+
+
+@bp.route('/bitcoin_greenhouse_gas_emissions')
+@cache_control()
+def bitcoin_greenhouse_gas_emissions(version=None):
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    price = request.args.get('price', 0.05)
+    send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh')
+
+    headers = {
+        'date': 'Date and Time',
+        'min_co2': 'Hydro-only, MMTCDE',
+        'guess_co2': 'Estimated, MMTCDE',
+        'max_co2': 'Coal-only, MMTCDE',
+    }
+
+    service = GreenhouseGasEmissionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        service.get_flat_greenhouse_gas_emissions(float(price)),
+        filename='Annualised Bitcoin greenhouse gas emissions.csv'
+    )
+
+
+@bp.route('/total_bitcoin_greenhouse_gas_emissions')
+@cache_control()
+def total_bitcoin_greenhouse_gas_emissions(version=None):
+    def to_dict(row):
+        row['date'] = month_name[row['date'].month] + row['date'].strftime(' %Y')
+        return row
+
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    price = request.args.get('price', 0.05)
+    send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh')
+
+    headers = {
+        'date': 'Month',
+        'v': 'Monthly emissions, MMTCDE',
+        'cumulative_v': 'Cumulative emissions, MMTCDE',
+    }
+
+    service = GreenhouseGasEmissionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        [to_dict(row) for row in service.get_total_greenhouse_gas_emissions(float(price))],
+        filename='Total Bitcoin greenhouse gas emissions.csv'
+    )
+
+
+@bp.route('/bitcoin_emission_intensity')
+@cache_control()
+def bitcoin_emission_intensity(version=None):
+    def to_dict(row):
+        row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%dT%H:%M:%S')
+        return row
+
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'date': 'Date and Time',
+        'co2_coef': 'Global hashrate-weighted CO2 Coefficient, gCO2eq/kWh',
+    }
+
+    service = EmissionIntensityServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        [to_dict(row) for row in service.get_bitcoin_emission_intensity()],
+        filename='Implied monthly Bitcoin emission intensity.csv'
+    )
+
+
+@bp.route('/monthly_bitcoin_power_mix')
+@cache_control()
+def monthly_bitcoin_power_mix(version=None):
+    def to_dict(row):
+        row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%d')
+        return row
+
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'date': 'Date',
+        'name': 'Source',
+        'value': 'Share of Bitcoin’s power mix (monthly average)',
+    }
+
+    service = PowerMixServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        [to_dict(row) for row in service.get_monthly_data()],
+        filename='Implied monthly Bitcoin power mix.csv'
+    )
+
+
+@bp.route('/yearly_bitcoin_power_mix')
+@cache_control()
+def yearly_bitcoin_power_mix(version=None):
+    def to_dict(row):
+        row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%d')
+        return row
+
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'date': 'Date',
+        'name': 'Source',
+        'value': 'Share of total power mix',
+    }
+
+    service = PowerMixServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        [to_dict(row) for row in service.get_yearly_data()],
+        filename='Implied yearly Bitcoin power mix.csv'
     )

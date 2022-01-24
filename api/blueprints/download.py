@@ -315,7 +315,7 @@ def monthly_bitcoin_power_mix(version=None):
     headers = {
         'date': 'Date',
         'name': 'Source',
-        'value': 'Share of Bitcoin’s power mix (monthly average)',
+        'value': "Share of Bitcoin's power mix (monthly average)",
     }
 
     service = PowerMixServiceFactory.create()

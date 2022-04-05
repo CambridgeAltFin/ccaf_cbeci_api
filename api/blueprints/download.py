@@ -125,9 +125,6 @@ def data(version=None):
 @bp.route('/data/monthly')
 @cache_control()
 def data_monthly(version=None):
-    if version != 'v1.1.1':
-        raise NotImplementedError('Not Implemented')
-
     file_type = request.args.get('file_type', 'csv')
     price = request.args.get('price', 0.05)
 
@@ -183,7 +180,7 @@ def mining_countries(version=None):
 @bp.route('/mining_provinces')
 @cache_control()
 def mining_provinces(version=None):
-    if version not in ['v1.1.0', 'v1.1.1']:
+    if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0']:
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')

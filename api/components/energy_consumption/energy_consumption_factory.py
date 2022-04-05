@@ -18,8 +18,9 @@ class EnergyConsumptionCalculatorFactory:
 
 class EnergyConsumptionServiceFactory:
     @staticmethod
-    def create():
+    def create(is_only_manufacturer=True):
         return EnergyConsumptionService(
             energy_consumption_calculator=EnergyConsumptionCalculatorFactory.create(),
-            repository=EnergyConsumptionRepositoryFactory.create()
+            repository=EnergyConsumptionRepositoryFactory.create(),
+            is_only_manufacturer=is_only_manufacturer
         )

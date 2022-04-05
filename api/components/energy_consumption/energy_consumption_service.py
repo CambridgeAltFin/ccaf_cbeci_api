@@ -9,29 +9,59 @@ from dateutil import tz
 import pandas as pd
 
 
+def _get_avg_efficiency_by_miners_types(miners):
+    miners_by_types = {}
+    typed_avg_efficiency = {}
+    for miner in miners:
+        miner_type = miner['type']
+        if miner_type:
+            if miner_type not in miners_by_types:
+                miners_by_types[miner_type] = []
+            miners_by_types[miner_type].append(miner['efficiency_j_gh'])
+
+    for t, efficiencies in miners_by_types.items():
+        typed_avg_efficiency[t] = sum(efficiencies) / len(efficiencies)
+
+    return typed_avg_efficiency
+
+
 class EnergyConsumptionService(object):
     # that is because base calculation in the DB is for the price 0.05 USD/KWth
     default_price = 0.05
 
-    def __init__(self, energy_consumption_calculator: EnergyConsumptionCalculator, repository: EnergyConsumptionRepository):
+    def __init__(
+            self,
+            energy_consumption_calculator: EnergyConsumptionCalculator,
+            repository: EnergyConsumptionRepository,
+            is_only_manufacturer=True
+    ):
         self.energy_consumption_calculator = energy_consumption_calculator
         self.repository = repository
-        self.metrics = ['min_consumption', 'max_consumption', 'guess_consumption', 'min_power', 'max_power', 'guess_power']
+        self.metrics = [
+            'min_consumption',
+            'max_consumption',
+            'guess_consumption',
+            'min_power',
+            'max_power',
+            'guess_power'
+        ]
+        self.calculated_prices = range(1, 21)
+        self.is_only_manufacturer = is_only_manufacturer
 
     def get_data(self, price: float):
         return map(lambda row: (row['timestamp'], row), self.repository.get_energy_consumptions(price)) \
-            if self.is_calculated(price) \
+            if self.is_calculated(price) and self.is_only_manufacturer \
             else self.calc_data(price)
 
     def is_calculated(self, price: float) -> bool:
-        return int(price * 100) in range(1, 21)
+        return int(price * 100) in self.calculated_prices
 
     def calc_data(self, price: float):
         return self._get_energy_dataframe(price, self.metrics).iterrows()
 
     def get_monthly_data(self, price: float):
         return map(lambda row: (datetime.combine(row['date'], datetime.min.time()), row), self.repository.get_cumulative_energy_consumptions(price)) \
-            if self.is_calculated(price) \
+            if self.is_calculated(price) and self.is_only_manufacturer \
             else self.calc_monthly_data(price)
 
     def calc_monthly_data(self, price: float):
@@ -54,7 +84,13 @@ class EnergyConsumptionService(object):
     def get_actual_data(self, price: float):
         return self._get_energy_dataframe(price, self.metrics).iloc[-1]
 
-    def _get_profitability_equipment(self, price: float, timestamp: int, prof_threshold_value: float, miners: list) -> List[float]:
+    def _get_profitability_equipment(
+            self,
+            price: float,
+            timestamp: int,
+            prof_threshold_value: float,
+            miners: list
+    ) -> List[float]:
         profitability_equipment = []
         price_coefficient = self.default_price / price
 
@@ -65,7 +101,17 @@ class EnergyConsumptionService(object):
 
         return profitability_equipment
 
-    def _get_date_metrics(self, price: float, timestamp: int, prof_threshold_value: float, metrics: List, miners: list, typed_avg_efficiency: dict, typed_hash_rates: dict, hash_rates_df: pd.DataFrame) -> Union[Dict[str, float], None]:
+    def _get_date_metrics(
+            self,
+            price: float,
+            timestamp: int,
+            prof_threshold_value: float,
+            metrics: List,
+            miners: list,
+            typed_avg_efficiency: dict,
+            typed_hash_rates: dict,
+            hash_rates_df: pd.DataFrame
+    ) -> Union[Dict[str, float], None]:
         hash_rates = {}
         if 'guess_consumption' in metrics or 'guess_power' in metrics:
             hash_rates = get_hash_rates_by_miners_types(typed_hash_rates, timestamp)
@@ -135,13 +181,22 @@ class EnergyConsumptionService(object):
         return smooth_data
 
     def _get_energy_dataframe(self, price: float, metrics):
-        typed_avg_efficiency = self._get_avg_efficiency_by_miners_types()
+        miners = self.repository.get_manufacturer_miners() if self.is_only_manufacturer else self.repository.get_miners()
+        typed_avg_efficiency = _get_avg_efficiency_by_miners_types(miners)
         hash_rates = pd.DataFrame(self.repository.get_hash_rates()).drop('date', axis=1).set_index('timestamp')
         typed_hash_rates = self.repository.get_typed_hash_rates()
-        miners = self.repository.get_miners()
 
         data = [
-            self._get_date_metrics(price, timestamp, row['value'], metrics, miners, typed_avg_efficiency, typed_hash_rates, hash_rates) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
+            self._get_date_metrics(
+                price,
+                timestamp,
+                row['value'],
+                metrics,
+                miners,
+                typed_avg_efficiency,
+                typed_hash_rates,
+                hash_rates
+            ) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
         ]
         smooth_data = self._smooth_data(data)
 
@@ -156,18 +211,3 @@ class EnergyConsumptionService(object):
             .drop('date', axis=1) \
             .set_index('timestamp')
         return prof_thresholds_df.rolling(window=14, min_periods=1).mean()
-
-    def _get_avg_efficiency_by_miners_types(self):
-        miners_by_types = {}
-        typed_avg_efficiency = {}
-        for miner in self.repository.get_miners():
-            miner_type = miner['type']
-            if miner_type:
-                if miner_type not in miners_by_types:
-                    miners_by_types[miner_type] = []
-                miners_by_types[miner_type].append(miner['efficiency_j_gh'])
-
-        for t, efficiencies in miners_by_types.items():
-            typed_avg_efficiency[t] = sum(efficiencies) / len(efficiencies)
-
-        return typed_avg_efficiency

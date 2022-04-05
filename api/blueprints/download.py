@@ -50,6 +50,23 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
+        energy_consumption = EnergyConsumptionServiceFactory.create(is_only_manufacturer=False)
+
+        return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
+
+    def v1_2_0(price):
+        def to_dict(timestamp, row):
+            return {
+                'timestamp': timestamp,
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'guess_consumption': row['guess_consumption'],
+                'max_consumption': row['max_consumption'],
+                'min_consumption': row['min_consumption'],
+                'guess_power': row['guess_power'],
+                'max_power': row['max_power'],
+                'min_power': row['min_power']
+            }
+
         energy_consumption = EnergyConsumptionServiceFactory.create()
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
@@ -69,7 +86,14 @@ def get_monthly_data(version, price=.05):
             'cumulative_value': round(row['cumulative_guess_consumption'], 2),
         }
 
-    energy_consumption = EnergyConsumptionServiceFactory.create()
+    if version == 'v1.1.1':
+        is_only_manufacturer = False
+    elif version == 'v1.2.0':
+        is_only_manufacturer = True
+    else:
+        raise NotImplementedError('Not Implemented')
+
+    energy_consumption = EnergyConsumptionServiceFactory.create(is_only_manufacturer=is_only_manufacturer)
 
     return [to_dict(date, row) for date, row in energy_consumption.get_monthly_data(price)]
 

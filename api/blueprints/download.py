@@ -46,6 +46,23 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
+        energy_analytic = EnergyAnalytic(only_manufacturer_miners=False)
+
+        return [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
+
+    def v1_2_0(price):
+        def to_dict(timestamp, row):
+            return {
+                'timestamp': timestamp,
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'guess_consumption': row['guess_consumption'],
+                'max_consumption': row['max_consumption'],
+                'min_consumption': row['min_consumption'],
+                'guess_power': row['guess_power'],
+                'max_power': row['max_power'],
+                'min_power': row['min_power']
+            }
+
         energy_analytic = EnergyAnalytic()
 
         return [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
@@ -65,7 +82,12 @@ def get_monthly_data(version, price=.05):
             'cumulative_value': round(row['cumulative_guess_consumption'], 2),
         }
 
-    energy_analytic = EnergyAnalytic()
+    if version == 'v1.1.1':
+        energy_analytic = EnergyAnalytic(only_manufacturer_miners=False)
+    elif version == 'v1.2.0':
+        energy_analytic = EnergyAnalytic()
+    else:
+        raise NotImplementedError('Not Implemented')
 
     return [to_dict(date, row) for date, row in energy_analytic.get_monthly_data(price)]
 
@@ -121,9 +143,6 @@ def data(version=None):
 @bp.route('/data/monthly')
 @cache_control()
 def data_monthly(version=None):
-    if version != 'v1.1.1':
-        raise NotImplementedError('Not Implemented')
-
     file_type = request.args.get('file_type', 'csv')
     price = request.args.get('price', 0.05)
 
@@ -179,7 +198,7 @@ def mining_countries(version=None):
 @bp.route('/mining_provinces')
 @cache_control()
 def mining_provinces(version=None):
-    if version not in ['v1.1.0', 'v1.1.1']:
+    if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0']:
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')

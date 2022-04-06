@@ -96,7 +96,7 @@ class EnergyConsumptionService(object):
 
         for miner in miners:
             if timestamp > miner['unix_date_of_release'] and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                if not miner['type']:
+                if miner['type'] not in ['s7', 's9']:
                     profitability_equipment.append(miner['efficiency_j_gh'])
 
         return profitability_equipment

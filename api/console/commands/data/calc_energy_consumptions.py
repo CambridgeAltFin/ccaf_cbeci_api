@@ -15,7 +15,7 @@ def handle():
 
         service = EnergyConsumptionServiceFactory.create()
         for cents in range(1, 21):
-            insert = 'INSERT INTO energy_consumptions (timestamp,price,date,guess_consumption,max_consumption,min_consumption,guess_power,max_power,min_power) VALUES '
+            insert = 'INSERT INTO energy_consumptions (timestamp,price,date,guess_consumption,max_consumption,min_consumption,guess_power,max_power,min_power,profitability_equipment) VALUES '
             values = []
             for timestamp, item in service.calc_data(cents / 100):
                 row = to_dict(timestamp, item, cents)

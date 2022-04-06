@@ -194,7 +194,7 @@ def profitability_equipment(version=None):
 
     energy_consumption = EnergyConsumptionServiceFactory.create(is_only_manufacturer=is_only_manufacturer)
 
-    rows = [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
+    rows = [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(float(price))]
 
     return send_file_func(headers, rows)
 

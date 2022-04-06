@@ -35,5 +35,6 @@ def to_dict(timestamp, row, cents):
         'min_consumption': row['min_consumption'],
         'guess_power': row['guess_power'],
         'max_power': row['max_power'],
-        'min_power': row['min_power']
+        'min_power': row['min_power'],
+        'profitability_equipment': row['profitability_equipment']
     }

@@ -120,7 +120,8 @@ class EnergyConsumptionService(object):
 
         result = {
             'date': datetime.utcfromtimestamp(timestamp).isoformat(),
-            'timestamp': timestamp
+            'timestamp': timestamp,
+            'profitability_equipment': EnergyConsumptionCalculator.get_avg(profitability_equipment)
         }
 
         if len(profitability_equipment) == 0:

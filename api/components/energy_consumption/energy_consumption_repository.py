@@ -12,7 +12,16 @@ import psycopg2.extras
 class EnergyConsumptionRepository:
 
     def get_energy_consumptions(self, price: float) -> list:
-        sql = 'SELECT timestamp, date, min_power::float, guess_power::float, max_power::float, min_consumption::float, guess_consumption::float, max_consumption::float FROM energy_consumptions ' \
+        sql = 'SELECT timestamp, ' \
+              'date, ' \
+              'min_power::float, ' \
+              'guess_power::float, ' \
+              'max_power::float, ' \
+              'min_consumption::float, ' \
+              'guess_consumption::float, ' \
+              'max_consumption::float, ' \
+              'profitability_equipment::float ' \
+              'FROM energy_consumptions ' \
               'WHERE price = %s'
         return self._run_select_query(sql, (str(price),))
 

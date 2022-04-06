@@ -186,15 +186,15 @@ def profitability_equipment(version=None):
         }
 
     if version == 'v1.1.1':
-        only_manufacturer_miners = False
+        is_only_manufacturer = False
     elif version == 'v1.2.0':
-        only_manufacturer_miners = True
+        is_only_manufacturer = True
     else:
         raise NotImplementedError('Not Implemented')
 
-    energy_analytic = EnergyAnalytic(only_manufacturer_miners=only_manufacturer_miners)
+    energy_consumption = EnergyConsumptionServiceFactory.create(is_only_manufacturer=is_only_manufacturer)
 
-    rows = [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
+    rows = [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
 
     return send_file_func(headers, rows)
 

@@ -164,6 +164,41 @@ def data_monthly(version=None):
     return send_file_func(headers, rows)
 
 
+@bp.route('/profitability_equipment')
+@cache_control()
+def profitability_equipment(version=None):
+    file_type = request.args.get('file_type', 'csv')
+    price = request.args.get('price', 0.05)
+
+    send_file_func = send_file(file_type=file_type)
+
+    headers = {
+        'timestamp': 'Timestamp',
+        'date': 'Date and Time',
+        'profitability_equipment': 'Profitability equipment'
+    }
+
+    def to_dict(timestamp, row):
+        return {
+            'timestamp': timestamp,
+            'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+            'profitability_equipment': row['profitability_equipment']
+        }
+
+    if version == 'v1.1.1':
+        only_manufacturer_miners = False
+    elif version == 'v1.2.0':
+        only_manufacturer_miners = True
+    else:
+        raise NotImplementedError('Not Implemented')
+
+    energy_analytic = EnergyAnalytic(only_manufacturer_miners=only_manufacturer_miners)
+
+    rows = [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
+
+    return send_file_func(headers, rows)
+
+
 @bp.route('/mining_countries')
 @cache_control()
 def mining_countries(version=None):

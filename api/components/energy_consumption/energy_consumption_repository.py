@@ -22,7 +22,8 @@ class EnergyConsumptionRepository:
               'max_consumption::float, ' \
               'profitability_equipment::float ' \
               'FROM energy_consumptions ' \
-              'WHERE price = %s'
+              'WHERE price = %s ' \
+              'ORDER BY timestamp'
         return self._run_select_query(sql, (str(price),))
 
     def get_cumulative_energy_consumptions(self, price: float) -> list:

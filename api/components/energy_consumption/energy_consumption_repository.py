@@ -48,8 +48,9 @@ class EnergyConsumptionRepository:
     def get_manufacturer_miners(self):
         five_years_ago = datetime.now() - relativedelta(years=5)
         sql = 'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type FROM miners ' \
-              'WHERE is_active is true AND is_manufacturer = 1 AND unix_date_of_release >= %s'
-        return self._run_select_query(sql, (int(five_years_ago.timestamp()),), Connection.custom_data)
+              'WHERE is_active is true AND is_manufacturer = 1 ' \
+              'AND (unix_date_of_release >= %s OR unix_date_of_release < %s)'
+        return self._run_select_query(sql, (int(five_years_ago.timestamp()), int(datetime(2014, 7, 1).timestamp())), Connection.custom_data)
 
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None, connection: str = Connection.custom_data):

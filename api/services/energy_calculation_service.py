@@ -36,7 +36,7 @@ class EnergyCalculationService:
         ) * hash_rate / 1e6 * self.guess_coefficient
 
     def _calculate_guess(self, profitability_equipment, hash_rates, typed_avg_efficiency):
-        guess_consumption = self._get_avg(profitability_equipment)
+        guess_consumption = self.get_avg(profitability_equipment)
         if guess_consumption == 0:
             return 0
         if hash_rates is not None and typed_avg_efficiency is not None:
@@ -45,6 +45,6 @@ class EnergyCalculationService:
         return guess_consumption
 
     @staticmethod
-    def _get_avg(values) -> float:
+    def get_avg(values) -> float:
         len_values = len(values)
         return sum(values) / len_values if len_values > 0 else 0

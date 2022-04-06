@@ -43,8 +43,10 @@ def get_manufacturer_miners():
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(
             'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type '
-            'FROM miners WHERE is_active is true AND is_manufacturer = 1 AND unix_date_of_release >= {timestamp}'
-            ''.format(timestamp=int(five_years_ago.timestamp()))
+            'FROM miners '
+            'WHERE is_active is true AND is_manufacturer = 1 '
+            'AND (unix_date_of_release >= {five_years_ago} OR unix_date_of_release < {july_2014})'
+            ''.format(five_years_ago=int(five_years_ago.timestamp()), july_2014=int(datetime(2014, 7, 1).timestamp()))
         )
         return cursor.fetchall()
 
@@ -107,13 +109,14 @@ class EnergyAnalytic(object):
         for miner in self.miners:
             if timestamp > miner['unix_date_of_release'] \
                     and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                if not miner['type']:
+                if miner['type'] not in ['s7', 's9']:
                     profitability_equipment.append(miner['efficiency_j_gh'])
 
         return profitability_equipment
 
-    def _get_date_metrics(self, price: float, timestamp: int, prof_threshold_value: float, metrics: List) -> Union[
-        Dict[str, float], None]:
+    def _get_date_metrics(
+            self, price: float, timestamp: int, prof_threshold_value: float, metrics: List
+    ) -> Union[Dict[str, float], None]:
         hash_rates = {}
         if 'guess_consumption' in metrics or 'guess_power' in metrics:
             hash_rates = get_hash_rates_by_miners_types(self.typed_hash_rates, timestamp)
@@ -121,7 +124,8 @@ class EnergyAnalytic(object):
 
         result = {
             'date': datetime.utcfromtimestamp(timestamp).isoformat(),
-            'timestamp': timestamp
+            'timestamp': timestamp,
+            'profitability_equipment': EnergyCalculationService.get_avg(profitability_equipment)
         }
 
         if len(profitability_equipment) == 0:
@@ -183,8 +187,9 @@ class EnergyAnalytic(object):
 
     def _get_energy_dataframe(self, price: float, metrics):
         data = [
-            self._get_date_metrics(price, timestamp, row['value'], metrics) for timestamp, row in
-            self._get_prof_thresholds_dataframe().iterrows()
+            self._get_date_metrics(
+                price, timestamp, row['value'], metrics
+            ) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
         ]
         smooth_data = self._smooth_data(data)
 

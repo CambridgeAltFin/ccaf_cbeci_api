@@ -1,6 +1,6 @@
 
-from components.energy_consumption.energy_consumption_service import EnergyConsumptionService
-from components.energy_consumption.energy_consumption_repository import EnergyConsumptionRepository
+from components.energy_consumption.v1_1_1.energy_consumption_service import EnergyConsumptionService
+from components.energy_consumption.v1_1_1.energy_consumption_repository import EnergyConsumptionRepository
 from components.energy_consumption.energy_consumption_calculator import EnergyConsumptionCalculator
 
 

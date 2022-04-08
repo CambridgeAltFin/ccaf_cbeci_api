@@ -1,11 +1,28 @@
 
 from components.energy_consumption.energy_consumption_calculator import EnergyConsumptionCalculator
 from components.energy_consumption.energy_consumption_repository import EnergyConsumptionRepository
+from helpers import get_hash_rates_by_miners_types
 
 from typing import List, Dict, Union
 from datetime import datetime
 from dateutil import tz
 import pandas as pd
+
+
+def _get_avg_efficiency_by_miners_types(miners):
+    miners_by_types = {}
+    typed_avg_efficiency = {}
+    for miner in miners:
+        miner_type = miner['type']
+        if miner_type:
+            if miner_type not in miners_by_types:
+                miners_by_types[miner_type] = []
+            miners_by_types[miner_type].append(miner['efficiency_j_gh'])
+
+    for t, efficiencies in miners_by_types.items():
+        typed_avg_efficiency[t] = sum(efficiencies) / len(efficiencies)
+
+    return typed_avg_efficiency
 
 
 class EnergyConsumptionService(object):
@@ -27,23 +44,15 @@ class EnergyConsumptionService(object):
             'max_power',
             'guess_power'
         ]
-        self.calculated_prices = range(1, 21)
 
     def get_data(self, price: float):
-        return map(lambda row: (row['timestamp'], row), self.repository.get_energy_consumptions(price)) \
-            if self.is_calculated(price) and True \
-            else self.calc_data(price)
-
-    def is_calculated(self, price: float) -> bool:
-        return int(price * 100) in self.calculated_prices
+        return self.calc_data(price)
 
     def calc_data(self, price: float):
         return self._get_energy_dataframe(price, self.metrics).iterrows()
 
     def get_monthly_data(self, price: float):
-        return map(lambda row: (datetime.combine(row['date'], datetime.min.time()), row), self.repository.get_cumulative_energy_consumptions(price)) \
-            if self.is_calculated(price) \
-            else self.calc_monthly_data(price)
+        return self.calc_monthly_data(price)
 
     def calc_monthly_data(self, price: float):
         today = datetime.utcnow().date()
@@ -77,7 +86,8 @@ class EnergyConsumptionService(object):
 
         for miner in miners:
             if timestamp > miner['unix_date_of_release'] and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                profitability_equipment.append(miner['efficiency_j_gh'])
+                if miner['type'] not in ['s7', 's9']:
+                    profitability_equipment.append(miner['efficiency_j_gh'])
 
         return profitability_equipment
 
@@ -88,8 +98,14 @@ class EnergyConsumptionService(object):
             prof_threshold_value: float,
             metrics: List,
             miners: list,
+            typed_avg_efficiency: dict,
+            typed_hash_rates: dict,
             hash_rates_df: pd.DataFrame
     ) -> Union[Dict[str, float], None]:
+        hash_rates = {}
+        if 'guess_consumption' in metrics or 'guess_power' in metrics:
+            hash_rates = get_hash_rates_by_miners_types(typed_hash_rates, timestamp)
+
         profitability_equipment = self._get_profitability_equipment(price, timestamp, prof_threshold_value, miners)
 
         result = {
@@ -116,7 +132,9 @@ class EnergyConsumptionService(object):
         if 'guess_consumption' in metrics:
             result['guess_consumption'] = self.energy_consumption_calculator.guess_consumption(
                 profitability_equipment,
-                hash_rates_df['value'][timestamp]
+                hash_rates_df['value'][timestamp],
+                hash_rates,
+                typed_avg_efficiency
             )
 
         if 'max_power' in metrics:
@@ -134,7 +152,9 @@ class EnergyConsumptionService(object):
         if 'guess_power' in metrics:
             result['guess_power'] = self.energy_consumption_calculator.guess_power(
                 profitability_equipment,
-                hash_rates_df['value'][timestamp]
+                hash_rates_df['value'][timestamp],
+                hash_rates,
+                typed_avg_efficiency
             )
 
         return result
@@ -153,7 +173,9 @@ class EnergyConsumptionService(object):
 
     def _get_energy_dataframe(self, price: float, metrics):
         miners = self.repository.get_miners()
+        typed_avg_efficiency = _get_avg_efficiency_by_miners_types(miners)
         hash_rates = pd.DataFrame(self.repository.get_hash_rates()).drop('date', axis=1).set_index('timestamp')
+        typed_hash_rates = self.repository.get_typed_hash_rates()
 
         data = [
             self._get_date_metrics(
@@ -162,6 +184,8 @@ class EnergyConsumptionService(object):
                 row['value'],
                 metrics,
                 miners,
+                typed_avg_efficiency,
+                typed_hash_rates,
                 hash_rates
             ) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
         ]

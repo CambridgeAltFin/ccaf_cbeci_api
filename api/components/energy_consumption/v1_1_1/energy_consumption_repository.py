@@ -39,12 +39,21 @@ class EnergyConsumptionRepository:
         sql = 'SELECT timestamp, date, value FROM hash_rate WHERE timestamp >= %s'
         return self._run_select_query(sql, (start_date.timestamp(),), Connection.blockchain_data)
 
+    def get_typed_hash_rates(self):
+        typed_hash_rates = {}
+        hash_rate_types = ['s7', 's9']
+        for hash_rate_type in hash_rate_types:
+            sql = 'SELECT type, value, date FROM hash_rate_by_types WHERE type = %s;'
+            data = self._run_select_query(sql, (hash_rate_type,), Connection.blockchain_data)
+            formatted_data = {}
+            for row in data:
+                formatted_data[calendar.timegm(row['date'].timetuple())] = row
+            typed_hash_rates[hash_rate_type] = formatted_data
+        return typed_hash_rates
+
     def get_miners(self):
-        five_years_ago = datetime.now() - relativedelta(years=5)
-        sql = 'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type FROM miners ' \
-              'WHERE is_active is true AND is_manufacturer = 1 ' \
-              'AND (unix_date_of_release >= %s OR unix_date_of_release < %s)'
-        return self._run_select_query(sql, (int(five_years_ago.timestamp()), int(datetime(2014, 7, 1).timestamp())), Connection.custom_data)
+        sql = 'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type FROM miners WHERE is_active is true'
+        return self._run_select_query(sql, (), Connection.custom_data)
 
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None, connection: str = Connection.custom_data):

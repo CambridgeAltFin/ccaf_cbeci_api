@@ -8,6 +8,7 @@ from components.gas_emission import GreenhouseGasEmissionServiceFactory, Emissio
     PowerMixServiceFactory
 from services import EnergyConsumption, EnergyConsumptionByTypes
 from components.energy_consumption import EnergyConsumptionServiceFactory
+from components.energy_consumption.v1_1_1 import EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_1_1
 from queries import get_mining_countries, get_mining_provinces
 from packaging.version import parse as version_parse
 from calendar import month_name
@@ -50,7 +51,7 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
-        energy_consumption = EnergyConsumptionServiceFactory.create(is_only_manufacturer=False)
+        energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
 
@@ -87,13 +88,11 @@ def get_monthly_data(version, price=.05):
         }
 
     if version == 'v1.1.1':
-        is_only_manufacturer = False
+        energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0':
-        is_only_manufacturer = True
+        energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
-
-    energy_consumption = EnergyConsumptionServiceFactory.create(is_only_manufacturer=is_only_manufacturer)
 
     return [to_dict(date, row) for date, row in energy_consumption.get_monthly_data(price)]
 
@@ -186,13 +185,11 @@ def profitability_equipment(version=None):
         }
 
     if version == 'v1.1.1':
-        is_only_manufacturer = False
+        energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0':
-        is_only_manufacturer = True
+        energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
-
-    energy_consumption = EnergyConsumptionServiceFactory.create(is_only_manufacturer=is_only_manufacturer)
 
     rows = [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(float(price))]
 

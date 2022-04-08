@@ -1,6 +1,6 @@
 
 from components.energy_consumption.energy_consumption_calculator import EnergyConsumptionCalculator
-from components.energy_consumption.energy_consumption_repository import EnergyConsumptionRepository
+from components.energy_consumption.v1_1_1.energy_consumption_repository import EnergyConsumptionRepository
 from helpers import get_hash_rates_by_miners_types
 
 from typing import List, Dict, Union

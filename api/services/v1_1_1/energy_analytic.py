@@ -2,14 +2,15 @@ from extensions import cache
 from config import config, start_date
 from typing import List, Dict, Union
 from datetime import datetime
-from dateutil import tz, relativedelta
+from dateutil import tz
+from helpers import load_typed_hasrates, get_avg_effciency_by_miners_types, get_hash_rates_by_miners_types
 from services.energy_calculation_service import EnergyCalculationService
 import psycopg2
 import psycopg2.extras
 import pandas as pd
 
 
-@cache.cached(key_prefix='actual-prof_threshold')
+@cache.cached(key_prefix='v1.1.1-prof_threshold')
 def get_prof_thresholds():
     with psycopg2.connect(**config['blockchain_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -18,7 +19,7 @@ def get_prof_thresholds():
         return cursor.fetchall()
 
 
-@cache.cached(key_prefix='actual-hash_rate')
+@cache.cached(key_prefix='v1.1.1-hash_rate')
 def get_hash_rates():
     with psycopg2.connect(**config['blockchain_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -26,18 +27,12 @@ def get_hash_rates():
         return cursor.fetchall()
 
 
-@cache.cached(key_prefix='actual-miners')
+@cache.cached(key_prefix='v1.1.1-miners')
 def get_miners():
-    five_years_ago = datetime.now() - relativedelta.relativedelta(years=5)
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(
-            'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type '
-            'FROM miners '
-            'WHERE is_active is true AND is_manufacturer = 1 '
-            'AND (unix_date_of_release >= {five_years_ago} OR unix_date_of_release < {july_2014})'
-            ''.format(five_years_ago=int(five_years_ago.timestamp()), july_2014=int(datetime(2014, 7, 1).timestamp()))
-        )
+            'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type FROM miners WHERE is_active is true')
         return cursor.fetchall()
 
 
@@ -50,11 +45,11 @@ class EnergyAnalytic(object):
         self.prof_thresholds = get_prof_thresholds()
         self.hash_rates = get_hash_rates()
         self.miners = get_miners()
+        self.typed_hash_rates = load_typed_hasrates()
+        self.typed_avg_efficiency = get_avg_effciency_by_miners_types(self.miners)
         self.hash_rates_df = pd.DataFrame(self.hash_rates).drop('date', axis=1).set_index('timestamp')
         self.cache_timeout = 24 * 60 * 60
-        self.metrics = [
-            'min_consumption', 'max_consumption', 'guess_consumption', 'min_power', 'max_power', 'guess_power'
-        ]
+        self.metrics = ['min_consumption', 'max_consumption', 'guess_consumption', 'min_power', 'max_power', 'guess_power']
 
     def get_data(self, price: float):
         @cache.cached(key_prefix=self._get_cache_key(f'get_data_{price}'), timeout=self.cache_timeout)
@@ -87,7 +82,6 @@ class EnergyAnalytic(object):
         @cache.cached(key_prefix=self._get_cache_key(f'get_actual_data_{price}'), timeout=self.cache_timeout)
         def get_from_cache():
             return self._get_energy_dataframe(price, self.metrics)
-
         return get_from_cache().iloc[-1]
 
     def _get_profitability_equipment(self, price: float, timestamp: int, prof_threshold_value: float) -> List[float]:
@@ -97,13 +91,15 @@ class EnergyAnalytic(object):
         for miner in self.miners:
             if timestamp > miner['unix_date_of_release'] \
                     and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                profitability_equipment.append(miner['efficiency_j_gh'])
+                if miner['type'] not in ['s7', 's9']:
+                    profitability_equipment.append(miner['efficiency_j_gh'])
 
         return profitability_equipment
 
-    def _get_date_metrics(
-            self, price: float, timestamp: int, prof_threshold_value: float, metrics: List
-    ) -> Union[Dict[str, float], None]:
+    def _get_date_metrics(self, price: float, timestamp: int, prof_threshold_value: float, metrics: List) -> Union[Dict[str, float], None]:
+        hash_rates = {}
+        if 'guess_consumption' in metrics or 'guess_power' in metrics:
+            hash_rates = get_hash_rates_by_miners_types(self.typed_hash_rates, timestamp)
         profitability_equipment = self._get_profitability_equipment(price, timestamp, prof_threshold_value)
 
         result = {
@@ -130,7 +126,9 @@ class EnergyAnalytic(object):
         if 'guess_consumption' in metrics:
             result['guess_consumption'] = self.energy_calculation_service.guess_consumption(
                 profitability_equipment,
-                self.hash_rates_df['value'][timestamp]
+                self.hash_rates_df['value'][timestamp],
+                hash_rates,
+                self.typed_avg_efficiency
             )
 
         if 'max_power' in metrics:
@@ -148,7 +146,9 @@ class EnergyAnalytic(object):
         if 'guess_power' in metrics:
             result['guess_power'] = self.energy_calculation_service.guess_power(
                 profitability_equipment,
-                self.hash_rates_df['value'][timestamp]
+                self.hash_rates_df['value'][timestamp],
+                hash_rates,
+                self.typed_avg_efficiency
             )
 
         return result
@@ -167,9 +167,7 @@ class EnergyAnalytic(object):
 
     def _get_energy_dataframe(self, price: float, metrics):
         data = [
-            self._get_date_metrics(
-                price, timestamp, row['value'], metrics
-            ) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
+            self._get_date_metrics(price, timestamp, row['value'], metrics) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
         ]
         smooth_data = self._smooth_data(data)
 
@@ -186,4 +184,4 @@ class EnergyAnalytic(object):
         return prof_thresholds_df.rolling(window=14, min_periods=1).mean()
 
     def _get_cache_key(self, prefix: str) -> str:
-        return f'{prefix}_{len(self.prof_thresholds)}_{len(self.miners)}'
+        return f'v1.1.1_{prefix}_{len(self.prof_thresholds)}'

@@ -4,6 +4,7 @@ import csv
 import io
 from datetime import datetime
 from services import EnergyConsumption, EnergyConsumptionByTypes, EnergyAnalytic
+from services.v1_1_1 import EnergyAnalytic as EnergyAnalytic_v_1_1_1
 from queries import get_mining_countries, get_mining_provinces
 from packaging.version import parse as version_parse
 from calendar import month_name
@@ -46,7 +47,7 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
-        energy_analytic = EnergyAnalytic(only_manufacturer_miners=False)
+        energy_analytic = EnergyAnalytic_v_1_1_1()
 
         return [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
 
@@ -83,7 +84,7 @@ def get_monthly_data(version, price=.05):
         }
 
     if version == 'v1.1.1':
-        energy_analytic = EnergyAnalytic(only_manufacturer_miners=False)
+        energy_analytic = EnergyAnalytic_v_1_1_1()
     elif version == 'v1.2.0':
         energy_analytic = EnergyAnalytic()
     else:
@@ -180,15 +181,13 @@ def profitability_equipment(version=None):
         }
 
     if version == 'v1.1.1':
-        only_manufacturer_miners = False
+        energy_analytic = EnergyAnalytic_v_1_1_1()
     elif version == 'v1.2.0':
-        only_manufacturer_miners = True
+        energy_analytic = EnergyAnalytic()
     else:
         raise NotImplementedError('Not Implemented')
 
-    energy_analytic = EnergyAnalytic(only_manufacturer_miners=only_manufacturer_miners)
-
-    rows = [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(price)]
+    rows = [to_dict(timestamp, row) for timestamp, row in energy_analytic.get_data(float(price))]
 
     return send_file_func(headers, rows)
 

@@ -28,7 +28,7 @@ class EnergyCalculationService:
     def max_power(self, profitability_equipment, hash_rate: float) -> float:
         return max(profitability_equipment) * hash_rate / 1e6 * self.max_coefficient
 
-    def guess_power(self, profitability_equipment, hash_rate: float, hash_rates, typed_avg_efficiency) -> float:
+    def guess_power(self, profitability_equipment, hash_rate: float, hash_rates=None, typed_avg_efficiency=None) -> float:
         return self._calculate_guess(
             profitability_equipment,
             hash_rates,

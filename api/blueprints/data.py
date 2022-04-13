@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from extensions import cache
 
-from services.energy_analytic import EnergyAnalytic
+from services.v1_1_1.energy_analytic import EnergyAnalytic
 from resources.data import DataResource, MonthlyDataResource, StatsResource
 from decorators import price
 from decorators.cache_control import cache_control

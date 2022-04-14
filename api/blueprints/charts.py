@@ -1,19 +1,18 @@
+from flask import Blueprint, jsonify
+import psycopg2
+import calendar
+import pandas as pd
 
 from config import config
 from extensions import cache
 from decorators.cache_control import cache_control
-from queries import get_mining_countries, get_mining_provinces
+from queries import get_mining_countries, get_mining_provinces, get_countries_dict
 from resources.gas_emission.yearly_bitcoin_power_mix import YearlyBitcoinPowerMixChartPoint
 from resources.gas_emission.monthly_bitcoin_power_mix import MonthlyBitcoinPowerMixChartPoint
 from resources.gas_emission.bitcoin_emission_intensity import BitcoinEmissionIntensityChartPoint
 from resources.gas_emission.bitcoin_greenhouse_gas_emission import BitcoinGreenhouseGasEmissionChartPoint
 from resources.gas_emission.total_bitcoin_greenhouse_gas_emission import TotalBitcoinGreenhouseGasEmissionChartPoint
 from components.gas_emission import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory, PowerMixServiceFactory
-
-import psycopg2
-import calendar
-import pandas as pd
-from flask import Blueprint, jsonify
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -102,10 +101,11 @@ def absolute_mining_countries():
 
 
 @bp.route('/mining_provinces')
+@bp.route('/mining_provinces/<country>')
 @cache_control()
-def mining_provinces():
+def mining_provinces(country='cn'):
     response = []
-    mining_provinces = get_mining_provinces()
+    mining_provinces = get_mining_provinces(country)
 
     for mining_province in mining_provinces:
         response.append({
@@ -142,13 +142,17 @@ def mining_map_countries():
 
 
 @bp.route('/mining_map_provinces')
+@bp.route('/mining_map_provinces/<country>')
 @cache_control()
-def mining_map_provinces():
-    @cache.cached(key_prefix='all_mining_map_provinces')
+def mining_map_provinces(country='cn'):
+    @cache.cached(key_prefix='all_mining_map_provinces_' + country)
     def get_mining_map_provinces():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM mining_map_provinces')
+            cursor.execute(
+                'SELECT name, local_value, date FROM mining_map_provinces WHERE country_id = %s ORDER BY id',
+                (get_countries_dict()[country.lower()],)
+            )
             return cursor.fetchall()
 
     response = []
@@ -156,9 +160,9 @@ def mining_map_provinces():
 
     for mining_map_province in mining_map_provinces:
         response.append({
-            'x': calendar.timegm(mining_map_province[4].timetuple()) * 1000,
-            'y': mining_map_province[3],
-            'name': mining_map_province[1]
+            'x': calendar.timegm(mining_map_province[2].timetuple()) * 1000,
+            'y': mining_map_province[1],
+            'name': mining_map_province[0]
         })
 
     return jsonify(data=response)

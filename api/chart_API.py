@@ -314,6 +314,7 @@ def recalculate_consumption_guess(value):
 
 @app.route("/api/countries")
 @cache_control()
+@cache.memoize()
 def countries_btc():
     energy_consumption_service = EnergyConsumptionServiceFactory.create()
     tup2dict = {country: [consumption, flag, code] for country, code, consumption, flag in countries}

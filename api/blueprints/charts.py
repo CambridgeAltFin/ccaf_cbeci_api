@@ -143,7 +143,7 @@ def mining_map_provinces(country='cn'):
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT name, local_value, date FROM mining_map_provinces WHERE country_id = %s ORDER BY id',
+                'SELECT name, local_value, date, code FROM mining_map_provinces WHERE country_id = %s ORDER BY id',
                 (get_countries_dict()[country.lower()],)
             )
             return cursor.fetchall()
@@ -155,7 +155,8 @@ def mining_map_provinces(country='cn'):
         response.append({
             'x': calendar.timegm(mining_map_province[2].timetuple()) * 1000,
             'y': mining_map_province[1],
-            'name': mining_map_province[0]
+            'name': mining_map_province[0],
+            'code': mining_map_province[3]
         })
 
     return jsonify(data=response)

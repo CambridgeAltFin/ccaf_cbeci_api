@@ -238,8 +238,14 @@ def mining_countries(version=None):
 @cache_control()
 def mining_provinces(version=None, country='cn'):
     country_titles = {
-        'cn': 'Share of Chinese hashrate',
-        'us': 'Share of US hashrate'
+        'cn': {
+            'name': 'Province',
+            'local_value': 'Share of Chinese hashrate'
+        },
+        'us': {
+            'name': 'State',
+            'local_value': 'US hashrate by state'
+        },
     }
 
     if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0'] or country not in country_titles:
@@ -248,9 +254,9 @@ def mining_provinces(version=None, country='cn'):
     file_type = request.args.get('file_type', 'csv')
     headers = {
         'date': 'Date',
-        'name': 'Province',
+        'name': country_titles[country]['name'],
         # 'value': 'Share of global hashrate',
-        'local_value': country_titles[country]
+        'local_value': country_titles[country]['local_value']
     }
     rows = get_mining_provinces(country, version[1:])
     send_file_func = send_file(file_type=file_type)

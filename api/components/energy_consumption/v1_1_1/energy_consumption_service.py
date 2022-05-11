@@ -3,7 +3,7 @@ from components.energy_consumption.energy_consumption_calculator import EnergyCo
 from components.energy_consumption.v1_1_1.energy_consumption_repository import EnergyConsumptionRepository
 from helpers import get_hash_rates_by_miners_types
 
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Any
 from datetime import datetime
 from dateutil import tz
 import pandas as pd
@@ -80,16 +80,18 @@ class EnergyConsumptionService(object):
             timestamp: int,
             prof_threshold_value: float,
             miners: list
-    ) -> List[float]:
+    ) -> tuple[list[dict[Any, Any]], list[float]]:
+        equipment_list = []
         profitability_equipment = []
         price_coefficient = self.default_price / price
 
         for miner in miners:
             if timestamp > miner['unix_date_of_release'] and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                if miner['type'] not in ['s7', 's9']:
+                if miner['type'] not in ['S7', 'S9']:
                     profitability_equipment.append(miner['efficiency_j_gh'])
+                    equipment_list.append(dict(miner))
 
-        return profitability_equipment
+        return equipment_list, profitability_equipment
 
     def _get_date_metrics(
             self,
@@ -98,20 +100,26 @@ class EnergyConsumptionService(object):
             prof_threshold_value: float,
             metrics: List,
             miners: list,
-            typed_avg_efficiency: dict,
-            typed_hash_rates: dict,
+            typed_avg_efficiency,
+            typed_hash_rates,
             hash_rates_df: pd.DataFrame
     ) -> Union[Dict[str, float], None]:
         hash_rates = {}
         if 'guess_consumption' in metrics or 'guess_power' in metrics:
             hash_rates = get_hash_rates_by_miners_types(typed_hash_rates, timestamp)
 
-        profitability_equipment = self._get_profitability_equipment(price, timestamp, prof_threshold_value, miners)
+        equipment_list, profitability_equipment = self._get_profitability_equipment(
+            price,
+            timestamp,
+            prof_threshold_value,
+            miners
+        )
 
         result = {
             'date': datetime.utcfromtimestamp(timestamp).isoformat(),
             'timestamp': timestamp,
-            'profitability_equipment': EnergyConsumptionCalculator.get_avg(profitability_equipment)
+            'profitability_equipment': EnergyConsumptionCalculator.get_avg(profitability_equipment),
+            'equipment_list': equipment_list,
         }
 
         if len(profitability_equipment) == 0:
@@ -189,12 +197,17 @@ class EnergyConsumptionService(object):
                 hash_rates
             ) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
         ]
+
+        return self._data_to_energy_dataframe(data)
+
+    def _data_to_energy_dataframe(self, data):
         smooth_data = self._smooth_data(data)
 
-        energy_df = pd.DataFrame(smooth_data).sort_values(by='timestamp').set_index('timestamp') \
-            .rolling(window=7, min_periods=1).mean()
+        energy_df = pd.DataFrame(smooth_data).sort_values(by='timestamp').set_index('timestamp')
+        equipment_list = energy_df[['equipment_list']].copy()
+        energy_df = energy_df.rolling(window=7, min_periods=1).mean()
 
-        return energy_df
+        return energy_df.join(equipment_list)
 
     def _get_prof_thresholds_dataframe(self):
         prof_thresholds_df = pd.DataFrame(self.repository.get_prof_thresholds()) \

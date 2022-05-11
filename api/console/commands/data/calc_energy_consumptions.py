@@ -5,6 +5,7 @@ from components.energy_consumption import EnergyConsumptionServiceFactory
 import click
 import psycopg2
 from datetime import datetime
+import json
 
 
 @click.command(name='data:calc:energy-consumptions')
@@ -15,7 +16,19 @@ def handle():
 
         service = EnergyConsumptionServiceFactory.create()
         for cents in range(1, 21):
-            insert = 'INSERT INTO energy_consumptions (timestamp,price,date,guess_consumption,max_consumption,min_consumption,guess_power,max_power,min_power,profitability_equipment) VALUES '
+            insert = 'INSERT INTO energy_consumptions (' \
+                     'timestamp' \
+                     ',price' \
+                     ',date' \
+                     ',guess_consumption' \
+                     ',max_consumption' \
+                     ',min_consumption' \
+                     ',guess_power' \
+                     ',max_power' \
+                     ',min_power' \
+                     ',profitability_equipment' \
+                     ',equipment_list' \
+                     ') VALUES '
             values = []
             for timestamp, item in service.calc_data(cents / 100):
                 row = to_dict(timestamp, item, cents)
@@ -36,5 +49,6 @@ def to_dict(timestamp, row, cents):
         'guess_power': row['guess_power'],
         'max_power': row['max_power'],
         'min_power': row['min_power'],
-        'profitability_equipment': row['profitability_equipment']
+        'profitability_equipment': row['profitability_equipment'],
+        'equipment_list': json.dumps(row['equipment_list'])
     }

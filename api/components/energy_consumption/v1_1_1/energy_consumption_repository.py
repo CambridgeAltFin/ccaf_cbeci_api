@@ -20,7 +20,8 @@ class EnergyConsumptionRepository:
               'min_consumption::float, ' \
               'guess_consumption::float, ' \
               'max_consumption::float, ' \
-              'profitability_equipment::float ' \
+              'profitability_equipment::float, ' \
+              'equipment_list ' \
               'FROM energy_consumptions ' \
               'WHERE price = %s ' \
               'ORDER BY timestamp'

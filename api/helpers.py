@@ -27,6 +27,8 @@ def load_typed_hasrates(table='hash_rate_by_types'):
 # functions for hash rate calculation
 # =============================================================================
 def get_hash_rates_by_miners_types(typed_hasrates, timestamp):
+    if typed_hasrates is None:
+        return None
     hash_rates = {}
     for miner_type, hr in typed_hasrates.items():
         hash_rates[miner_type] = hr[timestamp]['value']

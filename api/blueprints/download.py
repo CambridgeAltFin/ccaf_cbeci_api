@@ -170,17 +170,29 @@ def profitability_equipment(version=None):
     headers = {
         'timestamp': 'Timestamp',
         'date': 'Date and Time',
-        'profitability_equipment': 'Profitability equipment'
+        'profitability_equipment': 'Profitability equipment',
+        'equipment_list': 'Equipment list',
     }
+
+    def miner_to_str(miner):
+        miner_str = miner['miner_name']
+        if miner['type']:
+            miner_str += ' - ({type})'.format(type=miner['type'])
+        return miner_str
 
     def to_dict(timestamp, row):
         return {
             'timestamp': timestamp,
-            'date': datetime.utcfromtimestamp(timestamp).isoformat(),
-            'profitability_equipment': row['profitability_equipment']
+            'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
+            'profitability_equipment': row['profitability_equipment'],
+            'equipment_list': '; '.join(list(map(miner_to_str, row['equipment_list']))),
         }
 
-    if version == 'v1.1.1':
+    if version == 'v1.0.5':
+        energy_analytic = EnergyConsumption()
+    elif version == 'v1.1.0':
+        energy_analytic = EnergyConsumptionByTypes()
+    elif version == 'v1.1.1':
         energy_analytic = EnergyAnalytic_v_1_1_1()
     elif version == 'v1.2.0':
         energy_analytic = EnergyAnalytic()

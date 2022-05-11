@@ -1,6 +1,6 @@
 from extensions import cache
 from config import config
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Tuple, Any
 from datetime import datetime
 from helpers import load_typed_hasrates, get_avg_effciency_by_miners_types, get_hash_rates_by_miners_types, get_guess_consumption
 import psycopg2
@@ -41,8 +41,11 @@ class EnergyConsumptionByTypes(object):
     default_price = 0.05
 
     def get_data(self, price: float):
-        def get_profitability_equipment(price: float, timestamp: int, prof_threshold_value: float) -> List[float]:
+        def get_profitability_equipment(
+            price: float, timestamp: int, prof_threshold_value: float
+        ) -> tuple[list[dict[Any, Any]], list[Any]]:
             profitability_equipment = []
+            equipment_list = []
             price_coefficient = self.default_price / price
 
             for miner in miners:
@@ -50,17 +53,21 @@ class EnergyConsumptionByTypes(object):
                         and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                     if not miner['type']:
                         profitability_equipment.append(miner['efficiency_j_gh'])
+                        equipment_list.append(dict(miner))
 
-            return profitability_equipment
+            return equipment_list, profitability_equipment
 
-        def get_date_consumption(price: float, timestamp: int, prof_threshold_value: float
-                                 ) -> Union[Dict[str, float], None]:
+        def get_date_consumption(
+            price: float, timestamp: int, prof_threshold_value: float
+        ) -> Union[Dict[str, float], None]:
             hash_rates = get_hash_rates_by_miners_types(typed_hasrates, timestamp)
-            profitability_equipment = get_profitability_equipment(price, timestamp, prof_threshold_value)
+            equipment_list, profitability_equipment = get_profitability_equipment(price, timestamp, prof_threshold_value)
             if len(profitability_equipment) == 0:
                 return {
                     'date': datetime.utcfromtimestamp(timestamp).isoformat(),
                     'timestamp': timestamp,
+                    'profitability_equipment': 0,
+                    'equipment_list': [],
                     'min_consumption': None,
                     'max_consumption': None,
                     'guess_consumption': None
@@ -71,10 +78,13 @@ class EnergyConsumptionByTypes(object):
                 timestamp] * 365.25 * 24 / 1e9 * 1.01
             guess_consumption = get_guess_consumption(profitability_equipment, hash_rates_df['value'][timestamp],
                                                       hash_rates, typed_avg_effciency)
+            avg_profitability_equipment = sum(profitability_equipment) / len(profitability_equipment)
 
             return {
                 'date': datetime.utcfromtimestamp(timestamp).isoformat(),
                 'timestamp': timestamp,
+                'profitability_equipment': avg_profitability_equipment,
+                'equipment_list': equipment_list,
                 'min_consumption': min_consumption,
                 'max_consumption': max_consumption,
                 'guess_consumption': guess_consumption
@@ -83,17 +93,37 @@ class EnergyConsumptionByTypes(object):
         def smooth_consumptions(consumptions: List[Union[Dict[str, float], None]]) -> List[Dict[str, float]]:
             smooth_data = []
             for index, consumption in enumerate(consumptions):
-                prev_consumption = smooth_data[-1] if len(smooth_data) > 0 \
-                    else {'min_consumption': 0, 'max_consumption': 0, 'guess_consumption': 0}
+                prev_consumption = smooth_data[-1]\
+                    if len(smooth_data) > 0 \
+                    else {
+                        'min_consumption': 0,
+                        'max_consumption': 0,
+                        'guess_consumption': 0,
+                        'profitability_equipment': 0,
+                        'equipment_list': []
+                    }
 
                 smooth_data.insert(index, {
-                    'min_consumption': consumption['min_consumption'] if consumption['min_consumption'] is not None
+                    'min_consumption': consumption['min_consumption']
+                    if consumption['min_consumption'] is not None
                     else prev_consumption['min_consumption'],
-                    'max_consumption': consumption['max_consumption'] if consumption['max_consumption'] is not None
+
+                    'max_consumption': consumption['max_consumption']
+                    if consumption['max_consumption'] is not None
                     else prev_consumption['max_consumption'],
-                    'guess_consumption': consumption['guess_consumption'] if consumption[
-                                                                                 'guess_consumption'] is not None
+
+                    'guess_consumption': consumption['guess_consumption']
+                    if consumption['guess_consumption'] is not None
                     else prev_consumption['guess_consumption'],
+
+                    'profitability_equipment': consumption['profitability_equipment']
+                    if consumption['profitability_equipment'] is not None
+                    else prev_consumption['profitability_equipment'],
+
+                    'equipment_list': consumption['equipment_list']
+                    if consumption['equipment_list'] is not None
+                    else prev_consumption['equipment_list'],
+
                     'timestamp': consumption['timestamp'],
                     'date': consumption['date'],
                 })
@@ -115,7 +145,8 @@ class EnergyConsumptionByTypes(object):
                         prof_thresholds_ma_df.iterrows()]
         smooth_consumptions = smooth_consumptions(consumptions)
 
-        energy_df = pd.DataFrame(smooth_consumptions).sort_values(by='timestamp').set_index('timestamp') \
-            .rolling(window=7, min_periods=1).mean()
+        energy_df = pd.DataFrame(smooth_consumptions).sort_values(by='timestamp').set_index('timestamp')
+        equipment_list = energy_df[['equipment_list']].copy()
+        energy_df = energy_df.rolling(window=7, min_periods=1).mean()
 
-        return energy_df.iterrows()
+        return energy_df.join(equipment_list).iterrows()

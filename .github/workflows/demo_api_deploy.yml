@@ -48,7 +48,7 @@ jobs:
         SHA: ${{ github.sha }}
       with:
         host: ${{ secrets.DEMO_SERVER_HOST }}
-        username: atlas
+        username: cbeci
         port: 22
         envs: SHA
         script_stop: true

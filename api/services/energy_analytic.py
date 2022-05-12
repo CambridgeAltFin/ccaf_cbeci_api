@@ -29,15 +29,12 @@ def get_hash_rates():
 
 @cache.cached(key_prefix='actual-miners')
 def get_miners():
-    five_years_ago = datetime.now() - relativedelta.relativedelta(years=5)
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(
             'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type '
             'FROM miners '
-            'WHERE is_active is true AND is_manufacturer = 1 '
-            'AND (unix_date_of_release >= {five_years_ago} OR unix_date_of_release < {july_2014})'
-            ''.format(five_years_ago=int(five_years_ago.timestamp()), july_2014=int(datetime(2014, 7, 1).timestamp()))
+            'WHERE is_active is true AND is_manufacturer = 1'
         )
         return cursor.fetchall()
 
@@ -58,7 +55,8 @@ class EnergyAnalytic(EnergyAnalytic_v_1_1_1):
         equipment_list = []
 
         for miner in self.miners:
-            if timestamp > miner['unix_date_of_release'] \
+            five_years = datetime.fromtimestamp(miner['unix_date_of_release']) + relativedelta.relativedelta(years=5)
+            if miner['unix_date_of_release'] < timestamp < five_years.timestamp() \
                     and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                 profitability_equipment.append(miner['efficiency_j_gh'])
                 equipment_list.append(dict(miner))

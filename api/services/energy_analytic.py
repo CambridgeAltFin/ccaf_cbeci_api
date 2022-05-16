@@ -47,10 +47,7 @@ class EnergyAnalytic(EnergyAnalytic_v_1_1_1):
         self.miners = get_miners()
         self.hash_rates_df = pd.DataFrame(self.hash_rates).drop('date', axis=1).set_index('timestamp')
 
-    def _get_profitability_equipment(
-        self, price: float, timestamp: int, prof_threshold_value: float
-    ) -> tuple[list[Any], list[float]]:
-        profitability_equipment = []
+    def _get_equipment_list(self, price: float, timestamp: int, prof_threshold_value: float) -> list[dict[Any, Any]]:
         price_coefficient = self.default_price / price
         equipment_list = []
 
@@ -58,15 +55,14 @@ class EnergyAnalytic(EnergyAnalytic_v_1_1_1):
             five_years = datetime.fromtimestamp(miner['unix_date_of_release']) + relativedelta.relativedelta(years=5)
             if miner['unix_date_of_release'] < timestamp < five_years.timestamp() \
                     and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                profitability_equipment.append(miner['efficiency_j_gh'])
                 equipment_list.append(dict(miner))
 
-        return equipment_list, profitability_equipment
+        return equipment_list
 
     def _get_date_metrics(
         self, price: float, timestamp: int, prof_threshold_value: float, metrics: List
     ) -> Union[Dict[str, float], None]:
-        equipment_list, profitability_equipment = self._get_profitability_equipment(
+        equipment_list = self._get_equipment_list(
             price,
             timestamp,
             prof_threshold_value
@@ -75,12 +71,12 @@ class EnergyAnalytic(EnergyAnalytic_v_1_1_1):
         result = {
             'date': datetime.utcfromtimestamp(timestamp).isoformat(),
             'timestamp': timestamp,
-            'equipment_list': equipment_list,
-            'profitability_equipment': EnergyCalculationService.get_avg(profitability_equipment),
         }
 
-        if len(profitability_equipment) == 0:
+        if len(equipment_list) == 0:
             return result | {metrics[i]: None for i in range(len(metrics))}
+
+        profitability_equipment = list(map(lambda x: x['efficiency_j_gh'], equipment_list))
 
         if 'max_consumption' in metrics:
             result['max_consumption'] = self.energy_calculation_service.max_consumption(

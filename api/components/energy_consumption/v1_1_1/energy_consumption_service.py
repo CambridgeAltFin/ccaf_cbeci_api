@@ -105,7 +105,7 @@ class EnergyConsumptionService(object):
         profitability_equipment = list(map(lambda x: x['efficiency_j_gh'], equipment_list))
 
         return {
-            'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+            'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
             'timestamp': timestamp,
             'profitability_equipment': self.energy_consumption_calculator.get_avg(profitability_equipment),
             'equipment_list': equipment_list

@@ -206,7 +206,7 @@ def profitability_equipment(version=None):
 @bp.route('/mining_countries')
 @cache_control()
 def mining_countries(version=None):
-    if version not in ['v1.1.0', 'v1.1.1']:
+    if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0']:
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')

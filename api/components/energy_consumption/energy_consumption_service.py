@@ -36,6 +36,13 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_1_1):
             self.repository.get_cumulative_energy_consumptions(price)
         ) if self.is_calculated(price) else self.calc_monthly_data(price)
 
+    def get_actual_data(self, price: float):
+        result = self.repository.get_actual_energy_consumption(price)\
+            if self.is_calculated(price)\
+            else self.calc_data(price)
+
+        return list(result)[-1]
+
     def _get_equipment_list(
             self,
             price: float,

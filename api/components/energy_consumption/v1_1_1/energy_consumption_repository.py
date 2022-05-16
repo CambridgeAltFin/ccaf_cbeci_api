@@ -25,6 +25,21 @@ class EnergyConsumptionRepository:
               'ORDER BY timestamp'
         return self._run_select_query(sql, (str(price),))
 
+    def get_actual_energy_consumption(self, price: float) -> list:
+        sql = 'SELECT timestamp, ' \
+              'date, ' \
+              'min_power::float, ' \
+              'guess_power::float, ' \
+              'max_power::float, ' \
+              'min_consumption::float, ' \
+              'guess_consumption::float, ' \
+              'max_consumption::float ' \
+              'FROM energy_consumptions ' \
+              'WHERE price = %s ' \
+              'ORDER BY timestamp DESC ' \
+              'LIMIT 1'
+        return self._run_select_query(sql, (str(price),))
+
     def get_cumulative_energy_consumptions(self, price: float) -> list:
         sql = 'SELECT' \
               ' timestamp' \

@@ -43,31 +43,25 @@ class EnergyConsumption(object):
     default_price = 0.05
 
     def get_data(self, price: float):
-        def get_profitability_equipment(
-                price: float, timestamp: int, prof_threshold_value: float
-        ) -> tuple[list[dict[Any, Any]], list[float]]:
+        def get_profitability_equipment(price: float, timestamp: int, prof_threshold_value: float) -> list[Any]:
             profitability_equipment = []
             price_coefficient = self.default_price / price
-            equipment_list = []
 
             for miner in miners:
                 if timestamp > miner['unix_date_of_release']\
                         and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                     profitability_equipment.append(miner['efficiency_j_gh'])
-                    equipment_list.append(dict(miner))
 
-            return equipment_list, profitability_equipment
+            return profitability_equipment
 
         def get_date_consumption(
             price: float, timestamp: int, prof_threshold_value: float
         ) -> Union[Dict[str, float], None]:
-            equipment_list, profitability_equipment = get_profitability_equipment(price, timestamp, prof_threshold_value)
+            profitability_equipment = get_profitability_equipment(price, timestamp, prof_threshold_value)
             if len(profitability_equipment) == 0:
                 return {
                     'date': datetime.utcfromtimestamp(timestamp).isoformat(),
                     'timestamp': timestamp,
-                    'profitability_equipment': 0,
-                    'equipment_list': [],
                     'min_consumption': None,
                     'max_consumption': None,
                     'guess_consumption': None
@@ -82,8 +76,6 @@ class EnergyConsumption(object):
             return {
                 'date': datetime.utcfromtimestamp(timestamp).isoformat(),
                 'timestamp': timestamp,
-                'profitability_equipment': avg_profitability_equipment,
-                'equipment_list': equipment_list,
                 'min_consumption': min_consumption,
                 'max_consumption': max_consumption,
                 'guess_consumption': guess_consumption
@@ -98,8 +90,6 @@ class EnergyConsumption(object):
                         'min_consumption': 0,
                         'max_consumption': 0,
                         'guess_consumption': 0,
-                        'profitability_equipment': 0,
-                        'equipment_list': []
                     }
 
                 smooth_data.insert(index, {
@@ -114,14 +104,6 @@ class EnergyConsumption(object):
                     'guess_consumption': consumption['guess_consumption']
                     if consumption['guess_consumption'] is not None
                     else prev_consumption['guess_consumption'],
-
-                    'profitability_equipment': consumption['profitability_equipment']
-                    if consumption['profitability_equipment'] is not None
-                    else prev_consumption['profitability_equipment'],
-
-                    'equipment_list': consumption['equipment_list']
-                    if consumption['equipment_list'] is not None
-                    else prev_consumption['equipment_list'],
 
                     'timestamp': consumption['timestamp'],
                     'date': consumption['date'],
@@ -142,8 +124,55 @@ class EnergyConsumption(object):
                         prof_thresholds_ma_df.iterrows()]
         smooth_consumptions = smooth_consumptions(consumptions)
 
-        energy_df = pd.DataFrame(smooth_consumptions).sort_values(by='timestamp').set_index('timestamp')
-        equipment_list = energy_df[['equipment_list']].copy()
-        energy_df = energy_df.rolling(window=7, min_periods=1).mean()
+        energy_df = pd.DataFrame(smooth_consumptions).sort_values(by='timestamp').set_index('timestamp')\
+            .rolling(window=7, min_periods=1).mean()
 
-        return energy_df.join(equipment_list).iterrows()
+        return energy_df.iterrows()
+
+    def get_equipment_list(self, price: float):
+        def get_equipment(price: float, timestamp: int, prof_threshold_value: float) -> list[Any]:
+            equipment_list = []
+            price_coefficient = self.default_price / price
+
+            for miner in miners:
+                if timestamp > miner['unix_date_of_release'] \
+                        and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
+                    equipment_list.append(dict(miner))
+
+            return equipment_list
+
+        def get_date_equipment_list(
+            price: float, timestamp: int, prof_threshold_value: float
+        ) -> Union[Dict[str, float], None]:
+            equipment_list = get_equipment(price, timestamp, prof_threshold_value)
+            if len(equipment_list) == 0:
+                return {
+                    'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                    'timestamp': timestamp,
+                    'profitability_equipment': 0,
+                    'equipment_list': [],
+                }
+
+            profitability_equipment = list(map(lambda x: x['efficiency_j_gh'], equipment_list))
+            avg = sum(profitability_equipment) / len(profitability_equipment)
+
+            return {
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'timestamp': timestamp,
+                'profitability_equipment': avg,
+                'equipment_list': equipment_list
+            }
+
+        prof_thresholds = get_prof_thresholds()
+        miners = get_miners()
+
+        prof_thresholds_df = pd.DataFrame(prof_thresholds).sort_values(by='timestamp')\
+            .drop('date', axis=1)\
+            .set_index('timestamp')
+        prof_thresholds_ma_df = prof_thresholds_df.rolling(window=14, min_periods=1).mean()
+
+        return [
+            get_date_equipment_list(price, timestamp, row['value'])
+            for timestamp, row
+            in prof_thresholds_ma_df.iterrows()
+        ]

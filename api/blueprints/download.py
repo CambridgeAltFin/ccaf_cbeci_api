@@ -166,14 +166,13 @@ def data_monthly(version=None):
 @bp.route('/profitability_equipment')
 @cache_control()
 def profitability_equipment(version=None):
-    file_type = request.args.get('file_type', 'csv')
     price = request.args.get('price', 0.05)
 
-    send_file_func = send_file(file_type=file_type)
+    send_file_func = send_file()
 
     headers = {
         'timestamp': 'Timestamp',
-        'date': 'Date and Time',
+        'date': 'Date',
         'profitability_equipment': 'Profitability equipment',
         'equipment_list': 'Equipment list',
     }
@@ -184,10 +183,10 @@ def profitability_equipment(version=None):
             miner_str += ' - ({type})'.format(type=miner['type'])
         return miner_str
 
-    def to_dict(timestamp, row):
+    def to_dict(row):
         return {
-            'timestamp': timestamp,
-            'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
+            'timestamp': row['timestamp'],
+            'date': row['date'],
             'profitability_equipment': row['profitability_equipment'],
             'equipment_list': '; '.join(list(map(miner_to_str, row['equipment_list']))),
         }
@@ -203,9 +202,9 @@ def profitability_equipment(version=None):
     else:
         raise NotImplementedError('Not Implemented')
 
-    rows = [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(float(price))]
+    rows = [to_dict(row) for row in energy_consumption.get_equipment_list(float(price))]
 
-    return send_file_func(headers, rows)
+    return send_file_func(headers, rows, filename='profitability_equipment.csv')
 
 
 @bp.route('/mining_countries')

@@ -9,5 +9,4 @@ class StatsResource(dict):
             'max_power': round(item['max_power'], 2),
             'min_consumption': round(item['min_consumption'], 2),
             'min_power': round(item['min_power'], 2),
-            'profitability_equipment': round(item['profitability_equipment'], 2),
         })

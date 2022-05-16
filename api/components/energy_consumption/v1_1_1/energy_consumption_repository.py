@@ -19,16 +19,19 @@ class EnergyConsumptionRepository:
               'max_power::float, ' \
               'min_consumption::float, ' \
               'guess_consumption::float, ' \
-              'max_consumption::float, ' \
-              'profitability_equipment::float, ' \
-              'equipment_list ' \
+              'max_consumption::float ' \
               'FROM energy_consumptions ' \
               'WHERE price = %s ' \
               'ORDER BY timestamp'
         return self._run_select_query(sql, (str(price),))
 
     def get_cumulative_energy_consumptions(self, price: float) -> list:
-        sql = 'SELECT timestamp, date, monthly_consumption::float guess_consumption, cumulative_consumption::float cumulative_guess_consumption FROM cumulative_energy_consumptions ' \
+        sql = 'SELECT' \
+              ' timestamp' \
+              ', date' \
+              ', monthly_consumption::float guess_consumption' \
+              ', cumulative_consumption::float cumulative_guess_consumption ' \
+              'FROM cumulative_energy_consumptions ' \
               'WHERE price = %s'
         return self._run_select_query(sql, (str(price),))
 

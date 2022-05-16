@@ -36,25 +36,23 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_1_1):
             self.repository.get_cumulative_energy_consumptions(price)
         ) if self.is_calculated(price) else self.calc_monthly_data(price)
 
-    def _get_profitability_equipment(
+    def _get_equipment_list(
             self,
             price: float,
             timestamp: int,
             prof_threshold_value: float,
             miners: list
-    ) -> tuple[list[dict[Any, Any]], list[float]]:
+    ) -> list[dict[Any, Any]]:
         equipment_list = []
-        profitability_equipment = []
         price_coefficient = self.default_price / price
 
         for miner in miners:
             five_years = datetime.fromtimestamp(miner['unix_date_of_release']) + relativedelta(years=5)
             if miner['unix_date_of_release'] < timestamp < five_years.timestamp() \
                     and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
-                profitability_equipment.append(miner['efficiency_j_gh'])
                 equipment_list.append(dict(miner))
 
-        return equipment_list, profitability_equipment
+        return equipment_list
 
     def _get_energy_dataframe(self, price: float, metrics):
         miners = self.repository.get_miners()

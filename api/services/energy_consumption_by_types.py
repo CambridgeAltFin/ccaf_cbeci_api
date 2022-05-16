@@ -150,7 +150,7 @@ class EnergyConsumptionByTypes(object):
             equipment_list = get_equipment(price, timestamp, prof_threshold_value)
             if len(equipment_list) == 0:
                 return {
-                    'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                    'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
                     'timestamp': timestamp,
                     'profitability_equipment': 0,
                     'equipment_list': [],

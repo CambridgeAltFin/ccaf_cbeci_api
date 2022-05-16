@@ -26,8 +26,6 @@ def handle():
                      ',guess_power' \
                      ',max_power' \
                      ',min_power' \
-                     ',profitability_equipment' \
-                     ',equipment_list' \
                      ') VALUES '
             values = []
             for timestamp, item in service.calc_data(cents / 100):
@@ -49,6 +47,4 @@ def to_dict(timestamp, row, cents):
         'guess_power': row['guess_power'],
         'max_power': row['max_power'],
         'min_power': row['min_power'],
-        'profitability_equipment': row['profitability_equipment'],
-        'equipment_list': json.dumps(row['equipment_list'])
     }

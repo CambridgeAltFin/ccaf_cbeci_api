@@ -74,24 +74,59 @@ class EnergyConsumptionService(object):
     def get_actual_data(self, price: float):
         return self._get_energy_dataframe(price, self.metrics).iloc[-1]
 
-    def _get_profitability_equipment(
-            self,
-            price: float,
-            timestamp: int,
-            prof_threshold_value: float,
-            miners: list
-    ) -> tuple[list[dict[Any, Any]], list[float]]:
+    def get_equipment_list(self, price):
+        miners = self.repository.get_miners()
+
+        return [
+            self._get_date_equipment_list(
+                price,
+                timestamp,
+                row['value'],
+                miners
+            ) for timestamp, row in self._get_prof_thresholds_dataframe().iterrows()
+        ]
+
+    def _get_date_equipment_list(self, price, timestamp, prof_threshold, miners):
+        equipment_list = self._get_equipment_list(
+            price,
+            timestamp,
+            prof_threshold,
+            miners
+        )
+
+        if len(equipment_list) == 0:
+            return {
+                'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
+                'timestamp': timestamp,
+                'profitability_equipment': 0,
+                'equipment_list': [],
+            }
+
+        profitability_equipment = list(map(lambda x: x['efficiency_j_gh'], equipment_list))
+
+        return {
+            'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+            'timestamp': timestamp,
+            'profitability_equipment': self.energy_consumption_calculator.get_avg(profitability_equipment),
+            'equipment_list': equipment_list
+        }
+
+    def _get_equipment_list(
+        self,
+        price: float,
+        timestamp: int,
+        prof_threshold_value: float,
+        miners: list
+    ) -> list[dict[Any, Any]]:
         equipment_list = []
-        profitability_equipment = []
         price_coefficient = self.default_price / price
 
         for miner in miners:
             if timestamp > miner['unix_date_of_release'] and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                 if miner['type'] not in ['S7', 'S9']:
-                    profitability_equipment.append(miner['efficiency_j_gh'])
                     equipment_list.append(dict(miner))
 
-        return equipment_list, profitability_equipment
+        return equipment_list
 
     def _get_date_metrics(
             self,
@@ -108,7 +143,7 @@ class EnergyConsumptionService(object):
         if 'guess_consumption' in metrics or 'guess_power' in metrics:
             hash_rates = get_hash_rates_by_miners_types(typed_hash_rates, timestamp)
 
-        equipment_list, profitability_equipment = self._get_profitability_equipment(
+        equipment_list = self._get_equipment_list(
             price,
             timestamp,
             prof_threshold_value,
@@ -118,12 +153,12 @@ class EnergyConsumptionService(object):
         result = {
             'date': datetime.utcfromtimestamp(timestamp).isoformat(),
             'timestamp': timestamp,
-            'profitability_equipment': EnergyConsumptionCalculator.get_avg(profitability_equipment),
-            'equipment_list': equipment_list,
         }
 
-        if len(profitability_equipment) == 0:
+        if len(equipment_list) == 0:
             return result | {metrics[i]: None for i in range(len(metrics))}
+
+        profitability_equipment = list(map(lambda x: x['efficiency_j_gh'], equipment_list))
 
         if 'max_consumption' in metrics:
             result['max_consumption'] = self.energy_consumption_calculator.max_consumption(
@@ -203,11 +238,10 @@ class EnergyConsumptionService(object):
     def _data_to_energy_dataframe(self, data):
         smooth_data = self._smooth_data(data)
 
-        energy_df = pd.DataFrame(smooth_data).sort_values(by='timestamp').set_index('timestamp')
-        equipment_list = energy_df[['equipment_list']].copy()
-        energy_df = energy_df.rolling(window=7, min_periods=1).mean()
+        energy_df = pd.DataFrame(smooth_data).sort_values(by='timestamp').set_index('timestamp')\
+            .rolling(window=7, min_periods=1).mean()
 
-        return energy_df.join(equipment_list)
+        return energy_df
 
     def _get_prof_thresholds_dataframe(self):
         prof_thresholds_df = pd.DataFrame(self.repository.get_prof_thresholds()) \

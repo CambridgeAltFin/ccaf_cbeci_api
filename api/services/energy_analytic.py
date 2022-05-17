@@ -2,7 +2,6 @@ from extensions import cache
 from config import config, start_date
 from typing import List, Dict, Union, Any
 from datetime import datetime
-from dateutil import tz, relativedelta
 from services.energy_calculation_service import EnergyCalculationService
 from services.v1_1_1.energy_analytic import EnergyAnalytic as EnergyAnalytic_v_1_1_1
 import psycopg2
@@ -32,7 +31,12 @@ def get_miners():
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute(
-            'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type '
+            'SELECT miner_name '
+            ', unix_date_of_release '
+            ', efficiency_j_gh '
+            ', qty '
+            ', type '
+            ', unix_date_of_release + 157680000 "five_years_after_release" '
             'FROM miners '
             'WHERE is_active is true AND is_manufacturer = 1'
         )
@@ -52,8 +56,7 @@ class EnergyAnalytic(EnergyAnalytic_v_1_1_1):
         equipment_list = []
 
         for miner in self.miners:
-            five_years = datetime.fromtimestamp(miner['unix_date_of_release']) + relativedelta.relativedelta(years=5)
-            if miner['unix_date_of_release'] < timestamp < five_years.timestamp() \
+            if miner['unix_date_of_release'] < timestamp < miner['five_years_after_release'] \
                     and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                 equipment_list.append(dict(miner))
 

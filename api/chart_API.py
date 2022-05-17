@@ -33,7 +33,7 @@ from extensions import cache
 from services.realtime_collection import realtime_collections
 from helpers import load_typed_hasrates
 from forms.feedback_form import FeedbackForm
-from services.v1_1_1.energy_analytic import EnergyAnalytic
+from services.energy_analytic import EnergyAnalytic
 
 load_dotenv(override=True)
 

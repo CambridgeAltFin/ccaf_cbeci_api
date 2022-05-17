@@ -5,7 +5,6 @@ from components.energy_consumption.v1_1_1.energy_consumption_service import Ener
 
 from typing import Any
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 import pandas as pd
 
 
@@ -54,8 +53,7 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_1_1):
         price_coefficient = self.default_price / price
 
         for miner in miners:
-            five_years = datetime.fromtimestamp(miner['unix_date_of_release']) + relativedelta(years=5)
-            if miner['unix_date_of_release'] < timestamp < five_years.timestamp() \
+            if miner['unix_date_of_release'] < timestamp < miner['five_years_after_release'] \
                     and prof_threshold_value * price_coefficient > miner['efficiency_j_gh']:
                 equipment_list.append(dict(miner))
 

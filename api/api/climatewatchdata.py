@@ -20,7 +20,7 @@ class ClimateWatchData:
     def __init__(self, base_url='https://www.climatewatchdata.org/api/v1/'):
         self.base_url = base_url
 
-    def emissions(self, gas, location, sector, source):
+    def emissions(self, gas, sector, source, location=None):
         url = urljoin(self.base_url, 'emissions')
 
         return requests.get(url, params={

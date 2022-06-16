@@ -70,12 +70,34 @@ class GasEmissionRepository:
 
     def get_actual_world_emission(self):
         sql = "SELECT code, name, year, value " \
-              "FROM global_historical_emissions " \
+              "FROM ghg_historical_emissions " \
               "WHERE code = 'WORLD' " \
               "ORDER BY year DESC " \
               "LIMIT 1"
         result = self._run_select_query(sql)
         return result[0]
+
+    def get_emissions(self, limit=None):
+        sql = "SELECT c.code, c.country AS name, ghg.year, ghg.value " \
+              "FROM ghg_historical_emissions ghg " \
+              "JOIN countries c ON ghg.country_id = c.id " \
+              "WHERE ghg.year = (SELECT MAX(year) FROM ghg_historical_emissions WHERE country_id IS NOT NULL) " \
+              "ORDER BY ghg.value DESC"
+
+        if limit is not None:
+            sql += f' LIMIT {limit}'
+
+        return self._run_select_query(sql)
+
+    def get_emission_intensities(self):
+        sql = "SELECT c.code, c.country AS name, ghg.value, c.country_flag AS flag " \
+              "FROM ghg_emission_intensities ghg " \
+              "JOIN countries c ON ghg.country_id = c.id " \
+              "WHERE ghg.year = (SELECT MAX(year) FROM ghg_emission_intensities WHERE country_id IS NOT NULL) " \
+              "AND ghg.value IS NOT NULL " \
+              "ORDER BY ghg.value"
+
+        return self._run_select_query(sql)
 
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None):

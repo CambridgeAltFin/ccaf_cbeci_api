@@ -1,6 +1,6 @@
 
 
-class GlobalHistoricalEmission(dict):
+class GhgHistoricalEmission(dict):
     def __init__(self, emission):
         super().__init__(
             code=emission['code'],

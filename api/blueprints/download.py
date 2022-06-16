@@ -5,7 +5,7 @@ import io
 from datetime import datetime
 
 from components.gas_emission import GreenhouseGasEmissionServiceFactory, EmissionIntensityServiceFactory, \
-    PowerMixServiceFactory
+    PowerMixServiceFactory, EmissionServiceFactory
 from services import EnergyConsumption, EnergyConsumptionByTypes
 from components.energy_consumption import EnergyConsumptionServiceFactory
 from components.energy_consumption.v1_1_1 import EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_1_1
@@ -429,4 +429,32 @@ def yearly_bitcoin_power_mix(version=None):
         headers,
         [to_dict(row) for row in service.get_yearly_data()],
         filename='Implied yearly Bitcoin power mix.csv'
+    )
+
+
+@bp.route('/greenhouse_gas_emissions')
+@cache_control()
+def ghg_emissions(version=None):
+    def to_dict(row):
+        return {
+            'country': row['name'],
+            'value': row['value']
+        }
+
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'country': 'Country',
+        'value': 'MtCO2e',
+    }
+
+    service = EmissionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        [to_dict(row) for row in service.get_emissions()],
+        filename='Greenhouse Gas Emissions.csv'
     )

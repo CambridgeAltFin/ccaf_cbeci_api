@@ -19,6 +19,7 @@ cli.add_command(commands.data.calc_energy_consumptions)
 cli.add_command(commands.data.cumulative_electricity_estimates_calc)
 cli.add_command(commands.data.calc_co2_coefficient)
 
-cli.add_command(commands.data.global_historical_emissions)
+cli.add_command(commands.data.ghg_historical_emissions)
+cli.add_command(commands.data.ghg_emission_intensities)
 
 cli()

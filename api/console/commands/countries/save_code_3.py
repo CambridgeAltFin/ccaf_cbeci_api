@@ -11,4 +11,4 @@ def handle():
     with psycopg2.connect(**config['custom_data']) as connection, open('../storage/countries.json') as countries:
         cursor = connection.cursor()
         for country in json.loads(countries.read()):
-            cursor.execute('UPDATE countries SET code_3 = %s WHERE code = %s', (country['alpha-3'], country['alpha-2']))
+            cursor.execute('UPDATE countries SET code3 = %s WHERE code = %s', (country['alpha-3'], country['alpha-2']))

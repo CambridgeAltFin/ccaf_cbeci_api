@@ -9,6 +9,7 @@ servers:
     description: Demo server for testing
 tags:
   - name: Index
+  - name: Greenhouse Gas
   - name: Charts
   - name: Download
   - name: WYSIWYG
@@ -84,6 +85,8 @@ paths:
     $ref: "./endpoints/download/monthly_bitcoin_power_mix.yaml"
   /{version}/download/yearly_bitcoin_power_mix:
     $ref: "./endpoints/download/yearly_bitcoin_power_mix.yaml"
+  /{version}/download/greenhouse_gas_emissions:
+    $ref: "./endpoints/download/greenhouse_gas_emissions.yaml"
 
   /text_pages:
     $ref: "./endpoints/wysiwyg/text_pages.yaml"
@@ -100,3 +103,10 @@ paths:
 
   /feedback:
     $ref: "./endpoints/contact/feedback.yaml"
+
+  /ghg/world_emission:
+    $ref: "./endpoints/ghg/world_emission.yaml"
+  /ghg/emissions:
+    $ref: "./endpoints/ghg/emissions.yaml"
+  /ghg/emission_intensities:
+    $ref: "./endpoints/ghg/emission_intensities.yaml"

@@ -1,0 +1,10 @@
+type: object
+properties:
+  code:
+    type: string
+  name:
+    type: string
+  year:
+    type: integer
+  value:
+    type: number

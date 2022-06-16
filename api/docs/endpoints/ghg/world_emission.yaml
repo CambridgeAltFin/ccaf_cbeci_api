@@ -1,0 +1,14 @@
+get:
+  summary: World Emission
+  tags:
+    - Greenhouse Gas
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "../../schemas/GhgEmission.yaml"

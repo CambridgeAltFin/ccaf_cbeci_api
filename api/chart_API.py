@@ -133,7 +133,7 @@ def create_app():
         '/cbeci': app
     })
 
-    from blueprints import charts, contribute, download, text_pages, reports, sponsors, data
+    from blueprints import charts, contribute, download, text_pages, reports, sponsors, data, ghg
 
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(text_pages.bp, url_prefix='/api/text_pages')
@@ -142,6 +142,7 @@ def create_app():
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
     app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
     app.register_blueprint(data.bp, url_prefix='/api/data')
+    app.register_blueprint(ghg.bp, url_prefix='/api/ghg')
 
     swaggerui_bp = get_swaggerui_blueprint(
         '/cbeci' + SWAGGER_URL,

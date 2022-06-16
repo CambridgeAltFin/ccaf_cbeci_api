@@ -50,17 +50,32 @@ class GasEmissionRepository:
         return self._run_select_query(sql, (str(price),))
 
     def get_total_greenhouse_gas_emissions(self, price):
-        sql = 'SELECT date, timestamp, value AS v, cumulative_value AS cumulative_v FROM cumulative_greenhouse_gas_emissions ' \
+        sql = 'SELECT date, timestamp, value AS v, cumulative_value AS cumulative_v ' \
+              'FROM cumulative_greenhouse_gas_emissions ' \
               'WHERE price = %s'
         return self._run_select_query(sql, (str(price),))
 
     def get_monthly_bitcoin_power_mix(self):
-        sql = "SELECT timestamp, to_char(date, 'YYYY-MM') AS month, name, value FROM power_sources WHERE type = 'monthly' ORDER BY power_sources.order, timestamp"
+        sql = "SELECT timestamp, to_char(date, 'YYYY-MM') AS month, name, value " \
+              "FROM power_sources " \
+              "WHERE type = 'monthly' " \
+              "ORDER BY power_sources.order, timestamp"
         return self._run_select_query(sql)
 
     def get_yearly_bitcoin_power_mix(self):
-        sql = "SELECT timestamp, to_char(date, 'YYYY') AS year, name, value FROM power_sources WHERE type = 'yearly' ORDER BY power_sources.order, timestamp"
+        sql = "SELECT timestamp, to_char(date, 'YYYY') AS year, name, value " \
+              "FROM power_sources WHERE type = 'yearly' " \
+              "ORDER BY power_sources.order, timestamp"
         return self._run_select_query(sql)
+
+    def get_actual_world_emission(self):
+        sql = "SELECT code, name, year, value " \
+              "FROM global_historical_emissions " \
+              "WHERE code = 'WORLD' " \
+              "ORDER BY year DESC " \
+              "LIMIT 1"
+        result = self._run_select_query(sql)
+        return result[0]
 
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None):

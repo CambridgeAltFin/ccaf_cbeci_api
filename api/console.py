@@ -11,11 +11,14 @@ cli.add_command(commands.charts.calc_bitcoin_emission_intensity)
 cli.add_command(commands.charts.calc_bitcoin_greenhouse_gas_emissions)
 
 cli.add_command(commands.countries.save_country_id)
+cli.add_command(commands.countries.save_code_3)
 
 cli.add_command(commands.data.coinmetrics)
 cli.add_command(commands.data.hashrate)
 cli.add_command(commands.data.calc_energy_consumptions)
 cli.add_command(commands.data.cumulative_electricity_estimates_calc)
 cli.add_command(commands.data.calc_co2_coefficient)
+
+cli.add_command(commands.data.global_historical_emissions)
 
 cli()

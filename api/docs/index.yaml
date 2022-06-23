@@ -104,8 +104,8 @@ paths:
   /feedback:
     $ref: "./endpoints/contact/feedback.yaml"
 
-  /ghg/world_emission:
-    $ref: "./endpoints/ghg/world_emission.yaml"
+  /ghg/annualised_emission:
+    $ref: "./endpoints/ghg/annualised_emission.yaml"
   /ghg/emissions:
     $ref: "./endpoints/ghg/emissions.yaml"
   /ghg/emission_intensities:

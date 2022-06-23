@@ -13,6 +13,20 @@ class GasEmissionRepository:
         co2_coefficients = self._run_select_query(sql)
         return co2_coefficients
 
+    def get_actual_btc_emission_intensity(self):
+        sql = "SELECT " \
+              "c.id AS country_id " \
+              ", c.country AS name" \
+              ", c.code" \
+              ", c.country_flag AS flag" \
+              ", t.co2_coef AS value" \
+              ", to_char(t.date, 'YYYY') AS year " \
+              "FROM co2_coefficients t " \
+              "JOIN countries c ON c.code = 'BTC'" \
+              "ORDER BY timestamp DESC LIMIT 1"
+        co2_coefficients = self._run_select_query(sql)
+        return co2_coefficients[0]
+
     def get_total_global_co2_coefficients(self):
         sql = "SELECT to_char(t.date, 'YYYY-MM') AS month, MAX(t.co2_coef) AS co2_coef FROM co2_coefficients t " \
               'GROUP BY month ORDER BY month DESC'
@@ -77,15 +91,12 @@ class GasEmissionRepository:
         result = self._run_select_query(sql)
         return result[0]
 
-    def get_emissions(self, limit=None):
+    def get_emissions(self):
         sql = "SELECT c.code, c.country AS name, ghg.year, ghg.value " \
               "FROM ghg_historical_emissions ghg " \
               "JOIN countries c ON ghg.country_id = c.id " \
-              "WHERE ghg.year = (SELECT MAX(year) FROM ghg_historical_emissions WHERE country_id IS NOT NULL) " \
+              "WHERE ghg.year = (SELECT MAX(year) FROM ghg_historical_emissions WHERE country_id = ghg.country_id) " \
               "ORDER BY ghg.value DESC"
-
-        if limit is not None:
-            sql += f' LIMIT {limit}'
 
         return self._run_select_query(sql)
 
@@ -93,11 +104,27 @@ class GasEmissionRepository:
         sql = "SELECT c.code, c.country AS name, ghg.value, c.country_flag AS flag " \
               "FROM ghg_emission_intensities ghg " \
               "JOIN countries c ON ghg.country_id = c.id " \
-              "WHERE ghg.year = (SELECT MAX(year) FROM ghg_emission_intensities WHERE country_id IS NOT NULL) " \
+              "WHERE ghg.year = (SELECT MAX(year) FROM ghg_emission_intensities WHERE country_id = ghg.country_id) " \
               "AND ghg.value IS NOT NULL " \
               "ORDER BY ghg.value"
 
         return self._run_select_query(sql)
+
+    def get_annualised_btc_greenhouse_gas_emissions(self, year):
+        sql = "SELECT SUM(value) as value FROM greenhouse_gas_emissions " \
+              "WHERE price = %s " \
+              "AND to_char(date, 'YYYY') = %s " \
+              "AND name IN ('Historical Estimated', 'Estimated', 'Provisional Estimated')"
+        result = self._run_select_query(sql, (str(.05), str(year)))
+        return {'code': 'BTC', 'name': 'Annualised', 'year': year, 'value': result[0]['value']}
+
+    def get_actual_btc_greenhouse_gas_emission(self):
+        sql = "SELECT value, to_char(date, 'YYYY') AS year FROM greenhouse_gas_emissions " \
+              "WHERE price = %s " \
+              "AND name IN ('Historical Estimated', 'Estimated', 'Provisional Estimated') " \
+              "ORDER BY timestamp DESC LIMIT 1"
+        result = self._run_select_query(sql, (str(.05),))
+        return {'code': 'BTC', 'name': 'Bitcoin', 'year': result[0]['year'], 'value': result[0]['value']}
 
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None):

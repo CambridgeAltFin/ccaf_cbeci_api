@@ -1,3 +1,4 @@
+from extensions import cache
 from flask import Blueprint, jsonify
 from decorators.cache_control import cache_control
 from components.gas_emission import EmissionServiceFactory
@@ -7,24 +8,31 @@ from resources.gas_emission.ghg_emission_intensity import GhgEmissionIntensity
 bp = Blueprint('ghg', __name__, url_prefix='/ghg')
 
 
-@bp.route('/world_emission')
+@bp.route('/annualised_emission')
 @cache_control()
-def ghg_world_emission():
+@cache.memoize()
+def ghg_annualised_emission():
     emissions = EmissionServiceFactory.create()
+    world, btc = emissions.get_annualised_emission()
 
-    return jsonify(data=GhgHistoricalEmission(emissions.get_world_emission()))
+    return jsonify(data={
+        'BTC': GhgHistoricalEmission(btc),
+        'WORLD': GhgHistoricalEmission(world),
+    })
 
 
 @bp.route('/emissions')
 @cache_control()
+@cache.memoize()
 def ghg_emissions():
     emissions = EmissionServiceFactory.create()
 
-    return jsonify(data=[GhgHistoricalEmission(emission) for emission in emissions.get_emissions(40)])
+    return jsonify(data=[GhgHistoricalEmission(emission) for emission in emissions.get_emissions()])
 
 
 @bp.route('/emission_intensities')
 @cache_control()
+@cache.memoize()
 def ghg_emission_intensities():
     emissions = EmissionServiceFactory.create()
 

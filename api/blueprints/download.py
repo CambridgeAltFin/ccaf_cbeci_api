@@ -438,7 +438,7 @@ def ghg_emissions(version=None):
     def to_dict(row):
         return {
             'country': row['name'],
-            'value': row['value']
+            'value': round(row['value'], 2)
         }
 
     if version != 'v1.1.1':

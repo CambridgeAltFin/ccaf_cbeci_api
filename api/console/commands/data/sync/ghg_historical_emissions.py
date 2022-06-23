@@ -1,10 +1,12 @@
 import click
 import psycopg2
+from datetime import datetime
 from psycopg2.extras import execute_values
 
 from config import config
 
 from api.climatewatchdata import ClimateWatchData, Gas, Sector, Source
+from components.gas_emission.gas_emission_factory import GasEmissionRepositoryFactory
 
 
 @click.command(name='data:sync:ghg-historical-emissions')
@@ -27,7 +29,7 @@ def handle():
 
         for loc_data in data:
             code3 = loc_data['iso_code3']
-            country = next((country_id for country_id, country_name in countries if country_name == code3), None)
+            country = next((country_id for country_id, country_code in countries if country_code == code3), None)
             for year_data in loc_data['emissions']:
                 values.append((
                     country,

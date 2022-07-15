@@ -37,3 +37,16 @@ def ghg_emission_intensities():
     emissions = EmissionServiceFactory.create()
 
     return jsonify(data=[GhgEmissionIntensity(emission) for emission in emissions.get_emission_intensities()])
+
+
+@bp.route('/ranking')
+@cache_control()
+@cache.memoize()
+def ghg_ranking():
+    emissions = EmissionServiceFactory.create()
+
+    bitcoin_ghg_emissions = next((i for i, item in enumerate(emissions.get_emissions()) if item['code'] == 'BTC'), -1)
+
+    return jsonify(data={
+        'bitcoin_ghg_emissions': bitcoin_ghg_emissions
+    })

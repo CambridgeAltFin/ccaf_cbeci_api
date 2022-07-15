@@ -111,10 +111,9 @@ class GasEmissionRepository:
         return self._run_select_query(sql)
 
     def get_annualised_btc_greenhouse_gas_emissions(self, year):
-        sql = "SELECT SUM(value) as value FROM greenhouse_gas_emissions " \
+        sql = "SELECT SUM(value) as value FROM cumulative_greenhouse_gas_emissions " \
               "WHERE price = %s " \
-              "AND to_char(date, 'YYYY') = %s " \
-              "AND name IN ('Historical Estimated', 'Estimated', 'Provisional Estimated')"
+              "AND to_char(date, 'YYYY') = %s "
         result = self._run_select_query(sql, (str(.05), str(year)))
         return {'code': 'BTC', 'name': 'Annualised', 'year': year, 'value': result[0]['value']}
 

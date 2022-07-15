@@ -321,6 +321,7 @@ def countries_btc():
     tup2dict = {country: [consumption, flag, code] for country, code, consumption, flag in countries}
     tup2dict['Bitcoin'][0] = round(energy_consumption_service.get_actual_data(.05)['guess_consumption'], 2)
     dictsort = sorted(tup2dict.items(), key=lambda i: -1 if i[1][0] is None else i[1][0], reverse=True)
+
     response = []
     for item in dictsort:
         electricity_consumption = 0 if item[1][0] is None else item[1][0]

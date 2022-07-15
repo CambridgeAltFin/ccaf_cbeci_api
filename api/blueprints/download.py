@@ -310,9 +310,9 @@ def bitcoin_greenhouse_gas_emissions(version=None):
 
     headers = {
         'date': 'Date and Time',
-        'min_co2': 'Hydro-only, MMTCDE',
-        'guess_co2': 'Estimated, MMTCDE',
-        'max_co2': 'Coal-only, MMTCDE',
+        'min_co2': 'Hydro-only, MtCO2e',
+        'guess_co2': 'Estimated, MtCO2e',
+        'max_co2': 'Coal-only, MtCO2e',
     }
 
     service = GreenhouseGasEmissionServiceFactory.create()
@@ -339,8 +339,8 @@ def total_bitcoin_greenhouse_gas_emissions(version=None):
 
     headers = {
         'date': 'Month',
-        'v': 'Monthly emissions, MMTCDE',
-        'cumulative_v': 'Cumulative emissions, MMTCDE',
+        'v': 'Monthly emissions, MtCO2e',
+        'cumulative_v': 'Cumulative emissions, MtCO2e',
     }
 
     service = GreenhouseGasEmissionServiceFactory.create()

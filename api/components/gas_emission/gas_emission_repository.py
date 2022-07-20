@@ -1,4 +1,5 @@
 from config import config
+from components.BaseRepository import CustomDataRepository
 
 import time
 import psycopg2
@@ -6,7 +7,7 @@ import psycopg2.extras
 from datetime import datetime
 
 
-class GasEmissionRepository:
+class GasEmissionRepository(CustomDataRepository):
 
     def get_global_co2_coefficients(self):
         sql = 'SELECT t.timestamp, t.date, t.co2_coef, t.name FROM co2_coefficients t'
@@ -124,16 +125,3 @@ class GasEmissionRepository:
               "ORDER BY timestamp DESC LIMIT 1"
         result = self._run_select_query(sql, (str(.05),))
         return {'code': 'BTC', 'name': 'Bitcoin', 'year': result[0]['year'], 'value': result[0]['value']}
-
-    @staticmethod
-    def _run_select_query(sql: str, bindings: tuple = None):
-        with psycopg2.connect(**config['custom_data']) as conn:
-            cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cursor.execute(sql, bindings)
-            return cursor.fetchall()
-
-    @staticmethod
-    def _run_query(sql: str, bindings: tuple = None):
-        with psycopg2.connect(**config['custom_data']) as conn:
-            cursor = conn.cursor()
-            cursor.execute(sql, bindings)

@@ -21,6 +21,9 @@ class EmissionService:
         emissions.sort(key=lambda i: -i['value'])
         return emissions
 
+    def get_btc_index(self):
+        return next((i for i, item in enumerate(self.get_emissions()) if item['code'] == 'BTC'), -1) + 1
+
     def get_emission_intensities(self):
         emission_intensities = self.repository.get_emission_intensities()
         return emission_intensities

@@ -19,6 +19,18 @@ def get_mining_countries(version=None):
 
 
 @cache.memoize()
+def get_countries():
+    with psycopg2.connect(**config['custom_data']) as conn:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute(
+            'SELECT country, code, electricity_consumption, country_flag '
+            'FROM countries '
+            'ORDER BY electricity_consumption'
+        )
+        return cursor.fetchall()
+
+
+@cache.memoize()
 def get_mining_provinces(country_code, version=None):
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)

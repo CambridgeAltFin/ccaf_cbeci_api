@@ -1,9 +1,11 @@
+from components.energy_consumption import EnergyConsumptionServiceFactory
 from extensions import cache
 from flask import Blueprint, jsonify
 from decorators.cache_control import cache_control
 from components.gas_emission import EmissionServiceFactory
 from resources.gas_emission.ghg_historical_emission import GhgHistoricalEmission
 from resources.gas_emission.ghg_emission_intensity import GhgEmissionIntensity
+from components.countries import CountryFactory
 
 bp = Blueprint('ghg', __name__, url_prefix='/ghg')
 
@@ -44,9 +46,9 @@ def ghg_emission_intensities():
 @cache.memoize()
 def ghg_ranking():
     emissions = EmissionServiceFactory.create()
-
-    bitcoin_ghg_emissions = next((i for i, item in enumerate(emissions.get_emissions()) if item['code'] == 'BTC'), -1)
+    countries = CountryFactory.create_service()
 
     return jsonify(data={
-        'bitcoin_ghg_emissions': bitcoin_ghg_emissions
+        'bitcoin_ghg_emissions': emissions.get_btc_index(),
+        'bitcoin_electricity_consumption': countries.get_btc_index()
     })

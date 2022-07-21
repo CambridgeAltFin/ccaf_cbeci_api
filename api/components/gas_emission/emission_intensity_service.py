@@ -23,4 +23,8 @@ class EmissionIntensityService:
     def create_provisional_points(self):
         last_record = self.repository.get_newest_co2_coefficient()
         for day in pd.date_range(start=last_record['date'], end=datetime.today()).tolist():
-            self.repository.create_co2_coefficient_record(day.strftime('%Y-%m-%d'), last_record['co2_coef'], self.PROVISIONAL)
+            self.repository.create_co2_coefficient_record(
+                day.strftime('%Y-%m-%d'),
+                last_record['co2_coef'],
+                self.PROVISIONAL
+            )

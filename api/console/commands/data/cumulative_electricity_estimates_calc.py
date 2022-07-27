@@ -17,7 +17,7 @@ def handle():
             price = cents / 100
             insert = 'INSERT INTO cumulative_energy_consumptions (timestamp,price,date,monthly_consumption,cumulative_consumption) VALUES '
             values = []
-            for timestamp, item in service.calc_monthly_data(price):
+            for timestamp, item in service.calc_monthly_data(price, current_month=True):
                 row = to_dict(timestamp, item, price)
                 placeholder = ','.join(['%s' for _ in row.values()])
                 values.append(cursor.mogrify('(' + placeholder + ')', tuple(row.values())).decode('utf-8'))

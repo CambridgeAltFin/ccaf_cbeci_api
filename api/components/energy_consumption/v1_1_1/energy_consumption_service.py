@@ -51,15 +51,16 @@ class EnergyConsumptionService(object):
     def calc_data(self, price: float):
         return self._get_energy_dataframe(price, self.metrics).iterrows()
 
-    def get_monthly_data(self, price: float):
-        return self.calc_monthly_data(price)
+    def get_monthly_data(self, price: float, current_month=False):
+        return self.calc_monthly_data(price, current_month=current_month)
 
-    def calc_monthly_data(self, price: float):
-        today = datetime.utcnow().date()
-        start_of_month = datetime(today.year, today.month, 1, tzinfo=tz.tzutc())
-
+    def calc_monthly_data(self, price: float, current_month=False):
         energy_df = self._get_energy_dataframe(price, ['guess_power'])
-        energy_df = energy_df.loc[energy_df.index < int(start_of_month.timestamp())]
+
+        if not current_month:
+            today = datetime.utcnow().date()
+            start_of_month = datetime(today.year, today.month, 1, tzinfo=tz.tzutc())
+            energy_df = energy_df.loc[energy_df.index < int(start_of_month.timestamp())]
 
         energy_df.reset_index(inplace=True)
         energy_df['date'] = pd.to_datetime(energy_df['timestamp'], unit='s')

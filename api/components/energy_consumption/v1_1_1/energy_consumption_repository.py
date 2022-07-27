@@ -2,7 +2,7 @@
 from config import config, Connection, start_date
 
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
+from dateutil import tz
 
 import calendar
 import psycopg2
@@ -40,14 +40,18 @@ class EnergyConsumptionRepository:
               'LIMIT 1'
         return self._run_select_query(sql, (str(price),))
 
-    def get_cumulative_energy_consumptions(self, price: float) -> list:
+    def get_cumulative_energy_consumptions(self, price: float, current_month=False) -> list:
         sql = 'SELECT' \
               ' timestamp' \
               ', date' \
               ', monthly_consumption::float guess_consumption' \
               ', cumulative_consumption::float cumulative_guess_consumption ' \
               'FROM cumulative_energy_consumptions ' \
-              'WHERE price = %s'
+              'WHERE price = %s '
+        if not current_month:
+            today = datetime.utcnow().date()
+            start_of_month = datetime(today.year, today.month, 1, tzinfo=tz.tzutc())
+            sql += 'AND timestamp < {}'.format(int(start_of_month.timestamp()))
         return self._run_select_query(sql, (str(price),))
 
     def get_prof_thresholds(self):

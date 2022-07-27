@@ -132,10 +132,15 @@ class GreenhouseGasEmissionService:
             row['date'] = date.strftime('%Y-%m-%d')
             return row
 
-        energy_cumulative = pd.DataFrame([to_dict(date, row) for date, row in self.energy_consumption.get_monthly_data(price)])
+        energy_cumulative = pd.DataFrame([
+            to_dict(date, row) for date, row
+            in self.energy_consumption.get_monthly_data(price, current_month=True)
+        ])
         energy_cumulative['date'] = pd.to_datetime(energy_cumulative['date'])
         energy_cumulative['timestamp'] = energy_cumulative['date'].values.astype(np.int64) // 10 ** 9
-        energy_cumulative['month'] = pd.to_datetime(energy_cumulative['date'].dt.year.astype('str') + '-' + energy_cumulative['date'].dt.month.astype('str'))
+        energy_cumulative['month'] = pd.to_datetime(
+            energy_cumulative['date'].dt.year.astype('str') + '-' + energy_cumulative['date'].dt.month.astype('str')
+        )
         co2_coefficients = pd.DataFrame(self.repository.get_total_global_co2_coefficients())
         co2_coefficients['month'] = pd.to_datetime(co2_coefficients['month'])
 

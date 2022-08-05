@@ -1,16 +1,13 @@
-from config import config
 from components.BaseRepository import CustomDataRepository
 
 import time
-import psycopg2
-import psycopg2.extras
 from datetime import datetime
 
 
 class GasEmissionRepository(CustomDataRepository):
 
     def get_global_co2_coefficients(self):
-        sql = 'SELECT t.timestamp, t.date, t.co2_coef, t.name FROM co2_coefficients t'
+        sql = 'SELECT t.timestamp, t.date, t.co2_coef, t.name FROM co2_coefficients t ORDER BY timestamp'
         co2_coefficients = self._run_select_query(sql)
         return co2_coefficients
 

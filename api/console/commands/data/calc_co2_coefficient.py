@@ -5,7 +5,9 @@ import pandas as pd
 import numpy as np
 import statistics as stats
 from os.path import join
+import os
 import time
+import datetime
 
 from config import config
 from components.gas_emission.gas_emission_factory import EmissionIntensityServiceFactory
@@ -14,14 +16,14 @@ from components.gas_emission.gas_emission_factory import EmissionIntensityServic
 map_end_date = '2021-09-01'
 map_start_date = '2019-09-01'
 
-co2_g_p_kwh_hydro = 24  # [2]
-co2_g_p_kwh_wind = np.mean([11, 12])  # onshore & offshore [2]
-co2_g_p_kwh_nuc = 12  # [2]
-co2_g_p_kwh_solar = np.mean([41, 48, 27])  # solar rooftop, solar utility, concentrated solar power [2]
-co2_g_p_kwh_gas = 469  # Natural Gas [2]
-co2_g_p_kwh_coal = 820  # [2]
-co2_g_p_kwh_oil = 840  # [1]
-co2_g_p_kwh_oRenew = np.mean([38, 740, 230])  # geothermal, Biomass (cofiring) & Biomass (dedicated) [2]
+co2_g_p_kwh_hydro = 21
+co2_g_p_kwh_wind = 13
+co2_g_p_kwh_nuc = 13
+co2_g_p_kwh_solar = 35.5
+co2_g_p_kwh_gas = 486
+co2_g_p_kwh_coal = 1001
+co2_g_p_kwh_oil = 840
+co2_g_p_kwh_oRenew = 32.3
 
 emission_intensity_service = EmissionIntensityServiceFactory.create()
 
@@ -29,12 +31,67 @@ monthly_globalw_CO2_Coeff = {}
 
 
 @click.command(name='data:calc:co2-coefficient')
-@click.argument('directory')
-def handle(directory):
-    df3 = get_electricity_mix(join(directory, 'per-capita-electricity-source-stacked.csv'))
+def handle():
+    yearly = pd.read_csv(join(os.getcwd(), 'yearly.csv'))
+    monthly = pd.read_csv(join(os.getcwd(), 'month.csv'))
+
+    power_source_share = ['Share of Coal', 'Share of Gas', 'Share of Oil',
+                          'Share of Nuclear', 'Share of Hydro', 'Share of Wind', 'Share of Solar',
+                          'Share of Other renewable']
+
+    weighted_source_share = []
+    for power in power_source_share:
+        weighted_source_share.append("Weighted " + power)
+
+    g_monthly_bitcoin_energy_mix = pd.melt(monthly, id_vars='Date',
+                                           value_vars=weighted_source_share,
+                                           var_name='Power Source', value_name='Power Source Share')
+    g_monthly_bitcoin_energy_mix['Power Source'] = g_monthly_bitcoin_energy_mix['Power Source'].str.extract(
+        'Weighted Share of (.+)')
+
+    order = {
+        'Coal': 8,
+        'Wind': 3,
+        'Other renewable': 1,
+        'Oil': 6,
+        'Nuclear': 5,
+        'Solar': 2,
+        'Hydro': 4,
+        'Gas': 7,
+    }
 
     with psycopg2.connect(**config['custom_data']) as connection:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        for i, row in g_monthly_bitcoin_energy_mix.iterrows():
+            cursor.execute(
+                'insert into power_sources (type, name, value, timestamp, date, "order") '
+                'VALUES (%s, %s, %s, %s, %s, %s)',
+                (
+                    'monthly',
+                    row['Power Source'],
+                    round(row['Power Source Share'], 6),
+                    time.mktime(datetime.datetime.strptime(row['Date'], "%Y-%m-%d").timetuple()),
+                    row['Date'],
+                    order[row['Power Source']]
+                )
+            )
+
+        for i, row in yearly.iterrows():
+            cursor.execute(
+                'insert into power_sources (type, name, value, timestamp, date, "order") '
+                'VALUES (%s, %s, %s, %s, %s, %s)',
+                (
+                    'yearly',
+                    row['Power Source'],
+                    round(row['Power Source Share'], 6),
+                    time.mktime(datetime.datetime.strptime(row['Year'], "%Y-%m-%d").timetuple()),
+                    row['Year'],
+                    order[row['Power Source']],
+                ),
+            )
+
+        return
 
         df = get_hashrate_share(cursor)
         df2, historical_elec, post_elec = get_electricity_estimates(cursor)

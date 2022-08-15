@@ -383,6 +383,7 @@ def bitcoin_emission_intensity(version=None):
 def monthly_bitcoin_power_mix(version=None):
     def to_dict(row):
         row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%d')
+        row['value'] = round(row['value'] * 100, 2)
         return row
 
     if version != 'v1.1.1':

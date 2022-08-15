@@ -71,13 +71,13 @@ class GasEmissionRepository(CustomDataRepository):
         sql = "SELECT timestamp, to_char(date, 'YYYY-MM') AS month, name, value " \
               "FROM power_sources " \
               "WHERE type = 'monthly' " \
-              "ORDER BY power_sources.order, timestamp"
+              "ORDER BY timestamp, power_sources.order"
         return self._run_select_query(sql)
 
     def get_yearly_bitcoin_power_mix(self):
         sql = "SELECT timestamp, to_char(date, 'YYYY') AS year, name, value " \
               "FROM power_sources WHERE type = 'yearly' " \
-              "ORDER BY power_sources.order, timestamp"
+              "ORDER BY timestamp, power_sources.order"
         return self._run_select_query(sql)
 
     def get_actual_world_emission(self):

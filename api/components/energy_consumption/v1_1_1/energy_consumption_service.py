@@ -51,6 +51,9 @@ class EnergyConsumptionService(object):
     def calc_data(self, price: float):
         return self._get_energy_dataframe(price, self.metrics).iterrows()
 
+    def get_yearly_data(self, price: float, current_month=False):
+        return self.calc_yearly_data(price, current_month=current_month)
+
     def get_monthly_data(self, price: float, current_month=False):
         return self.calc_monthly_data(price, current_month=current_month)
 
@@ -70,6 +73,14 @@ class EnergyConsumptionService(object):
         energy_df['guess_consumption'] = energy_df['guess_power'].apply(lambda x: x * 24 / 1000).round(2)
         energy_df['cumulative_guess_consumption'] = energy_df['guess_consumption'].cumsum()
 
+        return energy_df.iterrows()
+
+    def calc_yearly_data(self, price: float, current_month=False):
+        energy_df = pd.DataFrame([dict(row) for t, row in self.get_monthly_data(price, current_month)])
+        energy_df['date'] = pd.to_datetime(energy_df['date'])
+        energy_df.set_index('date', inplace=True)
+        energy_df = energy_df.groupby(pd.Grouper(freq='Y')).sum()
+        energy_df['cumulative_guess_consumption'] = energy_df['guess_consumption'].cumsum()
         return energy_df.iterrows()
 
     def get_actual_data(self, price: float):

@@ -127,6 +127,14 @@ class GreenhouseGasEmissionService:
             if self.is_calculated(price) \
             else self.calc_total_greenhouse_gas_emissions(price).to_dict('records')
 
+    def get_total_yearly_greenhouse_gas_emissions(self, price: float):
+        df = pd.DataFrame([dict(row) for row in self.get_total_greenhouse_gas_emissions(price)])
+        df['date'] = pd.to_datetime(df['date'])
+        df.set_index('date', inplace=True)
+        df = df.groupby(pd.Grouper(freq='Y')).sum()
+        df['cumulative_v'] = df['v'].cumsum().round(2)
+        return df.iterrows()
+
     def calc_total_greenhouse_gas_emissions(self, price: float):
         def to_dict(date, row):
             row['date'] = date.strftime('%Y-%m-%d')

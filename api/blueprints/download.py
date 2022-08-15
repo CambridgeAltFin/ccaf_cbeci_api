@@ -97,6 +97,24 @@ def get_monthly_data(version, price=.05):
     return [to_dict(date, row) for date, row in energy_consumption.get_monthly_data(price)]
 
 
+def get_yearly_data(version, price=.05):
+    def to_dict(date, row):
+        return {
+            'year': date.strftime('%Y'),
+            'value': round(row['guess_consumption'], 2),
+            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
+        }
+
+    if version == 'v1.1.1':
+        energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
+    elif version == 'v1.2.0':
+        energy_consumption = EnergyConsumptionServiceFactory.create()
+    else:
+        raise NotImplementedError('Not Implemented')
+
+    return [to_dict(date, row) for date, row in energy_consumption.get_yearly_data(price)]
+
+
 def send_file(first_line=None, file_type='csv'):
     def send_csv(headers: Dict[str, str], rows: List[Dict[str, Union[str, int, float]]], filename='export.csv'):
         si = io.StringIO()
@@ -158,6 +176,24 @@ def data_monthly(version=None):
     }
 
     rows = get_monthly_data(version, float(price))
+    send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh', file_type=file_type)
+
+    return send_file_func(headers, rows)
+
+
+@bp.route('/data/yearly')
+@cache_control()
+def data_yearly(version=None):
+    file_type = request.args.get('file_type', 'csv')
+    price = request.args.get('price', 0.05)
+
+    headers = {
+        'year': 'Year',
+        'value': 'Yearly consumption, TWh',
+        'cumulative_value': 'Cumulative consumption, TWh',
+    }
+
+    rows = get_yearly_data(version, float(price))
     send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh', file_type=file_type)
 
     return send_file_func(headers, rows)
@@ -348,6 +384,34 @@ def total_bitcoin_greenhouse_gas_emissions(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_total_greenhouse_gas_emissions(float(price))],
+        filename='Total Bitcoin greenhouse gas emissions.csv'
+    )
+
+
+@bp.route('/total_yearly_bitcoin_greenhouse_gas_emissions')
+@cache_control()
+def total_yearly_bitcoin_greenhouse_gas_emissions(version=None):
+    def to_dict(row, date):
+        row['date'] = date.strftime('%Y')
+        return row
+
+    if version != 'v1.1.1':
+        raise NotImplementedError('Not Implemented')
+
+    price = request.args.get('price', 0.05)
+    send_file_func = send_file(first_line=f'Average electricity cost assumption: {price} USD/kWh')
+
+    headers = {
+        'date': 'Year',
+        'v': 'Yearly emissions, MtCO2e',
+        'cumulative_v': 'Cumulative emissions, MtCO2e',
+    }
+
+    service = GreenhouseGasEmissionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        [to_dict(row, date) for date, row in service.get_total_yearly_greenhouse_gas_emissions(float(price))],
         filename='Total Bitcoin greenhouse gas emissions.csv'
     )
 

@@ -338,7 +338,7 @@ def absolute_mining_countries(version=None):
 @bp.route('/bitcoin_greenhouse_gas_emissions')
 @cache_control()
 def bitcoin_greenhouse_gas_emissions(version=None):
-    if version != 'v1.1.1' or version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
 
     price = request.args.get('price', 0.05)
@@ -367,7 +367,7 @@ def total_bitcoin_greenhouse_gas_emissions(version=None):
         row['date'] = month_name[row['date'].month] + row['date'].strftime(' %Y')
         return row
 
-    if version != 'v1.1.1' or version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
 
     price = request.args.get('price', 0.05)
@@ -395,7 +395,7 @@ def total_yearly_bitcoin_greenhouse_gas_emissions(version=None):
         row['date'] = date.strftime('%Y')
         return row
 
-    if version != 'v1.1.1' or version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
 
     price = request.args.get('price', 0.05)
@@ -423,7 +423,7 @@ def bitcoin_emission_intensity(version=None):
         row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%dT%H:%M:%S')
         return row
 
-    if version != 'v1.1.1' or version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -450,7 +450,7 @@ def monthly_bitcoin_power_mix(version=None):
         row['value'] = round(row['value'] * 100, 2)
         return row
 
-    if version != 'v1.1.1' or version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -477,7 +477,7 @@ def yearly_bitcoin_power_mix(version=None):
         row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%d')
         return row
 
-    if version != 'v1.1.1' or version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -506,7 +506,7 @@ def ghg_emissions(version=None):
             'value': round(row['value'], 2)
         }
 
-    if version != 'v1.1.1' or version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()

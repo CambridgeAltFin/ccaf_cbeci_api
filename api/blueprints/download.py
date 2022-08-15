@@ -374,7 +374,7 @@ def bitcoin_emission_intensity(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_bitcoin_emission_intensity()],
-        filename='Implied monthly Bitcoin emission intensity.csv'
+        filename='Bitcoin emission intensity.csv'
     )
 
 
@@ -402,7 +402,7 @@ def monthly_bitcoin_power_mix(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_monthly_data()],
-        filename='Implied monthly Bitcoin power mix.csv'
+        filename='Bitcoin electricity consumption by source.csv'
     )
 
 
@@ -429,7 +429,7 @@ def yearly_bitcoin_power_mix(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_yearly_data()],
-        filename='Implied yearly Bitcoin power mix.csv'
+        filename='Bitcoin electricity consumption by source.csv'
     )
 
 

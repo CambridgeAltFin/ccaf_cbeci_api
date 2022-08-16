@@ -10,7 +10,7 @@ from components.gas_emission.gas_emission_factory import GasEmissionRepositoryFa
 @click.command(name='charts:calc:bitcoin-emission-intensity')
 def handle():
     service = EmissionIntensityServiceFactory.create()
-    service.create_provisional_points()
+    service.create_predicted_points()
 
     with psycopg2.connect(**config['custom_data']) as connection:
         cursor = connection.cursor()

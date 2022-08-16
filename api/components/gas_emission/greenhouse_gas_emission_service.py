@@ -15,13 +15,13 @@ class GreenhouseGasEmissionService:
     HISTORICAL_MAX_CO2 = 'Historical Coal-only'
     HISTORICAL_GUESS_CO2 = 'Historical Estimated'
 
-    MIN_CO2 = 'Hydro-only'
-    MAX_CO2 = 'Coal-only'
-    GUESS_CO2 = 'Estimated'
+    MIN_CO2 = 'Assessed Hydro-only'
+    MAX_CO2 = 'Assessed Coal-only'
+    GUESS_CO2 = 'Assessed Estimated'
 
-    PROVISIONAL_MIN_CO2 = 'Provisional Hydro-only'
-    PROVISIONAL_MAX_CO2 = 'Provisional Coal-only'
-    PROVISIONAL_GUESS_CO2 = 'Provisional Estimated'
+    PREDICTED_MIN_CO2 = 'Predicted Hydro-only'
+    PREDICTED_MAX_CO2 = 'Predicted Coal-only'
+    PREDICTED_GUESS_CO2 = 'Predicted Estimated'
 
     def __init__(self, repository: GasEmissionRepository, energy_consumption: EnergyConsumptionService):
         self.repository = repository
@@ -45,8 +45,8 @@ class GreenhouseGasEmissionService:
         pivot = self.join_energy_consumption_to_co2_coefficients(price)
 
         his = pivot[pivot['name'] == EmissionIntensityService.HISTORICAL]
-        est = pivot[pivot['name'] == EmissionIntensityService.ESTIMATED]
-        prov = pivot[pivot['name'] == EmissionIntensityService.PROVISIONAL]
+        est = pivot[pivot['name'] == EmissionIntensityService.ASSESSED]
+        prov = pivot[pivot['name'] == EmissionIntensityService.PREDICTED]
 
         his_min = his[['timestamp', 'date', 'name', 'min_co2']]
         his_min.loc[:, 'name'] = self.HISTORICAL_MIN_CO2
@@ -73,15 +73,15 @@ class GreenhouseGasEmissionService:
         est_max.loc[:, 'value'] = est_max['max_co2']
 
         prov_min = prov[['timestamp', 'date', 'name', 'min_co2']]
-        prov_min.loc[:, 'name'] = self.PROVISIONAL_MIN_CO2
+        prov_min.loc[:, 'name'] = self.PREDICTED_MIN_CO2
         prov_min.loc[:, 'value'] = prov_min['min_co2']
 
         prov_guess = prov[['timestamp', 'date', 'name', 'guess_co2']]
-        prov_guess.loc[:, 'name'] = self.PROVISIONAL_GUESS_CO2
+        prov_guess.loc[:, 'name'] = self.PREDICTED_GUESS_CO2
         prov_guess.loc[:, 'value'] = prov_guess['guess_co2']
 
         prov_max = prov[['timestamp', 'date', 'name', 'max_co2']]
-        prov_max.loc[:, 'name'] = self.PROVISIONAL_MAX_CO2
+        prov_max.loc[:, 'name'] = self.PREDICTED_MAX_CO2
         prov_max.loc[:, 'value'] = prov_max['max_co2']
 
         df = pd.DataFrame()

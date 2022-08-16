@@ -8,8 +8,8 @@ from datetime import datetime
 class EmissionIntensityService:
 
     HISTORICAL = 'Historical'
-    ESTIMATED = 'Estimated'
-    PROVISIONAL = 'Provisional'
+    ASSESSED = 'Assessed'
+    PREDICTED = 'Predicted'
 
     def __init__(self, repository: GasEmissionRepository):
         self.repository = repository
@@ -20,11 +20,11 @@ class EmissionIntensityService:
     def create_chart_point(self, date: datetime, co2_coefficient: float, name: str):
         self.repository.create_co2_coefficient_record(date.strftime('%Y-%m-%d'), co2_coefficient, name)
 
-    def create_provisional_points(self):
+    def create_predicted_points(self):
         last_record = self.repository.get_newest_co2_coefficient()
         for day in pd.date_range(start=last_record['date'], end=datetime.today()).tolist():
             self.repository.create_co2_coefficient_record(
                 day.strftime('%Y-%m-%d'),
                 last_record['co2_coef'],
-                self.PROVISIONAL
+                self.PREDICTED
             )

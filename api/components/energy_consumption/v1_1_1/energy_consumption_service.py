@@ -76,7 +76,7 @@ class EnergyConsumptionService(object):
         return energy_df.iterrows()
 
     def calc_yearly_data(self, price: float, current_month=False):
-        energy_df = pd.DataFrame([dict(row) for t, row in self.get_monthly_data(price, current_month)])
+        energy_df = pd.DataFrame([dict(row) | {'date': date} for date, row in self.get_monthly_data(price, current_month)])
         energy_df['date'] = pd.to_datetime(energy_df['date'])
         energy_df.set_index('date', inplace=True)
         energy_df = energy_df.groupby(pd.Grouper(freq='Y')).sum()

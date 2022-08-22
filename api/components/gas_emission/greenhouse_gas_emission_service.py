@@ -3,6 +3,7 @@ from components.gas_emission.co2_statistic import Co2Statistic
 from components.gas_emission.gas_emission_repository import GasEmissionRepository
 from components.gas_emission.emission_intensity_service import EmissionIntensityService
 from components.energy_consumption.energy_consumption_service import EnergyConsumptionService
+from components.gas_emission.ghg_constants import GhgConstants
 
 import numpy as np
 import pandas as pd
@@ -10,19 +11,6 @@ from datetime import datetime
 
 
 class GreenhouseGasEmissionService:
-
-    HISTORICAL_MIN_CO2 = 'Historical Hydro-only'
-    HISTORICAL_MAX_CO2 = 'Historical Coal-only'
-    HISTORICAL_GUESS_CO2 = 'Historical Estimated'
-
-    MIN_CO2 = 'Assessed Hydro-only'
-    MAX_CO2 = 'Assessed Coal-only'
-    GUESS_CO2 = 'Assessed Estimated'
-
-    PREDICTED_MIN_CO2 = 'Predicted Hydro-only'
-    PREDICTED_MAX_CO2 = 'Predicted Coal-only'
-    PREDICTED_GUESS_CO2 = 'Predicted Estimated'
-
     def __init__(self, repository: GasEmissionRepository, energy_consumption: EnergyConsumptionService):
         self.repository = repository
         self.energy_consumption = energy_consumption
@@ -49,39 +37,39 @@ class GreenhouseGasEmissionService:
         prov = pivot[pivot['name'] == EmissionIntensityService.PREDICTED]
 
         his_min = his[['timestamp', 'date', 'name', 'min_co2']]
-        his_min.loc[:, 'name'] = self.HISTORICAL_MIN_CO2
+        his_min.loc[:, 'name'] = GhgConstants.HISTORICAL_MIN_CO2
         his_min.loc[:, 'value'] = his_min['min_co2']
 
         his_guess = his[['timestamp', 'date', 'name', 'guess_co2']]
-        his_guess.loc[:, 'name'] = self.HISTORICAL_GUESS_CO2
+        his_guess.loc[:, 'name'] = GhgConstants.HISTORICAL_GUESS_CO2
         his_guess.loc[:, 'value'] = his_guess['guess_co2']
 
         his_max = his[['timestamp', 'date', 'name', 'max_co2']]
-        his_max.loc[:, 'name'] = self.HISTORICAL_MAX_CO2
+        his_max.loc[:, 'name'] = GhgConstants.HISTORICAL_MAX_CO2
         his_max.loc[:, 'value'] = his_max['max_co2']
 
         est_min = est[['timestamp', 'date', 'name', 'min_co2']]
-        est_min.loc[:, 'name'] = self.MIN_CO2
+        est_min.loc[:, 'name'] = GhgConstants.MIN_CO2
         est_min.loc[:, 'value'] = est_min['min_co2']
 
         est_guess = est[['timestamp', 'date', 'name', 'guess_co2']]
-        est_guess.loc[:, 'name'] = self.GUESS_CO2
+        est_guess.loc[:, 'name'] = GhgConstants.GUESS_CO2
         est_guess.loc[:, 'value'] = est_guess['guess_co2']
 
         est_max = est[['timestamp', 'date', 'name', 'max_co2']]
-        est_max.loc[:, 'name'] = self.MAX_CO2
+        est_max.loc[:, 'name'] = GhgConstants.MAX_CO2
         est_max.loc[:, 'value'] = est_max['max_co2']
 
         prov_min = prov[['timestamp', 'date', 'name', 'min_co2']]
-        prov_min.loc[:, 'name'] = self.PREDICTED_MIN_CO2
+        prov_min.loc[:, 'name'] = GhgConstants.PREDICTED_MIN_CO2
         prov_min.loc[:, 'value'] = prov_min['min_co2']
 
         prov_guess = prov[['timestamp', 'date', 'name', 'guess_co2']]
-        prov_guess.loc[:, 'name'] = self.PREDICTED_GUESS_CO2
+        prov_guess.loc[:, 'name'] = GhgConstants.PREDICTED_GUESS_CO2
         prov_guess.loc[:, 'value'] = prov_guess['guess_co2']
 
         prov_max = prov[['timestamp', 'date', 'name', 'max_co2']]
-        prov_max.loc[:, 'name'] = self.PREDICTED_MAX_CO2
+        prov_max.loc[:, 'name'] = GhgConstants.PREDICTED_MAX_CO2
         prov_max.loc[:, 'value'] = prov_max['max_co2']
 
         df = pd.DataFrame()

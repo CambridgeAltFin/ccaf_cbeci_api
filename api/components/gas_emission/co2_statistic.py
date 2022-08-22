@@ -1,7 +1,6 @@
 
 
 class Co2Statistic:
-
     @staticmethod
     def hydro():
         return 21

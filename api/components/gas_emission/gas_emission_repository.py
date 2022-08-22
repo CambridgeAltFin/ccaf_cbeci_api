@@ -1,4 +1,5 @@
 from components.BaseRepository import CustomDataRepository
+from components.gas_emission.ghg_constants import GhgConstants
 
 import time
 from datetime import datetime
@@ -52,14 +53,22 @@ class GasEmissionRepository(CustomDataRepository):
 
     def get_flat_greenhouse_gas_emissions(self, price):
         sql = "SELECT timestamp, to_char(MAX(DATE), 'YYYY-MM-DD\"T\"HH24:MI:SS') AS date " \
-              ", MAX(CASE WHEN name = ANY (ARRAY ['Historical Hydro-only', 'Hydro-only', 'Provisional Hydro-only']) THEN value END) AS min_co2 " \
-              ", MAX(CASE WHEN name = ANY (ARRAY ['Historical Estimated', 'Estimated', 'Provisional Estimated']) THEN value END) AS guess_co2 " \
-              ", MAX(CASE WHEN name = ANY (ARRAY ['Historical Coal-only', 'Coal-only', 'Provisional Coal-only']) THEN value END) AS max_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS min_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS guess_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS max_co2 " \
               "FROM greenhouse_gas_emissions " \
               "WHERE greenhouse_gas_emissions.price = %s " \
               "GROUP BY greenhouse_gas_emissions.timestamp " \
               "ORDER BY timestamp"
-        return self._run_select_query(sql, (str(price),))
+        return self._run_select_query(sql, (
+            GhgConstants.HISTORICAL_MIN_CO2, GhgConstants.MIN_CO2, GhgConstants.PREDICTED_MIN_CO2,
+
+            GhgConstants.HISTORICAL_GUESS_CO2, GhgConstants.GUESS_CO2, GhgConstants.PREDICTED_GUESS_CO2,
+
+            GhgConstants.HISTORICAL_MAX_CO2, GhgConstants.MAX_CO2, GhgConstants.PREDICTED_MAX_CO2,
+
+            str(price)
+        ))
 
     def get_total_greenhouse_gas_emissions(self, price):
         sql = 'SELECT date, timestamp, value AS v, cumulative_value AS cumulative_v ' \
@@ -118,7 +127,7 @@ class GasEmissionRepository(CustomDataRepository):
     def get_actual_btc_greenhouse_gas_emission(self):
         sql = "SELECT value, to_char(date, 'YYYY') AS year FROM greenhouse_gas_emissions " \
               "WHERE price = %s " \
-              "AND name IN ('Historical Estimated', 'Estimated', 'Provisional Estimated') " \
+              "AND name IN ('Predicted Estimated') " \
               "ORDER BY timestamp DESC LIMIT 1"
         result = self._run_select_query(sql, (str(.05),))
         return {'code': 'BTC', 'name': 'Bitcoin', 'year': result[0]['year'], 'value': result[0]['value']}

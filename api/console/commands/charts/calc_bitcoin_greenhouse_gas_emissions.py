@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta
 
+from api.digiconomist import Digiconomist
 from config import config, Connection
 from components.gas_emission.gas_emission_factory import GreenhouseGasEmissionServiceFactory
 
@@ -30,7 +32,8 @@ def handle():
         for cents in range(1, 21):
             price = round(cents / 100, 2)
             greenhouse_gas_emissions = service.calc_total_greenhouse_gas_emissions(price)
-            insert = 'INSERT INTO cumulative_greenhouse_gas_emissions (timestamp,date,price,value,cumulative_value) VALUES '
+            insert = 'INSERT INTO cumulative_greenhouse_gas_emissions (timestamp,date,price,value,cumulative_value) ' \
+                     'VALUES '
             values = []
             for _, item in greenhouse_gas_emissions.iterrows():
                 row = to_cum_dict(item, cents)
@@ -38,6 +41,22 @@ def handle():
                 values.append(cursor.mogrify('(' + placeholder + ')', tuple(row.values())).decode('utf-8'))
             insert += ','.join(values)
             cursor.execute(insert)
+
+        digiconomist = Digiconomist()
+        yesterday = datetime.today() - timedelta(days=1)
+        result = digiconomist.bitcoin(yesterday)
+        if len(result) > 0:
+            cursor.execute(
+                'INSERT INTO digiconomist_btc ("24hr_kWh", "24hr_kgCO2", "Output_kWh", "Output_kgCO2", date) '
+                'VALUES (%s, %s, %s, %s, %s)',
+                (
+                    result[0]['24hr_kWh'],
+                    result[0]['24hr_kgCO2'],
+                    result[0]['Output_kWh'],
+                    result[0]['Output_kgCO2'],
+                    yesterday
+                )
+            )
 
 
 def to_dict(row, cents):

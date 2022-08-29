@@ -27,3 +27,11 @@ class EmissionService:
     def get_emission_intensities(self):
         emission_intensities = self.repository.get_emission_intensities()
         return emission_intensities
+
+    def get_best_guess_and_digiconomist(self):
+        actual = self.repository.get_actual_btc_greenhouse_gas_emission()
+        digiconomist = self.repository.get_digiconomist_emission()
+        return {
+            'index': {'best_guess': actual['value']},
+            'digiconomist': digiconomist,
+        }

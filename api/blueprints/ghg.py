@@ -52,3 +52,12 @@ def ghg_ranking():
         'bitcoin_ghg_emissions': emissions.get_btc_index(),
         'bitcoin_electricity_consumption': countries.get_btc_index()
     })
+
+
+@bp.route('/btc_environmental_footprint')
+@cache_control()
+@cache.memoize()
+def btc_environmental_footprint():
+    emissions = EmissionServiceFactory.create()
+
+    return jsonify(data=emissions.get_best_guess_and_digiconomist())

@@ -131,3 +131,11 @@ class GasEmissionRepository(CustomDataRepository):
               "ORDER BY timestamp DESC LIMIT 1"
         result = self._run_select_query(sql, (str(.05),))
         return {'code': 'BTC', 'name': 'Bitcoin', 'year': result[0]['year'], 'value': result[0]['value']}
+
+    def get_digiconomist_emission(self):
+        sql = 'SELECT "24hr_kgCO2"' \
+              ', "Output_kgCO2"' \
+              ', "24hr_kgCO2" / 1000 AS "24hr_mtCO2"' \
+              ', "Output_kgCO2" / 1000 AS "Output_mtCO2" ' \
+              'FROM digiconomist_btc ORDER BY date DESC LIMIT 1'
+        return self._run_select_query(sql)[0]

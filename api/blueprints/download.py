@@ -8,12 +8,12 @@ from components.gas_emission import GreenhouseGasEmissionServiceFactory, Emissio
     PowerMixServiceFactory, EmissionServiceFactory
 from services import EnergyConsumption, EnergyConsumptionByTypes
 from components.energy_consumption import EnergyConsumptionServiceFactory
-from components.energy_consumption.v1_1_1 import EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_1_1
+from components.energy_consumption.v1_1_1 import \
+    EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_1_1
 from queries import get_mining_countries, get_mining_provinces
 from packaging.version import parse as version_parse
 from calendar import month_name
 from decorators.cache_control import cache_control
-
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 

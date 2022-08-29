@@ -136,6 +136,6 @@ class GasEmissionRepository(CustomDataRepository):
         sql = 'SELECT "24hr_kgCO2"' \
               ', "Output_kgCO2"' \
               ', "24hr_kgCO2" / 1000 AS "24hr_mtCO2"' \
-              ', "Output_kgCO2" / 1000 AS "Output_mtCO2" ' \
+              ', round(("Output_kgCO2" / 1000)::numeric, 3)::float AS "Output_mtCO2" ' \
               'FROM digiconomist_btc ORDER BY date DESC LIMIT 1'
         return self._run_select_query(sql)[0]

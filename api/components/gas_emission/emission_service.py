@@ -32,6 +32,6 @@ class EmissionService:
         actual = self.repository.get_actual_btc_greenhouse_gas_emission()
         digiconomist = self.repository.get_digiconomist_emission()
         return {
-            'index': {'best_guess': actual['value']},
+            'index': {'best_guess': round(actual['value'], 2)},
             'digiconomist': digiconomist,
         }

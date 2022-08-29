@@ -356,7 +356,6 @@ def bitcoin_greenhouse_gas_emissions(version=None):
     return send_file_func(
         headers,
         service.get_flat_greenhouse_gas_emissions(float(price)),
-        filename='Annualised Bitcoin greenhouse gas emissions.csv'
     )
 
 
@@ -384,7 +383,6 @@ def total_bitcoin_greenhouse_gas_emissions(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_total_greenhouse_gas_emissions(float(price))],
-        filename='Total Bitcoin greenhouse gas emissions.csv'
     )
 
 
@@ -412,7 +410,6 @@ def total_yearly_bitcoin_greenhouse_gas_emissions(version=None):
     return send_file_func(
         headers,
         [to_dict(row, date) for date, row in service.get_total_yearly_greenhouse_gas_emissions(float(price))],
-        filename='Total Bitcoin greenhouse gas emissions.csv'
     )
 
 
@@ -430,7 +427,7 @@ def bitcoin_emission_intensity(version=None):
 
     headers = {
         'date': 'Date and Time',
-        'co2_coef': 'Global hashrate-weighted CO2 Coefficient, gCO2eq/kWh',
+        'co2_coef': 'Emission intensity, gCO2e/kWh',
     }
 
     service = EmissionIntensityServiceFactory.create()
@@ -438,7 +435,6 @@ def bitcoin_emission_intensity(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_bitcoin_emission_intensity()],
-        filename='Bitcoin emission intensity.csv'
     )
 
 
@@ -446,7 +442,7 @@ def bitcoin_emission_intensity(version=None):
 @cache_control()
 def monthly_bitcoin_power_mix(version=None):
     def to_dict(row):
-        row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%d')
+        row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%m/%Y')
         row['value'] = round(row['value'] * 100, 2)
         return row
 
@@ -457,8 +453,8 @@ def monthly_bitcoin_power_mix(version=None):
 
     headers = {
         'date': 'Date',
-        'name': 'Source',
-        'value': "Share of Bitcoin's power mix (monthly average)",
+        'name': 'Energy source',
+        'value': "% of total",
     }
 
     service = PowerMixServiceFactory.create()
@@ -466,7 +462,6 @@ def monthly_bitcoin_power_mix(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_monthly_data()],
-        filename='Bitcoin electricity consumption by source.csv'
     )
 
 
@@ -474,7 +469,7 @@ def monthly_bitcoin_power_mix(version=None):
 @cache_control()
 def yearly_bitcoin_power_mix(version=None):
     def to_dict(row):
-        row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%d')
+        row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%m/%Y')
         return row
 
     if version != 'v1.1.1' and version != 'v1.2.0':
@@ -484,8 +479,8 @@ def yearly_bitcoin_power_mix(version=None):
 
     headers = {
         'date': 'Date',
-        'name': 'Source',
-        'value': 'Share of total power mix',
+        'name': 'Energy source',
+        'value': '% of total',
     }
 
     service = PowerMixServiceFactory.create()
@@ -493,7 +488,6 @@ def yearly_bitcoin_power_mix(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_yearly_data()],
-        filename='Bitcoin electricity consumption by source.csv'
     )
 
 
@@ -521,5 +515,4 @@ def ghg_emissions(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_emissions()],
-        filename='Greenhouse Gas Emissions.csv'
     )

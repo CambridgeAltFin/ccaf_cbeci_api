@@ -2,6 +2,7 @@
 from components.gas_emission.gas_emission_repository import GasEmissionRepository
 
 from datetime import datetime
+import numpy as np
 
 
 class EmissionService:
@@ -33,5 +34,5 @@ class EmissionService:
         digiconomist = self.repository.get_digiconomist_emission()
         return {
             'index': {'best_guess': round(actual['value'], 2)},
-            'digiconomist': digiconomist,
+            'digiconomist': digiconomist | {'mtCO2': np.round(digiconomist['24hr_kgCO2'] / 1000000000 * 365, 2)},
         }

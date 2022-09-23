@@ -317,8 +317,9 @@ def recalculate_consumption_guess(value):
 @cache.memoize()
 def countries_btc():
     energy_analytic = EnergyAnalytic()
+    actual_electricity_consumption = round(energy_analytic.get_actual_data(.05)['guess_consumption'], 2)
     tup2dict = {country: [consumption, flag, code] for country, code, consumption, flag in countries}
-    tup2dict['Bitcoin'][0] = round(energy_analytic.get_actual_data(.05)['guess_consumption'], 2)
+    tup2dict['Bitcoin'][0] = actual_electricity_consumption
     dictsort = sorted(tup2dict.items(), key=lambda i: -1 if i[1][0] is None else i[1][0], reverse=True)
     response = []
     for item in dictsort:
@@ -328,7 +329,7 @@ def countries_btc():
             'code': item[1][2],
             'y': electricity_consumption,
             'x': dictsort.index(item)+1,
-            'bitcoin_percentage': round(electricity_consumption/round(cons[-1][4], 2)*100, 2),
+            'bitcoin_percentage': round(electricity_consumption / actual_electricity_consumption * 100, 2),
             'logo': item[1][1]
         })
     for item in response:

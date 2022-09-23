@@ -30,6 +30,6 @@ def to_dict(date, row, price):
         'timestamp': int(date.timestamp()),
         'price': price,
         'date': date.strftime('%Y-%m-%d'),
-        'monthly_consumption': round(row['guess_consumption'], 2),
-        'cumulative_consumption': round(row['cumulative_guess_consumption'], 2),
+        'monthly_consumption': row['guess_consumption'],
+        'cumulative_consumption': row['cumulative_guess_consumption'],
     }

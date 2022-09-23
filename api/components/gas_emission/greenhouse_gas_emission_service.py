@@ -120,7 +120,7 @@ class GreenhouseGasEmissionService:
         df['date'] = pd.to_datetime(df['date'])
         df.set_index('date', inplace=True)
         df = df.groupby(pd.Grouper(freq='Y')).sum()
-        df['cumulative_v'] = df['v'].cumsum().round(2)
+        df['cumulative_v'] = df['v'].cumsum()
         return df.iterrows()
 
     def calc_total_greenhouse_gas_emissions(self, price: float):

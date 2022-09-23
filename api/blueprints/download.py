@@ -83,8 +83,8 @@ def get_monthly_data(version, price=.05):
     def to_dict(date, row):
         return {
             'month': month_name[date.month] + date.strftime(' %Y'),
-            'value': round(row['guess_consumption'], 2),
-            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
+            'value': round(row['guess_consumption'], 4),
+            'cumulative_value': round(row['cumulative_guess_consumption'], 4),
         }
 
     if version == 'v1.1.1':
@@ -101,8 +101,8 @@ def get_yearly_data(version, price=.05):
     def to_dict(date, row):
         return {
             'year': date.strftime('%Y'),
-            'value': round(row['guess_consumption'], 2),
-            'cumulative_value': round(row['cumulative_guess_consumption'], 2),
+            'value': round(row['guess_consumption'], 4),
+            'cumulative_value': round(row['cumulative_guess_consumption'], 4),
         }
 
     if version == 'v1.1.1':

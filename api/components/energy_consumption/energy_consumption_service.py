@@ -29,7 +29,7 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_1_1):
     def is_calculated(self, price: float) -> bool:
         return int(price * 100) in self.calculated_prices
 
-    def get_monthly_data(self, price: float, current_month=False):
+    def get_monthly_data(self, price: float, current_month=True):
         return map(
             lambda row: (datetime.combine(row['date'], datetime.min.time()), row),
             self.repository.get_cumulative_energy_consumptions(price, current_month=current_month)

@@ -363,8 +363,11 @@ def bitcoin_greenhouse_gas_emissions(version=None):
 @cache_control()
 def total_bitcoin_greenhouse_gas_emissions(version=None):
     def to_dict(row):
-        row['date'] = month_name[row['date'].month] + row['date'].strftime(' %Y')
-        return row
+        return {
+            'date': month_name[row['date'].month] + row['date'].strftime(' %Y'),
+            'v': round(row['v'], 4),
+            'cumulative_v': round(row['cumulative_v'], 4),
+        }
 
     if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')
@@ -391,7 +394,11 @@ def total_bitcoin_greenhouse_gas_emissions(version=None):
 def total_yearly_bitcoin_greenhouse_gas_emissions(version=None):
     def to_dict(row, date):
         row['date'] = date.strftime('%Y')
-        return row
+        return {
+            'date': date.strftime('%Y'),
+            'v': round(row['v'], 4),
+            'cumulative_v': round(row['cumulative_v'], 4),
+        }
 
     if version != 'v1.1.1' and version != 'v1.2.0':
         raise NotImplementedError('Not Implemented')

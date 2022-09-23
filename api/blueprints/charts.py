@@ -12,7 +12,9 @@ from resources.gas_emission.monthly_bitcoin_power_mix import MonthlyBitcoinPower
 from resources.gas_emission.bitcoin_emission_intensity import BitcoinEmissionIntensityChartPoint
 from resources.gas_emission.bitcoin_greenhouse_gas_emission import BitcoinGreenhouseGasEmissionChartPoint
 from resources.gas_emission.total_bitcoin_greenhouse_gas_emission import TotalBitcoinGreenhouseGasEmissionChartPoint
-from components.gas_emission import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory, PowerMixServiceFactory
+from resources.gas_emission.total_yearly_bitcoin_greenhouse_gas_emission import TotalYearlyBitcoinGreenhouseGasEmissionChartPoint
+from components.gas_emission import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory, \
+    PowerMixServiceFactory
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -124,7 +126,8 @@ def mining_map_countries():
     def get_mining_map_countries():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT m.*, c.code FROM mining_map_countries AS m JOIN countries AS c ON c.id = m.country_id ORDER BY m.date, c.code')
+            cursor.execute(
+                'SELECT m.*, c.code FROM mining_map_countries AS m JOIN countries AS c ON c.id = m.country_id ORDER BY m.date, c.code')
             return cursor.fetchall()
 
     response = []
@@ -174,7 +177,8 @@ def mining_map_provinces(country='cn'):
 @cache.memoize()
 def bitcoin_emission_intensity():
     service = EmissionIntensityServiceFactory.create()
-    return jsonify(data=[BitcoinEmissionIntensityChartPoint(point) for point in service.get_bitcoin_emission_intensity()])
+    return jsonify(
+        data=[BitcoinEmissionIntensityChartPoint(point) for point in service.get_bitcoin_emission_intensity()])
 
 
 @bp.route('/bitcoin_greenhouse_gas_emissions')
@@ -183,7 +187,8 @@ def bitcoin_emission_intensity():
 @cache.memoize()
 def bitcoin_greenhouse_gas_emissions(price=0.05):
     service = GreenhouseGasEmissionServiceFactory.create()
-    return jsonify(data=[BitcoinGreenhouseGasEmissionChartPoint(point) for point in service.get_greenhouse_gas_emissions(float(price))])
+    return jsonify(data=[BitcoinGreenhouseGasEmissionChartPoint(point) for point in
+                         service.get_greenhouse_gas_emissions(float(price))])
 
 
 @bp.route('/total_bitcoin_greenhouse_gas_emissions')
@@ -192,7 +197,18 @@ def bitcoin_greenhouse_gas_emissions(price=0.05):
 @cache.memoize()
 def total_bitcoin_greenhouse_gas_emissions(price=0.05):
     service = GreenhouseGasEmissionServiceFactory.create()
-    return jsonify(data=[TotalBitcoinGreenhouseGasEmissionChartPoint(point) for point in service.get_total_greenhouse_gas_emissions(float(price))])
+    return jsonify(data=[TotalBitcoinGreenhouseGasEmissionChartPoint(point) for point in
+                         service.get_total_greenhouse_gas_emissions(float(price))])
+
+
+@bp.route('/total_yearly_bitcoin_greenhouse_gas_emissions')
+@bp.route('/total_yearly_bitcoin_greenhouse_gas_emissions/<price>')
+@cache_control()
+@cache.memoize()
+def total_yearly_bitcoin_greenhouse_gas_emissions(price=0.05):
+    service = GreenhouseGasEmissionServiceFactory.create()
+    return jsonify(data=[TotalYearlyBitcoinGreenhouseGasEmissionChartPoint(point, date) for date, point in
+                         service.get_total_yearly_greenhouse_gas_emissions(float(price))])
 
 
 @bp.route('/monthly_bitcoin_power_mix')

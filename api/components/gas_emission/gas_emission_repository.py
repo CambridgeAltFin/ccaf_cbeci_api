@@ -99,7 +99,7 @@ class GasEmissionRepository(CustomDataRepository):
         return result[0]
 
     def get_emissions(self):
-        sql = "SELECT c.code, c.country AS name, ghg.year, ghg.value " \
+        sql = "SELECT c.code, c.country AS name, ghg.year, ghg.value, c.country_flag AS flag " \
               "FROM ghg_historical_emissions ghg " \
               "JOIN countries c ON ghg.country_id = c.id " \
               "WHERE ghg.year = (SELECT MAX(year) FROM ghg_historical_emissions WHERE country_id = ghg.country_id) " \
@@ -125,12 +125,21 @@ class GasEmissionRepository(CustomDataRepository):
         return {'code': 'BTC', 'name': 'Annualised', 'year': year, 'value': result[0]['value']}
 
     def get_actual_btc_greenhouse_gas_emission(self):
-        sql = "SELECT value, to_char(date, 'YYYY') AS year FROM greenhouse_gas_emissions " \
+        sql = "SELECT value" \
+              ", to_char(date, 'YYYY') AS year" \
+              ", (SELECT country_flag FROM countries WHERE code = 'BTC') AS flag" \
+              " FROM greenhouse_gas_emissions " \
               "WHERE price = %s " \
               "AND name IN ('Predicted Estimated') " \
               "ORDER BY timestamp DESC LIMIT 1"
         result = self._run_select_query(sql, (str(.05),))
-        return {'code': 'BTC', 'name': 'Bitcoin', 'year': result[0]['year'], 'value': result[0]['value']}
+        return {
+            'code': 'BTC',
+            'name': 'Bitcoin',
+            'year': result[0]['year'],
+            'value': result[0]['value'],
+            'flag': result[0]['flag']
+        }
 
     def get_digiconomist_emission(self):
         sql = 'SELECT "24hr_kgCO2"' \

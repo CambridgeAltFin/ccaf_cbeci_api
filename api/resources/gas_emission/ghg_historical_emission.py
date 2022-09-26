@@ -6,5 +6,6 @@ class GhgHistoricalEmission(dict):
             code=emission['code'],
             name=emission['name'],
             year=int(emission['year']),
-            value=round(float(emission['value']), 2)
+            value=round(float(emission['value']), 2),
+            flag=emission['flag'],
         )

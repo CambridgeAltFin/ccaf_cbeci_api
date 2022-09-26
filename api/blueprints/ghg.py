@@ -5,6 +5,7 @@ from decorators.cache_control import cache_control
 from components.gas_emission import EmissionServiceFactory
 from resources.gas_emission.ghg_historical_emission import GhgHistoricalEmission
 from resources.gas_emission.ghg_emission_intensity import GhgEmissionIntensity
+from resources.gas_emission.ghg_annualised_emission import GhgAnnualisedEmission
 from components.countries import CountryFactory
 
 bp = Blueprint('ghg', __name__, url_prefix='/ghg')
@@ -18,8 +19,8 @@ def ghg_annualised_emission():
     world, btc = emissions.get_annualised_emission()
 
     return jsonify(data={
-        'BTC': GhgHistoricalEmission(btc),
-        'WORLD': GhgHistoricalEmission(world),
+        'BTC': GhgAnnualisedEmission(btc),
+        'WORLD': GhgAnnualisedEmission(world),
     })
 
 

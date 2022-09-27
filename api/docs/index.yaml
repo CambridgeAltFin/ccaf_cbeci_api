@@ -3,12 +3,13 @@ info:
   title: Cbeci API
   version: 1.0
 servers:
-  - url: https://cbeci.org/api
+  - url: https://ccaf.io/cbeci/api
     description: Main (production) server
   - url: https://demo.ccaf.io/cbeci/api
     description: Demo server for testing
 tags:
   - name: Index
+  - name: Greenhouse Gas
   - name: Charts
   - name: Download
   - name: WYSIWYG
@@ -55,6 +56,16 @@ paths:
     $ref: "./endpoints/charts/mining_map_countries.yaml"
   /charts/mining_map_provinces:
     $ref: "./endpoints/charts/mining_map_provinces.yaml"
+  /charts/bitcoin_emission_intensity:
+    $ref: "./endpoints/charts/bitcoin_emission_intensity.yaml"
+  /charts/bitcoin_greenhouse_gas_emissions/{price}:
+    $ref: "./endpoints/charts/bitcoin_greenhouse_gas_emissions.yaml"
+  /charts/total_bitcoin_greenhouse_gas_emissions/{price}:
+    $ref: "./endpoints/charts/total_bitcoin_greenhouse_gas_emissions.yaml"
+  /charts/monthly_bitcoin_power_mix:
+    $ref: "./endpoints/charts/monthly_bitcoin_power_mix.yaml"
+  /charts/yearly_bitcoin_power_mix:
+    $ref: "./endpoints/charts/yearly_bitcoin_power_mix.yaml"
 
   /{version}/download/data:
     $ref: "./endpoints/download/data.yaml"
@@ -64,6 +75,18 @@ paths:
     $ref: "./endpoints/download/mining_countries.yaml"
   /{version}/download/mining_provinces:
     $ref: "./endpoints/download/mining_provinces.yaml"
+  /{version}/download/bitcoin_greenhouse_gas_emissions:
+    $ref: "./endpoints/download/bitcoin_greenhouse_gas_emissions.yaml"
+  /{version}/download/total_bitcoin_greenhouse_gas_emissions:
+    $ref: "./endpoints/download/total_bitcoin_greenhouse_gas_emissions.yaml"
+  /{version}/download/bitcoin_emission_intensity:
+    $ref: "./endpoints/download/bitcoin_emission_intensity.yaml"
+  /{version}/download/monthly_bitcoin_power_mix:
+    $ref: "./endpoints/download/monthly_bitcoin_power_mix.yaml"
+  /{version}/download/yearly_bitcoin_power_mix:
+    $ref: "./endpoints/download/yearly_bitcoin_power_mix.yaml"
+  /{version}/download/greenhouse_gas_emissions:
+    $ref: "./endpoints/download/greenhouse_gas_emissions.yaml"
 
   /text_pages:
     $ref: "./endpoints/wysiwyg/text_pages.yaml"
@@ -80,3 +103,10 @@ paths:
 
   /feedback:
     $ref: "./endpoints/contact/feedback.yaml"
+
+  /ghg/annualised_emission:
+    $ref: "./endpoints/ghg/annualised_emission.yaml"
+  /ghg/emissions:
+    $ref: "./endpoints/ghg/emissions.yaml"
+  /ghg/emission_intensities:
+    $ref: "./endpoints/ghg/emission_intensities.yaml"

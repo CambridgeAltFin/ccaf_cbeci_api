@@ -1,0 +1,29 @@
+get:
+  summary: Total Bitcoin Greenhouse Gas Emissions
+  tags:
+    - Charts
+  parameters:
+    - in: path
+      name: price
+      schema:
+        type: number
+        default: 0.05
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    x:
+                      type: integer
+                    y:
+                      type: number
+                    cumulative_y:
+                      type: number

@@ -1,0 +1,16 @@
+get:
+  summary: "Greenhouse gas emissions: Bitcoin compared to the 40 most polluting countries"
+  tags:
+    - Greenhouse Gas
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "../../schemas/GhgEmission.yaml"

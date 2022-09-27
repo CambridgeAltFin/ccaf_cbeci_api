@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify
 from extensions import cache
 
-from services.energy_analytic import EnergyAnalytic
-from resources.data import DataResource, MonthlyDataResource, StatsResource
+from components.energy_consumption import EnergyConsumptionServiceFactory
+from resources.data import DataResource, MonthlyDataResource, StatsResource, YearlyDataResource
 from decorators import price
 from decorators.cache_control import cache_control
 
@@ -15,8 +15,9 @@ bp = Blueprint('data', __name__, url_prefix='data')
 @cache_control()
 @cache.memoize()
 def data(value):
-    energy_analytic = EnergyAnalytic()
-    return jsonify(data=[DataResource(timestamp, row) for timestamp, row in energy_analytic.get_data(float(value))])
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
+    return jsonify(
+        data=[DataResource(timestamp, row) for timestamp, row in energy_consumption_service.get_data(float(value))])
 
 
 @bp.route('monthly/')
@@ -25,8 +26,20 @@ def data(value):
 @cache_control()
 @cache.memoize()
 def monthly_data(value):
-    energy_analytic = EnergyAnalytic()
-    return jsonify(data=[MonthlyDataResource(date, row) for date, row in energy_analytic.get_monthly_data(float(value))])
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
+    return jsonify(data=[MonthlyDataResource(date, row) for date, row in
+                         energy_consumption_service.get_monthly_data(float(value))])
+
+
+@bp.route('yearly/')
+@bp.route('yearly/<value>')
+@price.get_price()
+@cache_control()
+@cache.memoize()
+def yearly_data(value):
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
+    return jsonify(data=[YearlyDataResource(date, row) for date, row in
+                         energy_consumption_service.get_yearly_data(float(value))])
 
 
 @bp.route('stats/')
@@ -35,5 +48,5 @@ def monthly_data(value):
 @cache_control()
 @cache.memoize()
 def stats(value):
-    energy_analytic = EnergyAnalytic()
-    return jsonify(StatsResource(energy_analytic.get_actual_data(float(value))))
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
+    return jsonify(StatsResource(energy_consumption_service.get_actual_data(float(value))))

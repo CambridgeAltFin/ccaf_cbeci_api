@@ -1,0 +1,19 @@
+get:
+  summary: Annualised Emission
+  tags:
+    - Greenhouse Gas
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  WORLD:
+                    $ref: "../../schemas/GhgEmission.yaml"
+                  BTC:
+                    $ref: "../../schemas/GhgEmission.yaml"

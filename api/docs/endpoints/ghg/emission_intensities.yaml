@@ -1,0 +1,16 @@
+get:
+  summary: "Country Ranking: Greenhouse Gas Emission intensity"
+  tags:
+    - Greenhouse Gas
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "../../schemas/GhgEmission.yaml"

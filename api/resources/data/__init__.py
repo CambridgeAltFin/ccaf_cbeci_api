@@ -1,3 +1,4 @@
 from resources.data.data_resource import DataResource
 from resources.data.stats_resource import StatsResource
 from resources.data.monthly_data_resource import MonthlyDataResource
+from resources.data.yearly_data_resource import YearlyDataResource

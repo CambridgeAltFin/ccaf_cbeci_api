@@ -33,7 +33,7 @@ from extensions import cache
 from services.realtime_collection import realtime_collections
 from helpers import load_typed_hasrates
 from forms.feedback_form import FeedbackForm
-from services.energy_analytic import EnergyAnalytic
+from components.energy_consumption import EnergyConsumptionServiceFactory
 
 load_dotenv(override=True)
 
@@ -133,7 +133,7 @@ def create_app():
         '/cbeci': app
     })
 
-    from blueprints import charts, contribute, download, text_pages, reports, sponsors, data
+    from blueprints import charts, contribute, download, text_pages, reports, sponsors, data, ghg
 
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(text_pages.bp, url_prefix='/api/text_pages')
@@ -142,6 +142,7 @@ def create_app():
     app.register_blueprint(contribute.bp, url_prefix='/api/contribute')
     app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
     app.register_blueprint(data.bp, url_prefix='/api/data')
+    app.register_blueprint(ghg.bp, url_prefix='/api/ghg')
 
     swaggerui_bp = get_swaggerui_blueprint(
         '/cbeci' + SWAGGER_URL,
@@ -242,9 +243,9 @@ def before_request():
 @cache_control()
 @cache.memoize()
 def recalculate_power_max(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        max_power = energy_analytic.get_actual_data(float(value))['max_power']
+        max_power = energy_consumption_service.get_actual_data(float(value))['max_power']
     except:
         max_power = 'mining is not profitable'
     return jsonify(max_power)
@@ -255,9 +256,9 @@ def recalculate_power_max(value):
 @cache_control()
 @cache.memoize()
 def recalculate_power_min(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        min_power = energy_analytic.get_actual_data(float(value))['min_power']
+        min_power = energy_consumption_service.get_actual_data(float(value))['min_power']
     except:
         min_power = 'mining is not profitable'
     return jsonify(min_power)
@@ -268,9 +269,9 @@ def recalculate_power_min(value):
 @cache_control()
 @cache.memoize()
 def recalculate_power_guess(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        guess_power = energy_analytic.get_actual_data(float(value))['guess_power']
+        guess_power = energy_consumption_service.get_actual_data(float(value))['guess_power']
     except:
         guess_power = 'mining is not profitable'
     return jsonify(guess_power)
@@ -280,9 +281,9 @@ def recalculate_power_guess(value):
 @cache_control()
 @cache.memoize()
 def recalculate_consumption_max(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        max_consumption = energy_analytic.get_actual_data(float(value))['max_consumption']
+        max_consumption = energy_consumption_service.get_actual_data(float(value))['max_consumption']
     except:
         max_consumption = 'mining is not profitable'
     return jsonify(max_consumption)
@@ -292,9 +293,9 @@ def recalculate_consumption_max(value):
 @cache_control()
 @cache.memoize()
 def recalculate_consumption_min(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        min_consumption = energy_analytic.get_actual_data(float(value))['min_consumption']
+        min_consumption = energy_consumption_service.get_actual_data(float(value))['min_consumption']
     except:
         min_consumption = 'mining is not profitable'
     return jsonify(min_consumption)
@@ -304,9 +305,9 @@ def recalculate_consumption_min(value):
 @cache_control()
 @cache.memoize()
 def recalculate_consumption_guess(value):
-    energy_analytic = EnergyAnalytic()
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
     try:
-        guess_consumption = energy_analytic.get_actual_data(float(value))['guess_consumption']
+        guess_consumption = energy_consumption_service.get_actual_data(float(value))['guess_consumption']
     except:
         guess_consumption = 'mining is not profitable'
     return jsonify(guess_consumption)
@@ -316,11 +317,12 @@ def recalculate_consumption_guess(value):
 @cache_control()
 @cache.memoize()
 def countries_btc():
-    energy_analytic = EnergyAnalytic()
-    actual_electricity_consumption = round(energy_analytic.get_actual_data(.05)['guess_consumption'], 2)
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
+    actual_guess_consumption = round(energy_consumption_service.get_actual_data(.05)['guess_consumption'], 2)
     tup2dict = {country: [consumption, flag, code] for country, code, consumption, flag in countries}
-    tup2dict['Bitcoin'][0] = actual_electricity_consumption
+    tup2dict['Bitcoin'][0] = actual_guess_consumption
     dictsort = sorted(tup2dict.items(), key=lambda i: -1 if i[1][0] is None else i[1][0], reverse=True)
+
     response = []
     for item in dictsort:
         electricity_consumption = 0 if item[1][0] is None else item[1][0]
@@ -329,7 +331,7 @@ def countries_btc():
             'code': item[1][2],
             'y': electricity_consumption,
             'x': dictsort.index(item)+1,
-            'bitcoin_percentage': round(electricity_consumption / actual_electricity_consumption * 100, 2),
+            'bitcoin_percentage': round(electricity_consumption / actual_guess_consumption * 100, 2),
             'logo': item[1][1]
         })
     for item in response:

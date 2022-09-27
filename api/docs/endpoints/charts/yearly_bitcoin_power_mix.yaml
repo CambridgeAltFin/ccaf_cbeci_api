@@ -1,0 +1,23 @@
+get:
+  summary: Yearly Bitcoin Power Mix
+  tags:
+    - Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    x:
+                      type: number
+                    y:
+                      type: integer

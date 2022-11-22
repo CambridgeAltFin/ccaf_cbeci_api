@@ -14,7 +14,7 @@ def get_price():
                     "To get bitcoin electricity consumption estimate timeseries, "
                     "specify electricity price parameter 'p' (in USD), for example {endpoint}?p=0.05"
                 ).format(endpoint=request.path)
-            return f(value=price, *args, **kwargs)
+            return f(value=float(price), *args, **kwargs)
         return decorated_function
     return decorator
 

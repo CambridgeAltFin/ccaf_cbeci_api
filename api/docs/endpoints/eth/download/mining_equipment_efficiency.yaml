@@ -1,0 +1,20 @@
+get:
+  summary: Evolution of Ethereum mining equipment efficiency
+  parameters:
+    - in: path
+      name: version
+      required: true
+      schema:
+        type: string
+        enum:
+          - v1.2.0
+  tags:
+    - ETH/Download
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/csv:
+          schema:
+            type: string
+

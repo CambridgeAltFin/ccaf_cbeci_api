@@ -12,6 +12,8 @@ tags:
   - name: Greenhouse Gas
   - name: Charts
   - name: Download
+  - name: ETH/Charts
+  - name: ETH/Download
   - name: WYSIWYG
   - name: Contact
 paths:
@@ -87,6 +89,32 @@ paths:
     $ref: "./endpoints/download/yearly_bitcoin_power_mix.yaml"
   /{version}/download/greenhouse_gas_emissions:
     $ref: "./endpoints/download/greenhouse_gas_emissions.yaml"
+
+  /eth/charts/network_power_demand/{price}:
+     $ref: "./endpoints/eth/charts/network_power_demand.yaml"
+  /eth/charts/total_electricity_consumption/monthly/{price}:
+     $ref: "./endpoints/eth/charts/total_electricity_consumption.yaml"
+  /eth/charts/total_electricity_consumption/yearly/{price}:
+     $ref: "./endpoints/eth/charts/total_electricity_consumption.yaml"
+  /eth/charts/network_efficiency:
+     $ref: "./endpoints/eth/charts/network_efficiency.yaml"
+  /eth/charts/mining_equipment_efficiency:
+     $ref: "./endpoints/eth/charts/mining_equipment_efficiency.yaml"
+  /eth/charts/profitability_threshold/{price}:
+     $ref: "./endpoints/eth/charts/profitability_threshold.yaml"
+
+  /{version}/eth/download/network_power_demand/{price}:
+     $ref: "./endpoints/eth/download/network_power_demand.yaml"
+  /{version}/eth/download/total_electricity_consumption/monthly/{price}:
+     $ref: "./endpoints/eth/download/total_electricity_consumption.yaml"
+  /{version}/eth/download/total_electricity_consumption/yearly/{price}:
+     $ref: "./endpoints/eth/download/total_electricity_consumption.yaml"
+  /{version}/eth/download/network_efficiency:
+     $ref: "./endpoints/eth/download/network_efficiency.yaml"
+  /{version}/eth/download/mining_equipment_efficiency:
+     $ref: "./endpoints/eth/download/mining_equipment_efficiency.yaml"
+  /{version}/eth/download/profitability_threshold/{price}:
+     $ref: "./endpoints/eth/download/profitability_threshold.yaml"
 
   /text_pages:
     $ref: "./endpoints/wysiwyg/text_pages.yaml"

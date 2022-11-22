@@ -18,3 +18,9 @@ class CustomDataRepository:
             cursor = conn.cursor()
             cursor.execute(sql, bindings)
 
+    @staticmethod
+    def _save_values(sql: str, values: list):
+        with psycopg2.connect(**config['custom_data']) as conn:
+            cursor = conn.cursor()
+            psycopg2.extras.execute_values(cursor, sql, values)
+

@@ -1,0 +1,27 @@
+get:
+  summary: Profitability threshold of mining equipment
+  parameters:
+    - in: path
+      name: price
+      schema:
+        type: number
+      required: true
+  tags:
+    - ETH/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    efficiency:
+                      type: number
+                    timestamp:
+                      type: number

@@ -11,7 +11,7 @@ def init_app(cert, options=None, *args, **kwargs):
             'databaseURL': os.environ.get("FIREBASE_DATABASE_URL")
         }
 
-    return firebase_admin.initialize_app(cred, options, *args, **kwargs)
+    # return firebase_admin.initialize_app(cred, options, *args, **kwargs)
 
 
 class Collections:

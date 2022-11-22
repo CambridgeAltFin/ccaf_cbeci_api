@@ -1,0 +1,24 @@
+get:
+  summary: Historical ETH network power demand
+  parameters:
+    - in: path
+      name: version
+      required: true
+      schema:
+        type: string
+        enum:
+          - v1.2.0
+    - in: path
+      name: price
+      schema:
+        type: number
+      required: true
+  tags:
+    - ETH/Download
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/csv:
+          schema:
+            type: string

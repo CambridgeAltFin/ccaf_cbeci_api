@@ -1,0 +1,30 @@
+get:
+  summary: Historical ETH network power demand
+    - in: path
+      name: price
+      schema:
+        type: number
+      required: true
+  tags:
+    - ETH/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    guess_power:
+                      type: number
+                    max_power:
+                      type: number
+                    min_power:
+                      type: number
+                    timestamp:
+                      type: number

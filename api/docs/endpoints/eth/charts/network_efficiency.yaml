@@ -1,0 +1,36 @@
+get:
+  summary: Historical ETH network efficiency
+  tags:
+    - ETH/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  average_machine_efficiency:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        efficiency:
+                          type: number
+                        timestamp:
+                          type: number
+                  machine_efficiencies:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        efficiency:
+                          type: number
+                        label:
+                          type: string
+                        timestamp:
+                          type: number
+

@@ -1,7 +1,4 @@
-from typing import List, Dict, Union
-from flask import Blueprint, make_response, request
-import csv
-import io
+from flask import Blueprint, request
 from datetime import datetime
 
 from components.gas_emission import GreenhouseGasEmissionServiceFactory, EmissionIntensityServiceFactory, \
@@ -14,6 +11,7 @@ from queries import get_mining_countries, get_mining_provinces
 from packaging.version import parse as version_parse
 from calendar import month_name
 from decorators.cache_control import cache_control
+from helpers import send_file
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
@@ -113,23 +111,6 @@ def get_yearly_data(version, price=.05):
         raise NotImplementedError('Not Implemented')
 
     return [to_dict(date, row) for date, row in energy_consumption.get_yearly_data(price)]
-
-
-def send_file(first_line=None, file_type='csv'):
-    def send_csv(headers: Dict[str, str], rows: List[Dict[str, Union[str, int, float]]], filename='export.csv'):
-        si = io.StringIO()
-        keys = headers.keys()
-        cw = csv.DictWriter(si, fieldnames=keys, extrasaction="ignore")
-        if first_line is not None and len(keys) > 0:
-            cw.writerow({list(keys)[0]: first_line})
-        cw.writerow(headers)
-        cw.writerows(rows)
-        output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = f"attachment; filename={filename}"
-        output.headers["Content-type"] = "text/csv"
-        return output
-
-    return send_csv
 
 
 @bp.route('/data')

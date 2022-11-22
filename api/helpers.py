@@ -2,6 +2,10 @@
 import calendar
 import psycopg2.extras
 from config import config
+from flask import make_response
+from typing import List, Dict, Union
+import csv
+import io
 
 
 # =============================================================================
@@ -77,3 +81,20 @@ def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
     for t, hr in hash_rates.items():
         guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)
     return guess_consumption * hash_rate * 365.25 * 24 / 1e9 * 1.1
+
+
+def send_file(first_line=None, file_type='csv'):
+    def send_csv(headers: Dict[str, str], rows: List[Dict[str, Union[str, int, float]]], filename='export.csv'):
+        si = io.StringIO()
+        keys = headers.keys()
+        cw = csv.DictWriter(si, fieldnames=keys, extrasaction="ignore")
+        if first_line is not None and len(keys) > 0:
+            cw.writerow({list(keys)[0]: first_line})
+        cw.writerow(headers)
+        cw.writerows(rows)
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = f"attachment; filename={filename}"
+        output.headers["Content-type"] = "text/csv"
+        return output
+
+    return send_csv

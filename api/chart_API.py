@@ -133,7 +133,7 @@ def create_app():
         '/cbeci': app
     })
 
-    from blueprints import charts, contribute, download, text_pages, reports, sponsors, data, ghg
+    from blueprints import charts, contribute, download, text_pages, reports, sponsors, data, ghg, eth
 
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(text_pages.bp, url_prefix='/api/text_pages')
@@ -143,6 +143,9 @@ def create_app():
     app.register_blueprint(download.bp, url_prefix='/api/<string:version>/download')
     app.register_blueprint(data.bp, url_prefix='/api/data')
     app.register_blueprint(ghg.bp, url_prefix='/api/ghg')
+
+    app.register_blueprint(eth.charts.bp, url_prefix='/api/eth/charts')
+    app.register_blueprint(eth.download.bp, url_prefix='/api/<string:version>/eth/download')
 
     swaggerui_bp = get_swaggerui_blueprint(
         '/cbeci' + SWAGGER_URL,
@@ -176,8 +179,8 @@ if get_limiter_flag():
         default_limits_exempt_when=limits_exempt_when
     )
 
-init_firebase_app(cert=os.path.abspath(f"../storage/firebase/service-account-cert.{os.environ.get('PROJECT_ID')}.json"))
-realtime_collections.init()
+# init_firebase_app(cert=os.path.abspath(f"../storage/firebase/service-account-cert.{os.environ.get('PROJECT_ID')}.json"))
+# realtime_collections.init()
 
 # initialisation of cache vars:
 prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()

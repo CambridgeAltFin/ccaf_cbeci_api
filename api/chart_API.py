@@ -179,8 +179,8 @@ if get_limiter_flag():
         default_limits_exempt_when=limits_exempt_when
     )
 
-# init_firebase_app(cert=os.path.abspath(f"../storage/firebase/service-account-cert.{os.environ.get('PROJECT_ID')}.json"))
-# realtime_collections.init()
+init_firebase_app(cert=os.path.abspath(f"../storage/firebase/service-account-cert.{os.environ.get('PROJECT_ID')}.json"))
+realtime_collections.init()
 
 # initialisation of cache vars:
 prof_threshold, hash_rate, miners, countries, cons, typed_hasrates = load_data()

@@ -109,7 +109,7 @@ class EnergyConsumptionCalculator:
 
         return self.profthreshold
 
-    def calculate_elec_consumption(self, type='guess'):  # type can be max or min or guess
+    def calculate_elec_consumption(self, type='guess', ma_consumption=True):  # type can be max or min or guess
         self.profthreshold['#Gh per day'] = self.profthreshold['#Th per day'] * 1000
         elec_consumption = self.profthreshold[['timestamp', 'profitable_machines', '#Gh per day']]
         self.elec_consumption = elec_consumption
@@ -143,39 +143,54 @@ class EnergyConsumptionCalculator:
                 self.elec_consumption.at[index, 'guess elec consumption'] = guess_annual_elec
                 self.elec_consumption.at[index, 'machine_efficiency'] = machine_efficiency
 
+        if ma_consumption == True:
+            # 7 days moving average
+            if 'max elec consumption' in self.elec_consumption.columns:
+                self.elec_consumption['max elec consumption'] = self.elec_consumption['max elec consumption'].rolling(
+                    7).mean()
+            elif 'min elec consumption' in self.elec_consumption.columns:
+                self.elec_consumption['min elec consumption'] = self.elec_consumption['min elec consumption'].rolling(
+                    7).mean()
+            elif 'guess elec consumption' in self.elec_consumption.columns:
+                self.elec_consumption['guess elec consumption'] = self.elec_consumption[
+                    'guess elec consumption'].rolling(7).mean()
+
+            self.elec_consumption.dropna(inplace=True)
+            self.elec_consumption = self.elec_consumption.reset_index(drop=True)
+
         return self.elec_consumption
 
-    def calculate_power(self, type='guess'):  # type can be max or min or guess
+    def calculate_power(self, type='guess', ma_consumption=True):  # type can be max or min or guess
         self.profthreshold['#Gh per day'] = self.profthreshold['#Th per day'] * 1000
         elec_power = self.profthreshold[['timestamp', 'profitable_machines', '#Gh per day']]
         self.elec_power = elec_power
         if type == 'max':
             self.elec_power = self.calculate_elec_consumption(
-                type='max')  # unit GW (60*60*24*365.25)/ (3.6 * 10^15) * 10^9 = 8.766
+                type='max', ma_consumption=ma_consumption)  # unit GW (60*60*24*365.25)/ (3.6 * 10^15) * 10^9 = 8.766
             self.elec_power['max elec power'] = self.elec_power['max elec consumption'] / 8.766
         #             self.elec_power = self.calculate_elec_consumption(type = 'max') #unit GW (60*60*24*365.25)/ (3.6 * 10^15) * 10^9 = 8.766
         #             self.elec_power['max elec power'] = self.elec_power['max elec consumption'] / 8.766
 
         elif type == 'min':
             self.elec_power = self.calculate_elec_consumption(
-                type='min')  # unit GW (60*60*24*365.25)/ (3.6 * 10^15) * 10^9 = 8.766
+                type='min', ma_consumption=ma_consumption)  # unit GW (60*60*24*365.25)/ (3.6 * 10^15) * 10^9 = 8.766
             self.elec_power['min elec power'] = self.elec_power['min elec consumption'] / 8.766
 
         elif type == 'guess':
             self.elec_power = self.calculate_elec_consumption(
-                type='guess')  # unit GW (60*60*24*365.25)/ (3.6 * 10^15) * 10^9 = 8.766
+                type='guess', ma_consumption=ma_consumption)  # unit GW (60*60*24*365.25)/ (3.6 * 10^15) * 10^9 = 8.766
             self.elec_power['guess elec power'] = self.elec_power['guess elec consumption'] / 8.766
 
         return self.elec_consumption
 
-    def calculate_power_demand(self, ma=False):
+    def calculate_power_demand(self, ma=False, ma_consumption=True):
         self.get_profthreshold(ma=ma)
         self.get_profitable_equipment()
-        self.power_demand_df = self.calculate_power(type='min')
-        merge_df = self.calculate_power(type='guess')
+        self.power_demand_df = self.calculate_power(type='min', ma_consumption=ma_consumption)
+        merge_df = self.calculate_power(type='guess', ma_consumption=ma_consumption)
         merge_df.drop('profitable_machines', axis=1, inplace=True)
         self.power_demand_df = pd.merge(self.power_demand_df, merge_df, how='left', on=['timestamp', '#Gh per day'])
-        merge_df = self.calculate_power(type='max')
+        merge_df = self.calculate_power(type='max', ma_consumption=ma_consumption)
         merge_df.drop('profitable_machines', axis=1, inplace=True)
         self.power_demand_df = pd.merge(self.power_demand_df, merge_df, how='left', on=['timestamp', '#Gh per day'])
         return self.power_demand_df
@@ -222,81 +237,81 @@ def handle():
         dag['Memory size in GB'] = dag['Size'].str.extract('(\d+)GB').astype('int')
         dag = dag[pd.notnull(dag['Date'])]
 
-        # for cents in range(1, 21):
-        #     elec_cost = cents / 100
-        #     calculator = EnergyConsumptionCalculator('etc', miner_rev, hashrate, miners, dag, elec_cost)
-        #
-        #     calculator.get_profthreshold(ma=False)
-        #     calculator.get_profitable_equipment(retirement_year=99)
-        #     # consumption = calculator.calculate_elec_consumption(type = 'guess')
-        #     calculator.calculate_power(type='min')
-        #     calculator.calculate_power(type='max')
-        #     best_guess = calculator.calculate_power(type='guess')
-        #     best_guess['ts'] = best_guess.timestamp.values.astype(np.int64) // 10 ** 9
-        #     best_guess.set_index('ts', inplace=True)
-        #
-        #     graph_data = calculator.calculate_power_demand(ma=False)
-        #
-        #     graph_data['min elec consumption daily'] = graph_data['min elec consumption'] / 365.25
-        #     graph_data['max elec consumption daily'] = graph_data['max elec consumption'] / 365.25
-        #     graph_data['guess elec consumption daily'] = graph_data['guess elec consumption'] / 365.25
-        #     graph_data['ts'] = graph_data.timestamp.values.astype(np.int64) // 10 ** 9
-        #
-        #     insert = map(lambda x: (
-        #         'eth',
-        #         int(elec_cost * 100),
-        #         x['min elec power'],
-        #         x['guess elec power'],
-        #         x['max elec power'],
-        #         x['min elec consumption daily'],
-        #         x['guess elec consumption daily'],
-        #         x['max elec consumption daily'],
-        #         x['ts'],
-        #         datetime.fromtimestamp(x['ts']).strftime('%Y-%m-%d'),
-        #         '1.2.0',
-        #         best_guess.loc[x['ts'], 'machine_efficiency']
-        #     ), graph_data.to_records())
-        #
-        #     psycopg2.extras.execute_values(
-        #         cursor,
-        #         'insert into consumptions '
-        #         '(asset, price, min_power, guess_power, max_power, min_consumption, guess_consumption, max_consumption, timestamp, date, version, machine_efficiency) '
-        #         'values %s on conflict (asset, price, timestamp, version) do nothing',
-        #         list(insert)
-        #     )
-        #
-        #     graph_data['year'] = graph_data['timestamp'].dt.year
-        #     graph_data['month'] = graph_data['timestamp'].dt.month
-        #
-        #     monthly_consumption = graph_data.groupby(['year', 'month'], as_index=False).agg(
-        #         {'min elec consumption daily': sum, 'max elec consumption daily': sum,
-        #          'guess elec consumption daily': sum})
-        #     rename_dict = {'min elec consumption daily': 'min elec consumption monthly',
-        #                    'max elec consumption daily': 'max elec consumption monthly',
-        #                    'guess elec consumption daily': 'guess elec consumption monthly'}
-        #     monthly_consumption.rename(rename_dict, axis=1, inplace=True)
-        #     monthly_consumption['cumulative guess consumption'] = monthly_consumption[
-        #         'guess elec consumption monthly'].cumsum()
-        #
-        #     insert = map(lambda x: (
-        #         'eth',
-        #         int(elec_cost * 100),
-        #         x['guess elec consumption monthly'],
-        #         x['cumulative guess consumption'],
-        #         datetime.strptime(
-        #             str(x['year']) + '-' + str(x['month']) + '-' + str(calendar.monthrange(x['year'], x['month'])[1]),
-        #             '%Y-%m-%d').timestamp(),
-        #         str(x['year']) + '-' + str(x['month']) + '-' + str(calendar.monthrange(x['year'], x['month'])[1]),
-        #         '1.2.0'
-        #     ), monthly_consumption.to_records())
-        #
-        #     psycopg2.extras.execute_values(
-        #         cursor,
-        #         'insert into total_consumptions '
-        #         '(asset, price, guess_consumption, cumulative_guess_consumption, timestamp, date, version) '
-        #         'values %s on conflict (asset, price, timestamp, version) do nothing',
-        #         list(insert)
-        #     )
+        for cents in range(1, 21):
+            elec_cost = cents / 100
+            calculator = EnergyConsumptionCalculator('etc', miner_rev, hashrate, miners, dag, elec_cost)
+
+            calculator.get_profthreshold(ma=True)
+            calculator.get_profitable_equipment(retirement_year=99)
+            # consumption = calculator.calculate_elec_consumption(type = 'guess')
+            calculator.calculate_power(type='min', ma_consumption=True)
+            calculator.calculate_power(type='max', ma_consumption=True)
+            best_guess = calculator.calculate_power(type='guess', ma_consumption=True)
+            best_guess['ts'] = best_guess.timestamp.values.astype(np.int64) // 10 ** 9
+            best_guess.set_index('ts', inplace=True)
+
+            graph_data = calculator.calculate_power_demand(ma=True, ma_consumption=True)
+
+            graph_data['min elec consumption daily'] = graph_data['min elec consumption'] / 365.25
+            graph_data['max elec consumption daily'] = graph_data['max elec consumption'] / 365.25
+            graph_data['guess elec consumption daily'] = graph_data['guess elec consumption'] / 365.25
+            graph_data['ts'] = graph_data.timestamp.values.astype(np.int64) // 10 ** 9
+
+            insert = map(lambda x: (
+                'eth',
+                int(elec_cost * 100),
+                x['min elec power'],
+                x['guess elec power'],
+                x['max elec power'],
+                x['min elec consumption daily'],
+                x['guess elec consumption daily'],
+                x['max elec consumption daily'],
+                x['ts'],
+                datetime.fromtimestamp(x['ts']).strftime('%Y-%m-%d'),
+                '1.2.0',
+                best_guess.loc[x['ts'], 'machine_efficiency']
+            ), graph_data.to_records())
+
+            psycopg2.extras.execute_values(
+                cursor,
+                'insert into consumptions '
+                '(asset, price, min_power, guess_power, max_power, min_consumption, guess_consumption, max_consumption, timestamp, date, version, machine_efficiency) '
+                'values %s on conflict (asset, price, timestamp, version) do nothing',
+                list(insert)
+            )
+
+            graph_data['year'] = graph_data['timestamp'].dt.year
+            graph_data['month'] = graph_data['timestamp'].dt.month
+
+            monthly_consumption = graph_data.groupby(['year', 'month'], as_index=False).agg(
+                {'min elec consumption daily': sum, 'max elec consumption daily': sum,
+                 'guess elec consumption daily': sum})
+            rename_dict = {'min elec consumption daily': 'min elec consumption monthly',
+                           'max elec consumption daily': 'max elec consumption monthly',
+                           'guess elec consumption daily': 'guess elec consumption monthly'}
+            monthly_consumption.rename(rename_dict, axis=1, inplace=True)
+            monthly_consumption['cumulative guess consumption'] = monthly_consumption[
+                'guess elec consumption monthly'].cumsum()
+
+            insert = map(lambda x: (
+                'eth',
+                int(elec_cost * 100),
+                x['guess elec consumption monthly'],
+                x['cumulative guess consumption'],
+                datetime.strptime(
+                    str(x['year']) + '-' + str(x['month']) + '-' + str(calendar.monthrange(x['year'], x['month'])[1]),
+                    '%Y-%m-%d').timestamp(),
+                str(x['year']) + '-' + str(x['month']) + '-' + str(calendar.monthrange(x['year'], x['month'])[1]),
+                '1.2.0'
+            ), monthly_consumption.to_records())
+
+            psycopg2.extras.execute_values(
+                cursor,
+                'insert into total_consumptions '
+                '(asset, price, guess_consumption, cumulative_guess_consumption, timestamp, date, version) '
+                'values %s on conflict (asset, price, timestamp, version) do nothing',
+                list(insert)
+            )
 
         miners['Eff. Mh/s/W'] = miners['hashrate'] / miners['power']
         miners['available machine inclu dag'] = None

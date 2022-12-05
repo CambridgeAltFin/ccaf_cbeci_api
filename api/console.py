@@ -24,5 +24,6 @@ cli.add_command(commands.data.ghg_historical_emissions)
 cli.add_command(commands.data.ghg_emission_intensities)
 
 cli.add_command(commands.cbsi.sync_coinmetrics)
+cli.add_command(commands.cbsi.compare_datasource)
 
 cli()

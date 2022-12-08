@@ -196,7 +196,7 @@ class EnergyConsumptionCalculator:
         return self.power_demand_df
 
 
-@click.command(name='cbsi:sync:coinmetrics')
+@click.command(name='eth:sync:coinmetrics')
 def handle():
     url = 'https://charts.coinmetrics.io/pro-api/v4/timeseries/asset-metrics?page_size=10000&assets=eth&api_key={api_key}&metrics=FeeTotUSD,BlkUncRwdUSD,IssTotUSD,FeePrioTotUSD'.format(
         api_key=config['api.coinmetrics.io']['api_key'])

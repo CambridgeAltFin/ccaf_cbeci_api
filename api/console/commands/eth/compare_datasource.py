@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime
 
 
-@click.command(name='cbsi:compare:datasource')
+@click.command(name='eth:compare:datasource')
 def handle():
     beaconnodes = requests.get(
         'https://migalabs.es/metabase/api/public/card/ffdccfd0-60c2-424e-ab53-345e2f59b105/query?parameters=%5B%5D'

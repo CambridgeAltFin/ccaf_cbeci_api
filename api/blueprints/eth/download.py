@@ -2,12 +2,12 @@ from flask import Blueprint
 from extensions import cache
 from decorators import price
 from decorators.cache_control import cache_control
-from components.eth import EthFactory
+from components.eth import EthPowFactory
 from packaging.version import parse as version_parse
 
 
 bp = Blueprint('eth_download', __name__, url_prefix='/eth/download')
-eth_service = EthFactory.create_service()
+eth_service = EthPowFactory.create_service()
 
 
 @bp.route('/network_power_demand')

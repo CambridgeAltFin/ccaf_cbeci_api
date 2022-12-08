@@ -23,7 +23,9 @@ cli.add_command(commands.data.save_btc_to_countries)
 cli.add_command(commands.data.ghg_historical_emissions)
 cli.add_command(commands.data.ghg_emission_intensities)
 
-cli.add_command(commands.cbsi.sync_coinmetrics)
-cli.add_command(commands.cbsi.compare_datasource)
+cli.add_command(commands.eth.sync_coinmetrics)
+cli.add_command(commands.eth.compare_datasource)
+cli.add_command(commands.eth.pos_calc_electricity)
+cli.add_command(commands.eth.pos_sync_nodes)
 
 cli()

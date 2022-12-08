@@ -1,12 +1,12 @@
-from flask import Blueprint, jsonify, make_response
+from flask import Blueprint, jsonify
 from extensions import cache
 from decorators import price
 from decorators.cache_control import cache_control
-from components.eth import EthFactory
+from components.eth import EthPowFactory
 
 
 bp = Blueprint('eth_charts', __name__, url_prefix='/eth/charts')
-eth_service = EthFactory.create_service()
+eth_service = EthPowFactory.create_service()
 
 
 @bp.route('/network_power_demand')

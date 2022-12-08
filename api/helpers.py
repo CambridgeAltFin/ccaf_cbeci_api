@@ -6,6 +6,7 @@ from flask import make_response
 from typing import List, Dict, Union
 import csv
 import io
+from datetime import timedelta, datetime
 
 
 # =============================================================================
@@ -98,3 +99,8 @@ def send_file(first_line=None, file_type='csv'):
         return output
 
     return send_csv
+
+
+def daterange(start_date, end_date) -> list[datetime]:
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)

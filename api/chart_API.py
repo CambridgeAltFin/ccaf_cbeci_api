@@ -144,8 +144,11 @@ def create_app():
     app.register_blueprint(data.bp, url_prefix='/api/data')
     app.register_blueprint(ghg.bp, url_prefix='/api/ghg')
 
-    app.register_blueprint(eth.charts.bp, url_prefix='/api/eth/charts')
-    app.register_blueprint(eth.download.bp, url_prefix='/api/<string:version>/eth/download')
+    app.register_blueprint(eth.pow.charts.bp, url_prefix='/api/eth/pow/charts')
+    app.register_blueprint(eth.pow.download.bp, url_prefix='/api/<string:version>/eth/pow/download')
+
+    app.register_blueprint(eth.pos.charts.bp, url_prefix='/api/eth/pos/charts')
+    app.register_blueprint(eth.pos.download.bp, url_prefix='/api/<string:version>/eth/pos/download')
 
     swaggerui_bp = get_swaggerui_blueprint(
         '/cbeci' + SWAGGER_URL,

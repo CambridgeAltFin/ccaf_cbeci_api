@@ -6,7 +6,7 @@ from components.eth import EthPowFactory
 from packaging.version import parse as version_parse
 
 
-bp = Blueprint('eth_download', __name__, url_prefix='/eth/download')
+bp = Blueprint('eth_pow_download', __name__, url_prefix='/eth/pow/download')
 eth_service = EthPowFactory.create_service()
 
 

@@ -1,0 +1,2 @@
+from .network_power_demand import NetworkPowerDemandDto
+from .total_electricity_consumption import TotalElectricityConsumptionDto

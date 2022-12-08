@@ -5,7 +5,7 @@ from decorators.cache_control import cache_control
 from components.eth import EthPowFactory
 
 
-bp = Blueprint('eth_charts', __name__, url_prefix='/eth/charts')
+bp = Blueprint('eth_pow_charts', __name__, url_prefix='/eth/pow/charts')
 eth_service = EthPowFactory.create_service()
 
 

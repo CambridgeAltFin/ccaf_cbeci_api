@@ -1,10 +1,13 @@
 from .eth_repository import EthRepository
 from .dto.charts import \
     NetworkPowerDemandDto, \
-    TotalElectricityConsumptionDto
+    TotalElectricityConsumptionDto, \
+    ActiveNodeDto
 from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto, \
     MonthlyTotalElectricityConsumptionDto as DownloadMonthlyTotalElectricityConsumptionDto, \
-    YearlyTotalElectricityConsumptionDto as DownloadYearlyTotalElectricityConsumptionDto
+    YearlyTotalElectricityConsumptionDto as DownloadYearlyTotalElectricityConsumptionDto, \
+    ClientDistributionDto as DownloadClientDistributionDto, \
+    ActiveNodeDto as DownloadActiveNodeDto
 from helpers import send_file
 
 
@@ -57,3 +60,45 @@ class EthService:
             'consumption': 'Yearly consumption, kWh',
             'cumulative_consumption': 'Cumulative consumption, kWh',
         }, list(map(lambda x: DownloadYearlyTotalElectricityConsumptionDto(x), chart_data)))
+
+    def client_distribution(self):
+        client_distribution = self.repository.get_client_distribution()
+        chart_data = []
+        for item in client_distribution:
+            timestamp = item.pop('timestamp')
+            for node in item:
+                chart_data.append({
+                    'name': str(node).capitalize(),
+                    'x': timestamp,
+                    'y': item[node],
+                })
+        return chart_data
+
+    def download_client_distribution(self):
+        chart_data = self.repository.get_client_distribution()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'Date and Time',
+            'prysm': 'Prysm',
+            'lighthouse': 'Lighthouse',
+            'teku': 'Teku',
+            'nimbus': 'Nimbus',
+            'lodestar': 'Lodestar',
+            'grandine': 'Grandine',
+            'others': 'Others',
+        }, [DownloadClientDistributionDto(x) for x in chart_data])
+
+    def active_nodes(self):
+        chart_data = self.repository.get_active_nodes()
+
+        return [ActiveNodeDto(x) for x in chart_data]
+
+    def download_active_nodes(self):
+        chart_data = self.repository.get_active_nodes()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'Date and Time',
+            'total': 'Number of nodes',
+        }, [DownloadActiveNodeDto(x) for x in chart_data])

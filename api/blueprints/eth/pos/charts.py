@@ -27,3 +27,17 @@ def monthly_total_electricity_consumption():
 @cache.memoize()
 def yearly_total_electricity_consumption():
     return jsonify(data=eth_service.yearly_total_electricity_consumption())
+
+
+@bp.route('/client_distribution')
+@cache_control()
+@cache.memoize()
+def client_distribution():
+    return jsonify(data=eth_service.client_distribution())
+
+
+@bp.route('/active_nodes')
+@cache_control()
+@cache.memoize()
+def active_nodes():
+    return jsonify(data=eth_service.active_nodes())

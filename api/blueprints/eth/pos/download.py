@@ -34,3 +34,21 @@ def yearly_total_electricity_consumption(version: str):
     if version_parse(version) == version_parse('v1.2.0'):
         return eth_service.download_yearly_total_electricity_consumption()
     raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/client_distribution')
+@cache_control()
+@cache.memoize()
+def client_distribution(version: str):
+    if version_parse(version) == version_parse('v1.2.0'):
+        return eth_service.download_client_distribution()
+    raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/active_nodes')
+@cache_control()
+@cache.memoize()
+def active_nodes(version: str):
+    if version_parse(version) == version_parse('v1.2.0'):
+        return eth_service.download_active_nodes()
+    raise NotImplementedError('Not Implemented')

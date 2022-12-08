@@ -41,3 +41,10 @@ def client_distribution():
 @cache.memoize()
 def active_nodes():
     return jsonify(data=eth_service.active_nodes())
+
+
+@bp.route('/node_distribution')
+@cache_control()
+@cache.memoize()
+def node_distribution():
+    return jsonify(data=eth_service.node_distribution())

@@ -52,3 +52,12 @@ def active_nodes(version: str):
     if version_parse(version) == version_parse('v1.2.0'):
         return eth_service.download_active_nodes()
     raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/node_distribution')
+@cache_control()
+@cache.memoize()
+def node_distribution(version: str):
+    if version_parse(version) == version_parse('v1.2.0'):
+        return eth_service.download_node_distribution()
+    raise NotImplementedError('Not Implemented')

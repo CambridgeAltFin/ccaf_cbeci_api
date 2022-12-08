@@ -7,7 +7,8 @@ from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto
     MonthlyTotalElectricityConsumptionDto as DownloadMonthlyTotalElectricityConsumptionDto, \
     YearlyTotalElectricityConsumptionDto as DownloadYearlyTotalElectricityConsumptionDto, \
     ClientDistributionDto as DownloadClientDistributionDto, \
-    ActiveNodeDto as DownloadActiveNodeDto
+    ActiveNodeDto as DownloadActiveNodeDto, \
+    NodeDistributionDto as DownloadNodeDistributionDto
 from helpers import send_file
 
 
@@ -89,7 +90,7 @@ class EthService:
             'others': 'Others',
         }, [DownloadClientDistributionDto(x) for x in chart_data])
 
-    def active_nodes(self):
+    def active_nodes(self) -> list[ActiveNodeDto]:
         chart_data = self.repository.get_active_nodes()
 
         return [ActiveNodeDto(x) for x in chart_data]
@@ -102,3 +103,17 @@ class EthService:
             'timestamp': 'Date and Time',
             'total': 'Number of nodes',
         }, [DownloadActiveNodeDto(x) for x in chart_data])
+
+    def node_distribution(self):
+        chart_data = self.repository.get_node_distribution()
+
+        return chart_data
+
+    def download_node_distribution(self):
+        chart_data = self.repository.get_node_distribution()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'name': 'Country',
+            'number_of_nodes': 'Number of nodes',
+        }, [DownloadNodeDistributionDto(x) for x in chart_data])

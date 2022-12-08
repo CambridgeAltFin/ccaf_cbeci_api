@@ -27,3 +27,15 @@ class Migalabs:
             for [i, date, parser, prysm, lighthouse, teku, nimbus, lodestar, grandine, others]
             in response['data']['rows']
         ]
+
+    def beacon_chain_node_distribution(self):
+        response = requests.get(urljoin(self.base_url, 'card/e2a9dc34-b9ba-4d06-b564-aa7053618023/query')).json()
+
+        return [
+            {
+                'country': country,
+                'number_of_nodes': number_of_nodes,
+            }
+            for [country, number_of_nodes]
+            in response['data']['rows']
+        ]

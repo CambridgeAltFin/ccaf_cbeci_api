@@ -2,19 +2,26 @@ from .eth_repository import EthRepository
 from .dto.charts import \
     NetworkPowerDemandDto, \
     TotalElectricityConsumptionDto, \
-    ActiveNodeDto
+    ActiveNodeDto, \
+    PowerDemandLegacyVsFutureDto, \
+    ComparisonOfAnnualConsumptionDto
 from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto, \
     MonthlyTotalElectricityConsumptionDto as DownloadMonthlyTotalElectricityConsumptionDto, \
     YearlyTotalElectricityConsumptionDto as DownloadYearlyTotalElectricityConsumptionDto, \
     ClientDistributionDto as DownloadClientDistributionDto, \
     ActiveNodeDto as DownloadActiveNodeDto, \
     NodeDistributionDto as DownloadNodeDistributionDto
+from .dto.data import StatsDto
 from helpers import send_file
 
 
 class EthService:
     def __init__(self, repository: EthRepository):
         self.repository = repository
+
+    def stats(self):
+        stats = self.repository.get_stats()
+        return StatsDto(stats)
 
     def network_power_demand(self) -> list[NetworkPowerDemandDto]:
         chart_data = self.repository.get_network_power_demand()
@@ -48,8 +55,8 @@ class EthService:
 
         return send_file_func({
             'timestamp': 'Month',
-            'consumption': 'Monthly consumption, kWh',
-            'cumulative_consumption': 'Cumulative consumption, kWh',
+            'consumption': 'Monthly consumption, GWh',
+            'cumulative_consumption': 'Cumulative consumption, GWh',
         }, list(map(lambda x: DownloadMonthlyTotalElectricityConsumptionDto(x), chart_data)))
 
     def download_yearly_total_electricity_consumption(self):
@@ -58,8 +65,8 @@ class EthService:
 
         return send_file_func({
             'timestamp': 'Year',
-            'consumption': 'Yearly consumption, kWh',
-            'cumulative_consumption': 'Cumulative consumption, kWh',
+            'consumption': 'Yearly consumption, GWh',
+            'cumulative_consumption': 'Cumulative consumption, GWh',
         }, list(map(lambda x: DownloadYearlyTotalElectricityConsumptionDto(x), chart_data)))
 
     def client_distribution(self):
@@ -117,3 +124,13 @@ class EthService:
             'name': 'Country',
             'number_of_nodes': 'Number of nodes',
         }, [DownloadNodeDistributionDto(x) for x in chart_data])
+
+    def power_demand_legacy_vs_future(self) -> list[PowerDemandLegacyVsFutureDto]:
+        chart_data = self.repository.get_power_demand_legacy_vs_future()
+
+        return [PowerDemandLegacyVsFutureDto(x) for x in chart_data]
+
+    def comparison_of_annual_consumption(self) -> list[ComparisonOfAnnualConsumptionDto]:
+        chart_data = self.repository.get_comparison_of_annual_consumption()
+
+        return [ComparisonOfAnnualConsumptionDto(x) for x in chart_data]

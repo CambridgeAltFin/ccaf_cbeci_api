@@ -263,9 +263,9 @@ def handle():
                 x['min elec power'],
                 x['guess elec power'],
                 x['max elec power'],
-                x['min elec consumption daily'],
-                x['guess elec consumption daily'],
-                x['max elec consumption daily'],
+                x['min elec consumption'],
+                x['guess elec consumption'],
+                x['max elec consumption'],
                 x['ts'],
                 datetime.fromtimestamp(x['ts']).strftime('%Y-%m-%d'),
                 '1.2.0',
@@ -312,7 +312,7 @@ def handle():
                 'values %s on conflict (asset, price, timestamp, version) do nothing',
                 list(insert)
             )
-
+        return
         miners['Eff. Mh/s/W'] = miners['hashrate'] / miners['power']
         miners['available machine inclu dag'] = None
         storage_dict = {}

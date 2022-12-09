@@ -48,3 +48,17 @@ def active_nodes():
 @cache.memoize()
 def node_distribution():
     return jsonify(data=eth_service.node_distribution())
+
+
+@bp.route('/power_demand_legacy_vs_future')
+@cache_control()
+@cache.memoize()
+def power_demand_legacy_vs_future():
+    return jsonify(data=eth_service.power_demand_legacy_vs_future())
+
+
+@bp.route('/comparison_of_annual_consumption')
+@cache_control()
+@cache.memoize()
+def comparison_of_annual_consumption():
+    return jsonify(data=eth_service.comparison_of_annual_consumption())

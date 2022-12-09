@@ -2,6 +2,22 @@ from components.BaseRepository import CustomDataRepository
 
 
 class EthRepository(CustomDataRepository):
+    def get_stats(self):
+        result = self._run_select_query(
+            "select"
+            " min_power::float,"
+            " guess_power::float,"
+            " max_power::float,"
+            " min_consumption / power(10, 6) as min_consumption,"  # kWh to GWh
+            " guess_consumption / power(10, 6) as guess_consumption,"  # kWh to GWh
+            " max_consumption / power(10, 6) as max_consumption "  # kWh to GWh
+            "from consumptions "
+            "where asset = 'eth_pos'"
+            "order by timestamp desc "
+            "limit 1"
+        )
+        return result[0] if len(result) else None
+
     def get_network_power_demand(self):
         return self._run_select_query(
             "SELECT timestamp, min_power::float, guess_power::float, max_power::float "
@@ -20,7 +36,7 @@ class EthRepository(CustomDataRepository):
             from (SELECT asset,
                          extract(epoch from max(date))::int as timestamp,
                          substr(date::text, 1, 7) as month,
-                         sum(guess_consumption)  as guess_consumption
+                         sum(guess_consumption) / 365.25 / power(10, 6)  as guess_consumption -- annual kWh to daily GWh
                   from consumptions
                   where asset = 'eth_pos'
                   group by asset, substr(date::text, 1, 7)) as t
@@ -37,7 +53,7 @@ class EthRepository(CustomDataRepository):
             from (SELECT asset,
                          extract(epoch from max(date))::int as timestamp,
                          extract(year from date) as year,
-                         sum(guess_consumption)  as guess_consumption
+                         sum(guess_consumption) / 365.25 / power(10, 6) as guess_consumption -- annual kWh to daily GWh
                   from consumptions
                   where asset = 'eth_pos'
                   group by asset, extract(year from date)) as t
@@ -70,3 +86,27 @@ class EthRepository(CustomDataRepository):
             'JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id '
             'ORDER BY eth_pos_nodes_distribution.number_of_nodes DESC'
         )
+
+    def get_power_demand_legacy_vs_future(self):
+        return self._run_select_query("""
+            select distinct on (asset) asset,
+                               case
+                                   when asset = 'eth' then guess_power * power(10, 3) -- GW to MW
+                                   else guess_power / power(10, 3) -- kW to MW
+                               end as guess_power
+            from consumptions
+            where asset = 'eth_pos' or (asset = 'eth' and price = 5)
+            order by asset, timestamp desc
+        """)
+
+    def get_comparison_of_annual_consumption(self):
+        return self._run_select_query("""
+            select distinct on (asset) asset,
+                               case
+                                   when asset = 'eth_pos' then guess_consumption / power(10, 9) -- kWh to TWh
+                                   else guess_consumption end as guess_consumption
+            from consumptions
+            where asset = 'eth_pos'
+               or (asset in ('btc', 'eth') and price = 5)
+            order by asset, timestamp desc
+        """)

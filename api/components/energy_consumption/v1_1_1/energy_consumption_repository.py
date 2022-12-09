@@ -12,33 +12,33 @@ import psycopg2.extras
 class EnergyConsumptionRepository:
 
     def get_energy_consumptions(self, price: float) -> list:
-        sql = 'SELECT timestamp, ' \
-              'date, ' \
-              'min_power::float, ' \
-              'guess_power::float, ' \
-              'max_power::float, ' \
-              'min_consumption::float, ' \
-              'guess_consumption::float, ' \
-              'max_consumption::float ' \
-              'FROM energy_consumptions ' \
-              'WHERE price = %s ' \
-              'ORDER BY timestamp'
-        return self._run_select_query(sql, (str(price),))
+        sql = "SELECT timestamp, " \
+              "date, " \
+              "min_power::float, " \
+              "guess_power::float, " \
+              "max_power::float, " \
+              "min_consumption::float, " \
+              "guess_consumption::float, " \
+              "max_consumption::float " \
+              "FROM consumptions " \
+              "WHERE asset = 'btc' AND price = %s " \
+              "ORDER BY timestamp"
+        return self._run_select_query(sql, (int(price * 100),))
 
     def get_actual_energy_consumption(self, price: float) -> list:
-        sql = 'SELECT timestamp, ' \
-              'date, ' \
-              'min_power::float, ' \
-              'guess_power::float, ' \
-              'max_power::float, ' \
-              'min_consumption::float, ' \
-              'guess_consumption::float, ' \
-              'max_consumption::float ' \
-              'FROM energy_consumptions ' \
-              'WHERE price = %s ' \
-              'ORDER BY timestamp DESC ' \
-              'LIMIT 1'
-        return self._run_select_query(sql, (str(price),))
+        sql = "SELECT timestamp, " \
+              "date, " \
+              "min_power::float, " \
+              "guess_power::float, " \
+              "max_power::float, " \
+              "min_consumption::float, " \
+              "guess_consumption::float, " \
+              "max_consumption::float " \
+              "FROM consumptions " \
+              "WHERE asset = 'btc' AND price = %s " \
+              "ORDER BY timestamp DESC " \
+              "LIMIT 1"
+        return self._run_select_query(sql, (int(price * 100),))
 
     def get_cumulative_energy_consumptions(self, price: float, current_month=False) -> list:
         sql = 'SELECT' \

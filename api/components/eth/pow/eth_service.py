@@ -12,12 +12,17 @@ from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto
     MiningEquipmentEfficiencyDto as DownloadMiningEquipmentEfficiencyDto, \
     NetworkEfficiencyDto as DownloadNetworkEfficiencyDto, \
     ProfitabilityThresholdDto as DownloadProfitabilityThresholdDto
+from .dto.data import StatsDto
 from helpers import send_file
 
 
 class EthService:
     def __init__(self, repository: EthRepository):
         self.repository = repository
+
+    def stats(self, price: float):
+        stats = self.repository.get_stats(price)
+        return StatsDto(stats)
 
     def network_power_demand(self, price: float) -> list[NetworkPowerDemandDto]:
         chart_data = self.repository.get_network_power_demand(price)

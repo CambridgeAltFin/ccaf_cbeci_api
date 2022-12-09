@@ -2,6 +2,23 @@ from components.BaseRepository import CustomDataRepository
 
 
 class EthRepository(CustomDataRepository):
+    def get_stats(self, price: float):
+        result = self._run_select_query(
+            "select"
+            " min_power::float,"
+            " guess_power::float,"
+            " max_power::float,"
+            " min_consumption::float,"
+            " guess_consumption::float,"
+            " max_consumption::float "
+            "from consumptions "
+            "where asset = 'eth' and price = %s "
+            "order by timestamp desc "
+            "limit 1",
+            (int(price * 100),)
+        )
+        return result[0] if len(result) else None
+
     def get_network_power_demand(self, price: float):
         return self._run_select_query(
             "SELECT timestamp, min_power::float, guess_power::float, max_power::float "

@@ -274,7 +274,7 @@ def get_electricity_mix(path):
 
 
 def get_electricity_estimates(cursor):
-    sql = 'select e.timestamp "Timestamp", e.date "Date and Time", e.max_power "power MAX, GW", e.min_power "power MIN, GW", e.guess_power "power GUESS, GW", e.max_consumption "annualised consumption MAX, TWh", e.min_consumption "annualised consumption MIN, TWh", e.guess_consumption "annualised consumption GUESS, TWh" from energy_consumptions e where e.price = \'0.05\''
+    sql = 'select e.timestamp "Timestamp", e.date "Date and Time", e.max_power "power MAX, GW", e.min_power "power MIN, GW", e.guess_power "power GUESS, GW", e.max_consumption "annualised consumption MAX, TWh", e.min_consumption "annualised consumption MIN, TWh", e.guess_consumption "annualised consumption GUESS, TWh" from consumptions e where e.asset = \'btc\' and e.price = 5'
     cursor.execute(sql)
     data = cursor.fetchall()
     df2 = pd.DataFrame(data)

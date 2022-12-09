@@ -1,12 +1,7 @@
 get:
   summary: Historical ETH network power demand
-    - in: path
-      name: price
-      schema:
-        type: number
-      required: true
   tags:
-    - ETH/Charts
+    - Ethereum/Charts
   responses:
     200:
       description: Successful operation

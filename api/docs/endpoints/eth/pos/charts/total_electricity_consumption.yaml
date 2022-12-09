@@ -1,0 +1,23 @@
+get:
+  summary: Total ETH electricity consumption
+  tags:
+    - Ethereum/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    consumption:
+                      type: number
+                    cumulative_consumption:
+                      type: number
+                    timestamp:
+                      type: number

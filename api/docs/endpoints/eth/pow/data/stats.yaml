@@ -1,0 +1,25 @@
+get:
+  summary: Ethereum 1.0 network power demand
+  tags:
+    - Ethereum 1.0/Data
+  parameters:
+    - in: path
+      name: price
+      schema:
+        type: number
+      required: false
+    - in: query
+      name: p
+      schema:
+        type: number
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "../../../../schemas/DataStats.yaml"

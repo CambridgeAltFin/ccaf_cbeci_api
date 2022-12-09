@@ -1,7 +1,7 @@
 get:
   summary: Evolution of Ethereum mining equipment efficiency
   tags:
-    - ETH/Charts
+    - Ethereum 1.0/Charts
   responses:
     200:
       description: Successful operation

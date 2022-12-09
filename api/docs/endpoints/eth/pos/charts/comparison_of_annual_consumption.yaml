@@ -1,0 +1,23 @@
+get:
+  summary: "Annual consumption: BTC vs ETH 1.0 vs ETH"
+  tags:
+    - Ethereum/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: Ethereum 1.0
+                    guess_consumption:
+                      type: number
+                      example: 15.82

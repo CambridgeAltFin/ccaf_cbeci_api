@@ -1,0 +1,14 @@
+get:
+  summary: Ethereum network power demand
+  tags:
+    - Ethereum/Data
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: "../../../../schemas/DataStats.yaml"

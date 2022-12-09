@@ -1,7 +1,7 @@
 get:
   summary: Historical ETH network efficiency
   tags:
-    - ETH/Charts
+    - Ethereum 1.0/Charts
   responses:
     200:
       description: Successful operation

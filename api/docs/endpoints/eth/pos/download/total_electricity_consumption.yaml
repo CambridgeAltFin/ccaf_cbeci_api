@@ -1,5 +1,5 @@
 get:
-  summary: Historical ETH network efficiency
+  summary: Total ETH electricity consumption
   parameters:
     - in: path
       name: version
@@ -9,7 +9,7 @@ get:
         enum:
           - v1.2.0
   tags:
-    - ETH/Download
+    - Ethereum/Download
   responses:
     200:
       description: Successful operation
@@ -17,4 +17,3 @@ get:
         text/csv:
           schema:
             type: string
-

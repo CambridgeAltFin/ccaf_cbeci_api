@@ -1,13 +1,7 @@
 get:
-  summary: Total ETH electricity consumption
-  parameters:
-    - in: path
-      name: price
-      schema:
-        type: number
-      required: true
+  summary: Ethereum Consensus Client Distribution
   tags:
-    - ETH/Charts
+    - Ethereum/Charts
   responses:
     200:
       description: Successful operation
@@ -21,9 +15,12 @@ get:
                 items:
                   type: object
                   properties:
-                    consumption:
+                    name:
+                      type: string
+                      example: Prysm
+                    x:
                       type: number
-                    cumulative_consumption:
+                      example: 1644273000
+                    y:
                       type: number
-                    timestamp:
-                      type: number
+                      example: 2209

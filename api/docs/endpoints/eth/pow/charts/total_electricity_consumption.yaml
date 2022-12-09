@@ -1,5 +1,5 @@
 get:
-  summary: Profitability threshold of mining equipment
+  summary: Total ETH electricity consumption
   parameters:
     - in: path
       name: price
@@ -7,7 +7,7 @@ get:
         type: number
       required: true
   tags:
-    - ETH/Charts
+    - Ethereum 1.0/Charts
   responses:
     200:
       description: Successful operation
@@ -21,7 +21,9 @@ get:
                 items:
                   type: object
                   properties:
-                    efficiency:
+                    consumption:
+                      type: number
+                    cumulative_consumption:
                       type: number
                     timestamp:
                       type: number

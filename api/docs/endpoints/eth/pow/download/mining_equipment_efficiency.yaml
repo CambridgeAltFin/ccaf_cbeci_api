@@ -1,5 +1,5 @@
 get:
-  summary: Total ETH electricity consumption
+  summary: Evolution of Ethereum mining equipment efficiency
   parameters:
     - in: path
       name: version
@@ -8,13 +8,8 @@ get:
         type: string
         enum:
           - v1.2.0
-    - in: path
-      name: price
-      schema:
-        type: number
-      required: true
   tags:
-    - ETH/Download
+    - Ethereum 1.0/Download
   responses:
     200:
       description: Successful operation
@@ -22,3 +17,4 @@ get:
         text/csv:
           schema:
             type: string
+

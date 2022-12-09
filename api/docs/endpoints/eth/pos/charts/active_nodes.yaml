@@ -1,0 +1,23 @@
+get:
+  summary: Ethereum number of active nodes
+  tags:
+    - Ethereum/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    x:
+                      type: number
+                      example: 1644273000
+                    y:
+                      type: number
+                      example: 3689

@@ -12,8 +12,12 @@ tags:
   - name: Greenhouse Gas
   - name: Charts
   - name: Download
-  - name: ETH/Charts
-  - name: ETH/Download
+  - name: Ethereum/Data
+  - name: Ethereum/Charts
+  - name: Ethereum/Download
+  - name: Ethereum 1.0/Data
+  - name: Ethereum 1.0/Charts
+  - name: Ethereum 1.0/Download
   - name: WYSIWYG
   - name: Contact
 paths:
@@ -90,31 +94,67 @@ paths:
   /{version}/download/greenhouse_gas_emissions:
     $ref: "./endpoints/download/greenhouse_gas_emissions.yaml"
 
-  /eth/charts/network_power_demand/{price}:
-     $ref: "./endpoints/eth/charts/network_power_demand.yaml"
-  /eth/charts/total_electricity_consumption/monthly/{price}:
-     $ref: "./endpoints/eth/charts/total_electricity_consumption.yaml"
-  /eth/charts/total_electricity_consumption/yearly/{price}:
-     $ref: "./endpoints/eth/charts/total_electricity_consumption.yaml"
-  /eth/charts/network_efficiency:
-     $ref: "./endpoints/eth/charts/network_efficiency.yaml"
-  /eth/charts/mining_equipment_efficiency:
-     $ref: "./endpoints/eth/charts/mining_equipment_efficiency.yaml"
-  /eth/charts/profitability_threshold/{price}:
-     $ref: "./endpoints/eth/charts/profitability_threshold.yaml"
+  /eth/pos/data/stats:
+     $ref: "./endpoints/eth/pos/data/stats.yaml"
 
-  /{version}/eth/download/network_power_demand/{price}:
-     $ref: "./endpoints/eth/download/network_power_demand.yaml"
-  /{version}/eth/download/total_electricity_consumption/monthly/{price}:
-     $ref: "./endpoints/eth/download/total_electricity_consumption.yaml"
-  /{version}/eth/download/total_electricity_consumption/yearly/{price}:
-     $ref: "./endpoints/eth/download/total_electricity_consumption.yaml"
-  /{version}/eth/download/network_efficiency:
-     $ref: "./endpoints/eth/download/network_efficiency.yaml"
-  /{version}/eth/download/mining_equipment_efficiency:
-     $ref: "./endpoints/eth/download/mining_equipment_efficiency.yaml"
-  /{version}/eth/download/profitability_threshold/{price}:
-     $ref: "./endpoints/eth/download/profitability_threshold.yaml"
+  /eth/pos/charts/network_power_demand:
+     $ref: "./endpoints/eth/pos/charts/network_power_demand.yaml"
+  /eth/pos/charts/total_electricity_consumption/monthly:
+     $ref: "./endpoints/eth/pos/charts/total_electricity_consumption.yaml"
+  /eth/pos/charts/total_electricity_consumption/yearly:
+     $ref: "./endpoints/eth/pos/charts/total_electricity_consumption.yaml"
+  /eth/pos/charts/client_distribution:
+     $ref: "./endpoints/eth/pos/charts/client_distribution.yaml"
+  /eth/pos/charts/active_nodes:
+     $ref: "./endpoints/eth/pos/charts/active_nodes.yaml"
+  /eth/pos/charts/node_distribution:
+     $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
+  /eth/pos/charts/power_demand_legacy_vs_future:
+     $ref: "./endpoints/eth/pos/charts/power_demand_legacy_vs_future.yaml"
+  /eth/pos/charts/comparison_of_annual_consumption:
+     $ref: "./endpoints/eth/pos/charts/comparison_of_annual_consumption.yaml"
+
+  /{version}/eth/pos/download/network_power_demand:
+     $ref: "./endpoints/eth/pos/download/network_power_demand.yaml"
+  /{version}/eth/pos/download/total_electricity_consumption/monthly:
+     $ref: "./endpoints/eth/pos/download/total_electricity_consumption.yaml"
+  /{version}/eth/pos/download/total_electricity_consumption/yearly:
+     $ref: "./endpoints/eth/pos/download/total_electricity_consumption.yaml"
+  /{version}/eth/pos/download/client_distribution:
+     $ref: "./endpoints/eth/pos/download/client_distribution.yaml"
+  /{version}/eth/pos/download/active_nodes:
+     $ref: "./endpoints/eth/pos/download/active_nodes.yaml"
+  /{version}/eth/pos/download/node_distribution:
+    $ref: "./endpoints/eth/pos/download/node_distribution.yaml"
+
+  /eth/pow/data/stats/{price}:
+     $ref: "./endpoints/eth/pow/data/stats.yaml"
+
+  /eth/pow/charts/network_power_demand/{price}:
+     $ref: "./endpoints/eth/pow/charts/network_power_demand.yaml"
+  /eth/pow/charts/total_electricity_consumption/monthly/{price}:
+     $ref: "./endpoints/eth/pow/charts/total_electricity_consumption.yaml"
+  /eth/pow/charts/total_electricity_consumption/yearly/{price}:
+     $ref: "./endpoints/eth/pow/charts/total_electricity_consumption.yaml"
+  /eth/pow/charts/network_efficiency:
+     $ref: "./endpoints/eth/pow/charts/network_efficiency.yaml"
+  /eth/pow/charts/mining_equipment_efficiency:
+     $ref: "./endpoints/eth/pow/charts/mining_equipment_efficiency.yaml"
+  /eth/pow/charts/profitability_threshold/{price}:
+     $ref: "./endpoints/eth/pow/charts/profitability_threshold.yaml"
+
+  /{version}/eth/pow/download/network_power_demand/{price}:
+     $ref: "./endpoints/eth/pow/download/network_power_demand.yaml"
+  /{version}/eth/pow/download/total_electricity_consumption/monthly/{price}:
+     $ref: "./endpoints/eth/pow/download/total_electricity_consumption.yaml"
+  /{version}/eth/pow/download/total_electricity_consumption/yearly/{price}:
+     $ref: "./endpoints/eth/pow/download/total_electricity_consumption.yaml"
+  /{version}/eth/pow/download/network_efficiency:
+     $ref: "./endpoints/eth/pow/download/network_efficiency.yaml"
+  /{version}/eth/pow/download/mining_equipment_efficiency:
+     $ref: "./endpoints/eth/pow/download/mining_equipment_efficiency.yaml"
+  /{version}/eth/pow/download/profitability_threshold/{price}:
+     $ref: "./endpoints/eth/pow/download/profitability_threshold.yaml"
 
   /text_pages:
     $ref: "./endpoints/wysiwyg/text_pages.yaml"

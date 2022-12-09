@@ -17,7 +17,5 @@ get:
                   properties:
                     name:
                       type: string
-                      example: Ethereum 1.0
                     guess_consumption:
                       type: number
-                      example: 15.82

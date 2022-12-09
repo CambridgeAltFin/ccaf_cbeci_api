@@ -17,13 +17,9 @@ get:
                   properties:
                     code:
                       type: string
-                      example: US
                     name:
                       type: string
-                      example: United States
                     flag:
                       type: string
-                      example: https://firebasestorage.googleapis.com/v0/b/ccaf-afea.appspot.com/o/flags%2FUnited%20States.svg?alt=media&token=b4a4bead-995b-467e-80e3-a0f97848529f
                     number_of_nodes:
                       type: number
-                      example: 2110

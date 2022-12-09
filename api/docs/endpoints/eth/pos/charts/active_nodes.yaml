@@ -17,7 +17,5 @@ get:
                   properties:
                     x:
                       type: number
-                      example: 1644273000
                     y:
                       type: number
-                      example: 3689

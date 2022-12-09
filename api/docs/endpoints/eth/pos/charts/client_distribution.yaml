@@ -17,10 +17,7 @@ get:
                   properties:
                     name:
                       type: string
-                      example: Prysm
                     x:
                       type: number
-                      example: 1644273000
                     y:
                       type: number
-                      example: 2209

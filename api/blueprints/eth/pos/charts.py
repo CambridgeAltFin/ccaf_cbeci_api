@@ -3,7 +3,6 @@ from extensions import cache
 from decorators.cache_control import cache_control
 from components.eth import EthPosFactory
 
-
 bp = Blueprint('eth_pos_charts', __name__, url_prefix='/eth/pos/charts')
 eth_service = EthPosFactory.create_service()
 
@@ -51,14 +50,16 @@ def node_distribution():
 
 
 @bp.route('/power_demand_legacy_vs_future')
+@bp.route('/power_demand_legacy_vs_future/<date>')
 @cache_control()
 @cache.memoize()
-def power_demand_legacy_vs_future():
-    return jsonify(data=eth_service.power_demand_legacy_vs_future())
+def power_demand_legacy_vs_future(date=None):
+    return jsonify(data=eth_service.power_demand_legacy_vs_future(date))
 
 
 @bp.route('/comparison_of_annual_consumption')
+@bp.route('/comparison_of_annual_consumption/<date>')
 @cache_control()
 @cache.memoize()
-def comparison_of_annual_consumption():
-    return jsonify(data=eth_service.comparison_of_annual_consumption())
+def comparison_of_annual_consumption(date=None):
+    return jsonify(data=eth_service.comparison_of_annual_consumption(date))

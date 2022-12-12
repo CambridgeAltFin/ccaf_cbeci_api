@@ -111,7 +111,11 @@ paths:
      $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
   /eth/pos/charts/power_demand_legacy_vs_future:
      $ref: "./endpoints/eth/pos/charts/power_demand_legacy_vs_future.yaml"
+  /eth/pos/charts/power_demand_legacy_vs_future/{YYYY-MM-DD}:
+     $ref: "./endpoints/eth/pos/charts/power_demand_legacy_vs_future.yaml"
   /eth/pos/charts/comparison_of_annual_consumption:
+     $ref: "./endpoints/eth/pos/charts/comparison_of_annual_consumption.yaml"
+  /eth/pos/charts/comparison_of_annual_consumption/{YYYY-MM-DD}:
      $ref: "./endpoints/eth/pos/charts/comparison_of_annual_consumption.yaml"
 
   /{version}/eth/pos/download/network_power_demand:

@@ -12,7 +12,8 @@ from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto
     ActiveNodeDto as DownloadActiveNodeDto, \
     NodeDistributionDto as DownloadNodeDistributionDto
 from .dto.data import StatsDto
-from helpers import send_file
+from helpers import send_file, is_valid_date_string_format
+from  exceptions import HttpException
 
 
 class EthService:
@@ -125,12 +126,22 @@ class EthService:
             'number_of_nodes': 'Number of nodes',
         }, [DownloadNodeDistributionDto(x) for x in chart_data])
 
-    def power_demand_legacy_vs_future(self) -> list[PowerDemandLegacyVsFutureDto]:
-        chart_data = self.repository.get_power_demand_legacy_vs_future()
+    def power_demand_legacy_vs_future(self, date: str = None) -> list[PowerDemandLegacyVsFutureDto]:
+        if date is None:
+            chart_data = self.repository.get_power_demand_legacy_vs_future()
+        elif is_valid_date_string_format(date):
+            chart_data = self.repository.get_power_demand_legacy_vs_future_by_date(date)
+        else:
+            raise HttpException(f'Invalid date: {date}')
 
         return [PowerDemandLegacyVsFutureDto(x) for x in chart_data]
 
-    def comparison_of_annual_consumption(self) -> list[ComparisonOfAnnualConsumptionDto]:
-        chart_data = self.repository.get_comparison_of_annual_consumption()
+    def comparison_of_annual_consumption(self, date: str = None) -> list[ComparisonOfAnnualConsumptionDto]:
+        if date is None:
+            chart_data = self.repository.get_comparison_of_annual_consumption()
+        elif is_valid_date_string_format(date):
+            chart_data = self.repository.get_comparison_of_annual_consumption_by_date(date)
+        else:
+            raise HttpException(f'Invalid date: {date}')
 
         return [ComparisonOfAnnualConsumptionDto(x) for x in chart_data]

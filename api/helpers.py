@@ -104,3 +104,11 @@ def send_file(first_line=None, file_type='csv'):
 def daterange(start_date, end_date) -> list[datetime]:
     for n in range(int((end_date - start_date).days)):
         yield start_date + timedelta(n)
+
+
+def is_valid_date_string_format(date: str, date_format: str = '%Y-%m-%d') -> bool:
+    try:
+        datetime.strptime(date, date_format)
+    except ValueError:
+        return False
+    return True

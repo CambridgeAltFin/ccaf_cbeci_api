@@ -34,6 +34,7 @@ from services.realtime_collection import realtime_collections
 from helpers import load_typed_hasrates
 from forms.feedback_form import FeedbackForm
 from components.energy_consumption import EnergyConsumptionServiceFactory
+from exceptions import HttpException
 
 load_dotenv(override=True)
 
@@ -222,6 +223,11 @@ def bad_request(error):
 @app.errorhandler(NotImplementedError)
 def bad_request(error):
     return make_response(jsonify(error=str(error)), 404)
+
+
+@app.errorhandler(HttpException)
+def bad_request(error: HttpException):
+    return make_response(jsonify(error=str(error)), error.code)
 
 
 @app.before_request

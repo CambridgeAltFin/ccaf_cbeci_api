@@ -99,6 +99,18 @@ class EthRepository(CustomDataRepository):
             order by asset, timestamp desc
         """)
 
+    def get_power_demand_legacy_vs_future_by_date(self, date):
+        return self._run_select_query("""
+            select distinct on (asset) asset,
+                               case
+                                   when asset = 'eth' then guess_power * power(10, 3) -- GW to MW
+                                   else guess_power / power(10, 3) -- kW to MW
+                               end as guess_power
+            from consumptions
+            where (asset = 'eth_pos' or (asset = 'eth' and price = 5)) and date <= %s
+            order by asset, timestamp desc
+        """, (date,))
+
     def get_comparison_of_annual_consumption(self):
         return self._run_select_query("""
             select distinct on (asset) asset,
@@ -110,3 +122,15 @@ class EthRepository(CustomDataRepository):
                or (asset in ('btc', 'eth') and price = 5)
             order by asset, timestamp desc
         """)
+
+    def get_comparison_of_annual_consumption_by_date(self, date):
+        return self._run_select_query("""
+            select distinct on (asset) asset,
+                               case
+                                   when asset = 'eth_pos' then guess_consumption / power(10, 9) -- kWh to TWh
+                                   else guess_consumption end as guess_consumption
+            from consumptions
+            where (asset = 'eth_pos' or (asset in ('btc', 'eth') and price = 5))
+               and date <= %s
+            order by asset, timestamp desc
+        """, (date,))

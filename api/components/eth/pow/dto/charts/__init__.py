@@ -1,4 +1,5 @@
 from .network_power_demand import NetworkPowerDemandDto
+from .annualised_consumption import AnnualisedConsumptionDto
 from .total_electricity_consumption import TotalElectricityConsumptionDto
 from .machine_efficiency import MachineEfficiencyDto
 from .average_machine_efficiency import AverageMachineEfficiencyDto

@@ -14,6 +14,13 @@ def network_power_demand():
     return jsonify(data=eth_service.network_power_demand())
 
 
+@bp.route('/annualised_consumption')
+@cache_control()
+@cache.memoize()
+def annualised_consumption():
+    return jsonify(data=eth_service.annualised_consumption())
+
+
 @bp.route('/total_electricity_consumption/monthly')
 @cache_control()
 @cache.memoize()

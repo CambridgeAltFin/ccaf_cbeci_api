@@ -1,5 +1,5 @@
 get:
-  summary: Ethereum 1.0 network power demand
+  summary: Ethereum 1.0 network power demand, power - GW, consumption - TWh
   tags:
     - Ethereum 1.0/Data
   parameters:

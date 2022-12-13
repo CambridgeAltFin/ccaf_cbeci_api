@@ -1,5 +1,5 @@
 get:
-  summary: Historical ETH network power demand, kW
+  summary: Historical ETH annualised consumption, GWh
   tags:
     - Ethereum/Charts
   responses:
@@ -15,11 +15,11 @@ get:
                 items:
                   type: object
                   properties:
-                    guess_power:
+                    guess_consumption:
                       type: number
-                    max_power:
+                    max_consumption:
                       type: number
-                    min_power:
+                    min_consumption:
                       type: number
                     timestamp:
                       type: number

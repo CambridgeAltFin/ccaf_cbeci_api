@@ -99,6 +99,8 @@ paths:
 
   /eth/pos/charts/network_power_demand:
      $ref: "./endpoints/eth/pos/charts/network_power_demand.yaml"
+  /eth/pos/charts/annualised_consumption:
+     $ref: "./endpoints/eth/pos/charts/annualised_consumption.yaml"
   /eth/pos/charts/total_electricity_consumption/monthly:
      $ref: "./endpoints/eth/pos/charts/total_electricity_consumption.yaml"
   /eth/pos/charts/total_electricity_consumption/yearly:
@@ -120,6 +122,8 @@ paths:
 
   /{version}/eth/pos/download/network_power_demand:
      $ref: "./endpoints/eth/pos/download/network_power_demand.yaml"
+  /{version}/eth/pos/download/annualised_consumption:
+     $ref: "./endpoints/eth/pos/download/annualised_consumption.yaml"
   /{version}/eth/pos/download/total_electricity_consumption/monthly:
      $ref: "./endpoints/eth/pos/download/total_electricity_consumption.yaml"
   /{version}/eth/pos/download/total_electricity_consumption/yearly:
@@ -136,6 +140,8 @@ paths:
 
   /eth/pow/charts/network_power_demand/{price}:
      $ref: "./endpoints/eth/pow/charts/network_power_demand.yaml"
+  /eth/pow/charts/annualised_consumption/{price}:
+     $ref: "./endpoints/eth/pow/charts/annualised_consumption.yaml"
   /eth/pow/charts/total_electricity_consumption/monthly/{price}:
      $ref: "./endpoints/eth/pow/charts/total_electricity_consumption.yaml"
   /eth/pow/charts/total_electricity_consumption/yearly/{price}:
@@ -149,6 +155,8 @@ paths:
 
   /{version}/eth/pow/download/network_power_demand/{price}:
      $ref: "./endpoints/eth/pow/download/network_power_demand.yaml"
+  /{version}/eth/pow/download/annualised_consumption/{price}:
+     $ref: "./endpoints/eth/pow/download/annualised_consumption.yaml"
   /{version}/eth/pow/download/total_electricity_consumption/monthly/{price}:
      $ref: "./endpoints/eth/pow/download/total_electricity_consumption.yaml"
   /{version}/eth/pow/download/total_electricity_consumption/yearly/{price}:

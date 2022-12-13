@@ -1,6 +1,7 @@
 from .eth_repository import EthRepository
 from .dto.charts import \
     NetworkPowerDemandDto, \
+    AnnualisedConsumptionDto, \
     TotalElectricityConsumptionDto, \
     ActiveNodeDto, \
     PowerDemandLegacyVsFutureDto, \
@@ -10,7 +11,8 @@ from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto
     YearlyTotalElectricityConsumptionDto as DownloadYearlyTotalElectricityConsumptionDto, \
     ClientDistributionDto as DownloadClientDistributionDto, \
     ActiveNodeDto as DownloadActiveNodeDto, \
-    NodeDistributionDto as DownloadNodeDistributionDto
+    NodeDistributionDto as DownloadNodeDistributionDto, \
+    AnnualisedConsumptionDto as DownloadAnnualisedConsumptionDto
 from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
 from  exceptions import HttpException
@@ -39,6 +41,22 @@ class EthService:
             'guess_power': 'Best Electricity Demand, kW',
             'max_power': 'Upper Electricity Demand, kW',
         }, list(map(lambda x: DownloadNetworkPowerDemandDto(x), chart_data)))
+
+    def annualised_consumption(self) -> list[AnnualisedConsumptionDto]:
+        chart_data = self.repository.get_annualised_consumption()
+
+        return [AnnualisedConsumptionDto(x) for x in chart_data]
+
+    def download_annualised_consumption(self):
+        chart_data = self.repository.get_annualised_consumption()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'Date and Time',
+            'min_consumption': 'Lower Annualised Consumption, GWh',
+            'guess_consumption': 'Best Annualised Consumption, GWh',
+            'max_consumption': 'Upper Annualised Consumption, GWh',
+        }, [DownloadAnnualisedConsumptionDto(x) for x in chart_data])
 
     def monthly_total_electricity_consumption(self) -> list[TotalElectricityConsumptionDto]:
         chart_data = self.repository.get_monthly_total_electricity_consumption()

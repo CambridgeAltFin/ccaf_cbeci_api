@@ -1,4 +1,5 @@
 from .network_power_demand import NetworkPowerDemandDto
+from .annualised_consumption import AnnualisedConsumptionDto
 from .monthly_total_electricity_consumption import MonthlyTotalElectricityConsumptionDto
 from .yearly_total_electricity_consumption import YearlyTotalElectricityConsumptionDto
 from .mining_equipment_efficiency import MiningEquipmentEfficiencyDto

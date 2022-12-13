@@ -21,6 +21,17 @@ def network_power_demand(version: str, value: float):
     raise NotImplementedError('Not Implemented')
 
 
+@bp.route('/annualised_consumption')
+@bp.route('/annualised_consumption/<value>')
+@price.get_price()
+@cache_control()
+@cache.memoize()
+def annualised_consumption(version: str, value: float):
+    if version_parse(version) == version_parse('v1.2.0'):
+        return eth_service.download_annualised_consumption(value)
+    raise NotImplementedError('Not Implemented')
+
+
 @bp.route('/total_electricity_consumption/monthly')
 @bp.route('/total_electricity_consumption/monthly/<value>')
 @price.get_price()

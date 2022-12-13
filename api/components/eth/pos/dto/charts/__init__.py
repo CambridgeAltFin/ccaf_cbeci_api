@@ -3,3 +3,4 @@ from .total_electricity_consumption import TotalElectricityConsumptionDto
 from .active_node import ActiveNodeDto
 from .power_demand_legacy_vs_future import PowerDemandLegacyVsFutureDto
 from .comparison_of_annual_consumption import ComparisonOfAnnualConsumptionDto
+from .annualised_consumption import AnnualisedConsumptionDto

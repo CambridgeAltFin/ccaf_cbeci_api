@@ -1,7 +1,13 @@
 get:
-  summary: Historical ETH network power demand, kW
+  summary: Historical ETH annualised consumption, TWh
+  parameters:
+    - in: path
+      name: price
+      schema:
+        type: number
+      required: true
   tags:
-    - Ethereum/Charts
+    - Ethereum 1.0/Charts
   responses:
     200:
       description: Successful operation
@@ -15,11 +21,11 @@ get:
                 items:
                   type: object
                   properties:
-                    guess_power:
+                    guess_consumption:
                       type: number
-                    max_power:
+                    max_consumption:
                       type: number
-                    min_power:
+                    min_consumption:
                       type: number
                     timestamp:
                       type: number

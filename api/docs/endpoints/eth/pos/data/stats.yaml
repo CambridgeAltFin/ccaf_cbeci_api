@@ -1,5 +1,5 @@
 get:
-  summary: Ethereum network power demand
+  summary: Ethereum network power demand, power - kW, consumption - GWh
   tags:
     - Ethereum/Data
   responses:

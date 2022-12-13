@@ -18,6 +18,15 @@ def network_power_demand(value: float):
     return jsonify(data=eth_service.network_power_demand(value))
 
 
+@bp.route('/annualised_consumption')
+@bp.route('/annualised_consumption/<value>')
+@price.get_price()
+@cache_control()
+@cache.memoize()
+def annualised_consumption(value: float):
+    return jsonify(data=eth_service.annualised_consumption(value))
+
+
 @bp.route('/total_electricity_consumption/monthly')
 @bp.route('/total_electricity_consumption/monthly/<value>')
 @price.get_price()

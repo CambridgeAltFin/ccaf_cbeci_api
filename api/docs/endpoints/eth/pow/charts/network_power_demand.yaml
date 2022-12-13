@@ -1,5 +1,6 @@
 get:
-  summary: Historical ETH network power demand
+  summary: Historical ETH network power demand, GW
+  parameters:
     - in: path
       name: price
       schema:

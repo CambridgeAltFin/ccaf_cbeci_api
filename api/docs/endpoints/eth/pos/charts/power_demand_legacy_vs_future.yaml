@@ -1,5 +1,5 @@
 get:
-  summary: "Ethereum power demand: Legacy vs Future"
+  summary: "Ethereum power demand: Legacy vs Future, MW"
   tags:
     - Ethereum/Charts
   responses:

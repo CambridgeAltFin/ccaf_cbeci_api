@@ -28,6 +28,15 @@ class EthRepository(CustomDataRepository):
             (int(price * 100), )
         )
 
+    def get_annualised_consumption(self, price: float):
+        return self._run_select_query(
+            "SELECT timestamp, min_consumption::float, guess_consumption::float, max_consumption::float "
+            "FROM consumptions "
+            "WHERE asset = 'eth' AND price = %s "
+            "ORDER BY timestamp",
+            (int(price * 100), )
+        )
+
     def get_monthly_total_electricity_consumption(self, price: float):
         return self._run_select_query(
             "SELECT timestamp, guess_consumption::float, cumulative_guess_consumption::float "

@@ -1,6 +1,7 @@
 from .eth_repository import EthRepository
 from .dto.charts import \
     NetworkPowerDemandDto, \
+    AnnualisedConsumptionDto, \
     TotalElectricityConsumptionDto, \
     MachineEfficiencyDto, \
     AverageMachineEfficiencyDto, \
@@ -8,6 +9,7 @@ from .dto.charts import \
     ProfitabilityThresholdDto
 from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto, \
     MonthlyTotalElectricityConsumptionDto as DownloadMonthlyTotalElectricityConsumptionDto, \
+    AnnualisedConsumptionDto as DownloadAnnualisedConsumptionDto, \
     YearlyTotalElectricityConsumptionDto as DownloadYearlyTotalElectricityConsumptionDto, \
     MiningEquipmentEfficiencyDto as DownloadMiningEquipmentEfficiencyDto, \
     NetworkEfficiencyDto as DownloadNetworkEfficiencyDto, \
@@ -39,6 +41,22 @@ class EthService:
             'guess_power': 'power GUESS, GW',
             'max_power': 'power MAX, GW',
         }, list(map(lambda x: DownloadNetworkPowerDemandDto(x), chart_data)))
+
+    def annualised_consumption(self, price: float) -> list[AnnualisedConsumptionDto]:
+        chart_data = self.repository.get_annualised_consumption(price)
+
+        return [AnnualisedConsumptionDto(x) for x in chart_data]
+
+    def download_annualised_consumption(self, price: float):
+        chart_data = self.repository.get_annualised_consumption(price)
+        send_file_func = send_file(first_line=f'Average electricity cost assumption: {str(price)} USD/kWh')
+
+        return send_file_func({
+            'timestamp': 'Date and Time',
+            'min_consumption': 'annualised consumption MIN, TWh',
+            'guess_consumption': 'annualised consumption GUESS, TWh',
+            'max_consumption': 'annualised consumption MAX, TWh',
+        }, [DownloadAnnualisedConsumptionDto(x) for x in chart_data])
 
     def monthly_total_electricity_consumption(self, price: float) -> list[TotalElectricityConsumptionDto]:
         chart_data = self.repository.get_monthly_total_electricity_consumption(price)

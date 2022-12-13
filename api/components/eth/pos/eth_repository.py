@@ -26,6 +26,17 @@ class EthRepository(CustomDataRepository):
             "ORDER BY timestamp",
         )
 
+    def get_annualised_consumption(self):
+        return self._run_select_query(
+            "SELECT timestamp,"
+            " min_consumption / power(10, 6) as min_consumption,"
+            " guess_consumption / power(10, 6) as guess_consumption,"
+            " max_consumption / power(10, 6) as max_consumption "
+            "FROM consumptions "
+            "WHERE asset = 'eth_pos' "
+            "ORDER BY timestamp",
+        )
+
     def get_monthly_total_electricity_consumption(self):
         return self._run_select_query(
             """

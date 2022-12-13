@@ -1,5 +1,5 @@
 get:
-  summary: Total ETH electricity consumption
+  summary: Total ETH electricity consumption, TWh
   parameters:
     - in: path
       name: price

@@ -1,5 +1,5 @@
 get:
-  summary: "Annual consumption: BTC vs ETH 1.0 vs ETH"
+  summary: "Annual consumption: BTC vs ETH 1.0 vs ETH, TWh"
   tags:
     - Ethereum/Charts
   responses:

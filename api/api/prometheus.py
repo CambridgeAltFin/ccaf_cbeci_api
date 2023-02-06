@@ -12,29 +12,31 @@ class Prometheus:
 
     def crawler_observed_client_distribution(
         self,
-        start_date='2021-12-04',
-        start_date_format='%Y-%m-%d',
+        start_date='2021-12-04 22:30',
+        start_date_format='%Y-%m-%d %H:%M',
         end_date=datetime.today().strftime('%Y-%m-%d'),
         end_date_format='%Y-%m-%d',
     ):
-        prometheus_data = []
+        prometheus_data = {}
         start = datetime.strptime(start_date, start_date_format)
         end = datetime.strptime(end_date, end_date_format)
-        for date in daterange(start, end):
-            [year, month, day] = date.strftime('%Y-%m-%d').split('-')
-            response = requests.get(urljoin(self.base_url, 'query'), {
-                'query': 'crawler_observed_client_distribution',
-                'time': int(datetime(year=int(year), month=int(month), day=int(day), hour=22, minute=30).timestamp())
-            }).json()
-            if len(response['data']['result']) == 0:
-                continue
-            item = {
-                'Date': date.strftime('%Y-%m-%d')
-            }
-            for i in response['data']['result']:
-                item[i['metric']['client']] = int(i['value'][1])
-            prometheus_data.append(item)
-        return prometheus_data
+
+        response = requests.get(urljoin(self.base_url, 'query_range'), {
+            'query': 'crawler_observed_client_distribution',
+            'start': int(start.timestamp()),
+            'end': int(end.timestamp()),
+            'step': 86400
+        }).json()
+
+        for item in response['data']['result']:
+            for [timestamp, value] in item['values']:
+                if timestamp not in prometheus_data:
+                    prometheus_data[timestamp] = {
+                        'Date': datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                prometheus_data[timestamp][item['metric']['client']] = value
+
+        return list(prometheus_data.values())
 
     def crawler_geographical_distribution(
         self,

@@ -74,7 +74,7 @@ class EthRepository(CustomDataRepository):
     def get_client_distribution(self):
         return self._run_select_query(
             "SELECT prysm, lighthouse, teku, nimbus, lodestar, grandine, others, "
-            "   extract(epoch from (date + interval '22 hour 30 minute'))::int as timestamp "
+            "   extract(epoch from (date))::int as timestamp "
             "FROM eth_pos_nodes "
             "WHERE source = 'prometheus' "
             "ORDER BY date",
@@ -83,7 +83,7 @@ class EthRepository(CustomDataRepository):
     def get_active_nodes(self):
         return self._run_select_query(
             "SELECT prysm + lighthouse + teku + nimbus + lodestar + grandine + others as total, "
-            "   extract(epoch from (date + interval '22 hour 30 minute'))::int as timestamp "
+            "   extract(epoch from (date))::int as timestamp "
             "FROM eth_pos_nodes "
             "WHERE source = 'prometheus' "
             "ORDER BY date",

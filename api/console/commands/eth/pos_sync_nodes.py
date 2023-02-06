@@ -10,13 +10,11 @@ import psycopg2.extras
 @click.command(name='eth-pos:sync:nodes')
 def handle():
     migalabs_data = Migalabs().beacon_chain_client_distribution_over_time()
+    prometheus_data = Prometheus().crawler_observed_client_distribution()
+    print(prometheus_data)
 
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
-        cursor.execute("select max(date) from eth_pos_nodes where source = 'prometheus'")
-        [(date,)] = cursor.fetchall()
-        prometheus_data = Prometheus().crawler_observed_client_distribution(
-            start_date=date.strftime('%Y-%m-%d')) if date else Prometheus().crawler_observed_client_distribution()
         save_data(cursor, prometheus_data, 'prometheus')
         save_data(cursor, migalabs_data, 'migalabs')
 

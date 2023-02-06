@@ -5,6 +5,7 @@ from .dto.charts import \
     TotalElectricityConsumptionDto, \
     ActiveNodeDto, \
     PowerDemandLegacyVsFutureDto, \
+    NodeDistributionDto, \
     ComparisonOfAnnualConsumptionDto
 from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto, \
     MonthlyTotalElectricityConsumptionDto as DownloadMonthlyTotalElectricityConsumptionDto, \
@@ -15,7 +16,7 @@ from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto
     AnnualisedConsumptionDto as DownloadAnnualisedConsumptionDto
 from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
-from  exceptions import HttpException
+from exceptions import HttpException
 
 
 class EthService:
@@ -133,13 +134,14 @@ class EthService:
     def node_distribution(self):
         chart_data = self.repository.get_node_distribution()
 
-        return chart_data
+        return [NodeDistributionDto(x) for x in chart_data]
 
     def download_node_distribution(self):
         chart_data = self.repository.get_node_distribution()
         send_file_func = send_file()
 
         return send_file_func({
+            'date': 'Date and Time',
             'name': 'Country',
             'number_of_nodes': 'Number of nodes',
         }, [DownloadNodeDistributionDto(x) for x in chart_data])

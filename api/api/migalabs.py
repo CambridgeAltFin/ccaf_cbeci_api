@@ -35,6 +35,7 @@ class Migalabs:
             {
                 'country': country,
                 'number_of_nodes': number_of_nodes,
+                'date': None
             }
             for [country, number_of_nodes]
             in response['data']['rows']

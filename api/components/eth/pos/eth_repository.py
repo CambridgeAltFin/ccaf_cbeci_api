@@ -91,11 +91,12 @@ class EthRepository(CustomDataRepository):
 
     def get_node_distribution(self):
         return self._run_select_query(
-            'SELECT countries.country AS name, countries.code, countries.country_flag AS flag, '
-            '   eth_pos_nodes_distribution.number_of_nodes '
-            'FROM eth_pos_nodes_distribution '
-            'JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id '
-            'ORDER BY eth_pos_nodes_distribution.number_of_nodes DESC'
+            "SELECT countries.country AS name, countries.code, countries.country_flag AS flag, "
+            "   eth_pos_nodes_distribution.number_of_nodes, eth_pos_nodes_distribution.date "
+            "FROM eth_pos_nodes_distribution "
+            "JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id "
+            "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
+            "ORDER BY eth_pos_nodes_distribution.country_id, eth_pos_nodes_distribution.date DESC"
         )
 
     def get_power_demand_legacy_vs_future(self):

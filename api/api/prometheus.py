@@ -35,3 +35,31 @@ class Prometheus:
                 item[i['metric']['client']] = int(i['value'][1])
             prometheus_data.append(item)
         return prometheus_data
+
+    def crawler_geographical_distribution(
+        self,
+        start_date='2021-12-04 22:30',
+        start_date_format='%Y-%m-%d %H:%M',
+        end_date=datetime.today().strftime('%Y-%m-%d'),
+        end_date_format='%Y-%m-%d',
+    ):
+        prometheus_data = []
+        start = datetime.strptime(start_date, start_date_format)
+        end = datetime.strptime(end_date, end_date_format)
+
+        response = requests.get(urljoin(self.base_url, 'query_range'), {
+            'query': 'crawler_geographical_distribution',
+            'start': int(start.timestamp()),
+            'end': int(end.timestamp()),
+            'step': 86400
+        }).json()
+
+        for item in response['data']['result']:
+            for [timestamp, value] in item['values']:
+                prometheus_data.append({
+                    'country': item['metric']['country'],
+                    'number_of_nodes': value,
+                    'date': datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+                })
+
+        return prometheus_data

@@ -10,6 +10,7 @@ import psycopg2.extras
 @click.command(name='eth-pos:sync:nodes-distribution')
 def handle():
     data = Migalabs().beacon_chain_node_distribution()
+    prometheus_data = Prometheus().crawler_geographical_distribution()
 
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
@@ -18,10 +19,24 @@ def handle():
 
         psycopg2.extras.execute_values(
             cursor,
-            'insert into eth_pos_nodes_distribution (country_id, number_of_nodes)  '
-            'VALUES %s on conflict (country_id) do nothing',
+            'insert into eth_pos_nodes_distribution (country_id, number_of_nodes, source, date)  '
+            'VALUES %s on conflict (country_id, source, date) do nothing',
             [(
                 countries[i['country']],
                 i.get('number_of_nodes', 0),
+                'migalabs',
+                i.get('date', None),
             ) for i in data]
+        )
+
+        psycopg2.extras.execute_values(
+            cursor,
+            'insert into eth_pos_nodes_distribution (country_id, number_of_nodes, source, date)  '
+            'VALUES %s on conflict (country_id, source, date) do nothing',
+            [(
+                countries[i['country']],
+                i.get('number_of_nodes', 0),
+                'prometheus',
+                i.get('date', None),
+            ) for i in list(filter(lambda x: x['country'] in countries, prometheus_data))]
         )

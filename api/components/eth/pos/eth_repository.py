@@ -96,7 +96,7 @@ class EthRepository(CustomDataRepository):
             "FROM eth_pos_nodes_distribution "
             "JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id "
             "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
-            "ORDER BY eth_pos_nodes_distribution.country_id, eth_pos_nodes_distribution.date DESC"
+            "ORDER BY countries.country, eth_pos_nodes_distribution.date"
         )
 
     def get_power_demand_legacy_vs_future(self):

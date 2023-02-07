@@ -91,10 +91,20 @@ class EthRepository(CustomDataRepository):
 
     def get_node_distribution(self):
         return self._run_select_query(
-            "SELECT countries.country AS name, countries.code, countries.country_flag AS flag, "
-            "   eth_pos_nodes_distribution.number_of_nodes, eth_pos_nodes_distribution.date "
+            "SELECT countries.country AS name, "
+            "   countries.code, "
+            "   countries.country_flag AS flag, "
+            "   eth_pos_nodes_distribution.number_of_nodes, "
+            "   eth_pos_nodes_distribution.date, "
+            "   eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric AS country_share "
             "FROM eth_pos_nodes_distribution "
             "JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id "
+            "JOIN ("
+            "   SELECT date, sum(number_of_nodes) AS total "
+            "   FROM eth_pos_nodes_distribution "
+            "   WHERE eth_pos_nodes_distribution.source = 'prometheus'"
+            "   GROUP BY date"
+            ") AS agg ON agg.date = eth_pos_nodes_distribution.date "
             "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
             "ORDER BY countries.country, eth_pos_nodes_distribution.date"
         )

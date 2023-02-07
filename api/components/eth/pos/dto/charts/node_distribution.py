@@ -8,5 +8,6 @@ class NodeDistributionDto(dict):
             code=point['code'],
             flag=point['flag'],
             number_of_nodes=point['number_of_nodes'],
+            country_share=float(round(point['country_share'], 6)),
             timestamp=int(point['date'].replace(hour=0, minute=0, tzinfo=timezone.utc).timestamp()),
         )

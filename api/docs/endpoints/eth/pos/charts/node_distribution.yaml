@@ -23,3 +23,5 @@ get:
                       type: string
                     number_of_nodes:
                       type: number
+                    country_share:
+                      type: number

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from extensions import cache
 from decorators.cache_control import cache_control
 from components.eth import EthPosFactory
@@ -50,10 +50,13 @@ def active_nodes():
 
 
 @bp.route('/node_distribution')
+@bp.route('/node_distribution/<date>')
 @cache_control()
-@cache.memoize()
-def node_distribution():
-    return jsonify(data=eth_service.node_distribution())
+@cache.cached(query_string=True)
+def node_distribution(date=None):
+    if date is None and request.args.get('date') is not None:
+        date = request.args.get('date')
+    return jsonify(data=eth_service.node_distribution(date))
 
 
 @bp.route('/power_demand_legacy_vs_future')

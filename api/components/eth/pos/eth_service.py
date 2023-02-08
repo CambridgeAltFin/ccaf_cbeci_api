@@ -17,6 +17,7 @@ from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto
 from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
+import datetime
 
 
 class EthService:
@@ -131,8 +132,10 @@ class EthService:
             'total': 'Number of nodes',
         }, [DownloadActiveNodeDto(x) for x in chart_data])
 
-    def node_distribution(self):
-        chart_data = self.repository.get_node_distribution()
+    def node_distribution(self, date: str = None):
+        if date is None or not is_valid_date_string_format(date):
+            date = datetime.date.today().strftime('%Y-%m-%d')
+        chart_data = self.repository.get_node_distribution_by_date(date)
 
         return [NodeDistributionDto(x) for x in chart_data]
 

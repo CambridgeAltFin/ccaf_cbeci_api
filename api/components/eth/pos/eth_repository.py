@@ -1,4 +1,5 @@
 from components.BaseRepository import CustomDataRepository
+from datetime import datetime, timedelta
 
 
 class EthRepository(CustomDataRepository):
@@ -107,6 +108,27 @@ class EthRepository(CustomDataRepository):
             ") AS agg ON agg.date = eth_pos_nodes_distribution.date "
             "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
             "ORDER BY countries.country, eth_pos_nodes_distribution.date"
+        )
+
+    def get_node_distribution_by_date(self, date):
+        return self._run_select_query(
+            "SELECT countries.country AS name, "
+            "   countries.code, "
+            "   countries.country_flag AS flag, "
+            "   eth_pos_nodes_distribution.number_of_nodes, "
+            "   eth_pos_nodes_distribution.date, "
+            "   eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric AS country_share "
+            "FROM eth_pos_nodes_distribution "
+            "JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id "
+            "JOIN ("
+            "   SELECT date, sum(number_of_nodes) AS total "
+            "   FROM eth_pos_nodes_distribution "
+            "   WHERE eth_pos_nodes_distribution.source = 'prometheus' AND date(eth_pos_nodes_distribution.date) = %s"
+            "   GROUP BY date"
+            ") AS agg ON agg.date = eth_pos_nodes_distribution.date "
+            "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
+            "ORDER BY countries.country, eth_pos_nodes_distribution.date",
+            ((datetime.strptime(date, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d'),)
         )
 
     def get_power_demand_legacy_vs_future(self):

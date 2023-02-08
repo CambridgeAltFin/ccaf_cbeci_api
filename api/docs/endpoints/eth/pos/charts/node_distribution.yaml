@@ -2,6 +2,12 @@ get:
   summary: Ethereum Node Distribution
   tags:
     - Ethereum/Charts
+  parameters:
+    - in: query
+      name: date
+      schema:
+        type: string
+      required: false
   responses:
     200:
       description: Successful operation

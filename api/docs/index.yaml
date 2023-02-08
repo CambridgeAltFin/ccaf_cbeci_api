@@ -111,6 +111,8 @@ paths:
      $ref: "./endpoints/eth/pos/charts/active_nodes.yaml"
   /eth/pos/charts/node_distribution:
      $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
+  /eth/pos/charts/node_distribution/{YYYY-MM-DD}:
+     $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
   /eth/pos/charts/power_demand_legacy_vs_future:
      $ref: "./endpoints/eth/pos/charts/power_demand_legacy_vs_future.yaml"
   /eth/pos/charts/power_demand_legacy_vs_future/{YYYY-MM-DD}:

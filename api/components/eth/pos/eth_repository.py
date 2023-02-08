@@ -63,7 +63,7 @@ class EthRepository(CustomDataRepository):
                    sum(t.guess_consumption) 
                      over (partition by t.asset order by t.year)::float as cumulative_guess_consumption
             from (SELECT asset,
-                         extract(epoch from max(date))::int as timestamp,
+                         extract(epoch from to_date(extract(year from date)::varchar, 'yyyy'))::int as timestamp,
                          extract(year from date) as year,
                          sum(guess_consumption) / 365.25 / power(10, 6) as guess_consumption -- annual kWh to daily GWh
                   from consumptions

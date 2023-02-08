@@ -11,7 +11,6 @@ import psycopg2.extras
 def handle():
     migalabs_data = Migalabs().beacon_chain_client_distribution_over_time()
     prometheus_data = Prometheus().crawler_observed_client_distribution()
-    print(prometheus_data)
 
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()

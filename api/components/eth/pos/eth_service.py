@@ -146,7 +146,6 @@ class EthService:
         return send_file_func({
             'date': 'Date and Time',
             'name': 'Country',
-            'number_of_nodes': 'Number of nodes',
             'country_share': "Country's share, %"
         }, [DownloadNodeDistributionDto(x) for x in chart_data])
 

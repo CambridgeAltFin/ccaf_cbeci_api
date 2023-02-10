@@ -56,7 +56,8 @@ def active_nodes():
 def node_distribution(date=None):
     if date is None and request.args.get('date') is not None:
         date = request.args.get('date')
-    return jsonify(data=eth_service.node_distribution(date))
+    data, meta = eth_service.node_distribution(date)
+    return jsonify(data=data, meta=meta)
 
 
 @bp.route('/power_demand_legacy_vs_future')

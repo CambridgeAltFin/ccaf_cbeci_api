@@ -121,6 +121,13 @@ class EthRepository(CustomDataRepository):
             "ORDER BY countries.country, eth_pos_nodes_distribution.date"
         )
 
+    def get_node_distribution_meta(self):
+        return self._run_select_query("""
+            select min(date(eth_pos_nodes_distribution.date)) as min, max(date(eth_pos_nodes_distribution.date))
+            from eth_pos_nodes_distribution
+            where eth_pos_nodes_distribution.source = 'prometheus'
+        """)[0]
+
     def get_node_distribution_by_date(self, date):
         return self._run_select_query(
             "SELECT countries.country AS name, "

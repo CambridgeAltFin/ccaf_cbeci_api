@@ -6,6 +6,7 @@ from .dto.charts import \
     ActiveNodeDto, \
     PowerDemandLegacyVsFutureDto, \
     NodeDistributionDto, \
+    NodeDistributionMetaDto, \
     ComparisonOfAnnualConsumptionDto
 from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto, \
     MonthlyTotalElectricityConsumptionDto as DownloadMonthlyTotalElectricityConsumptionDto, \
@@ -136,8 +137,9 @@ class EthService:
         if date is None or not is_valid_date_string_format(date):
             date = datetime.date.today().strftime('%Y-%m-%d')
         chart_data = self.repository.get_node_distribution_by_date(date)
+        meta = self.repository.get_node_distribution_meta()
 
-        return [NodeDistributionDto(x) for x in chart_data]
+        return [NodeDistributionDto(x) for x in chart_data], NodeDistributionMetaDto(meta)
 
     def download_node_distribution(self):
         chart_data = self.repository.get_node_distribution()

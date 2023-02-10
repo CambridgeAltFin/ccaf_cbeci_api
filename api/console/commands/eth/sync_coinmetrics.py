@@ -25,7 +25,7 @@ dags = [
     {'Size': '2GB', 'Block': '3,840,000', 'Date': '6/8/2017'},
     {'Size': '3GB', 'Block': '7,680,000', 'Date': '5/2/2019'},
     {'Size': '4GB', 'Block': '11,520,000', 'Date': '12/25/2020'},
-    {'Size': '5GB', 'Block': '15,360,000', 'Date': ''},
+    {'Size': '5GB', 'Block': '15,360,000', 'Date': '08/17/2022'},
     {'Size': '6GB', 'Block': '19,200,000', 'Date': ''},
     {'Size': '8GB', 'Block': '26,880,000', 'Date': ''},
 ]
@@ -86,7 +86,6 @@ class EnergyConsumptionCalculator:
                 dag_size = 0
             else:
                 dag_size = self.dag[self.dag['Date'] <= row['timestamp']]['Memory size in GB'].max()
-
             profitable_machines = profitable_machines[
                 (profitable_machines['memory']) > dag_size]  # should be more than dag size
 
@@ -226,16 +225,20 @@ def handle():
     hashrate['time'] = pd.to_datetime(hashrate['time']).dt.strftime('%Y-%m-%d')
 
     dag = pd.DataFrame.from_records(dags)
+    dag['Date'] = pd.to_datetime(dag['Date'])
+    dag['Memory size in GB'] = dag['Size'].str.extract('(\d+)GB').astype('int')
+    dag = dag[pd.notnull(dag['Date'])]
 
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('select * from cbsi_miners')
         miners = pd.DataFrame.from_records(cursor.fetchall())
-        miners['Date'] = pd.to_datetime(miners['released_at'])
 
-        dag['Date'] = pd.to_datetime(dag['Date'])
-        dag['Memory size in GB'] = dag['Size'].str.extract('(\d+)GB').astype('int')
-        dag = dag[pd.notnull(dag['Date'])]
+        miners['Date'] = pd.to_datetime(miners['released_at'])
+        valid_asic = ["Bitmain", "Whatsminer", "Canaan", "Innosilicon", " Linzhi"]
+        miners = miners.loc[~(miners['type'] == 'asic') | miners['brand'].isin(valid_asic)]
+        miners['efficiency_gh_j'] = (miners['hashrate'] / miners['power']) / 1000
+        miners['memory'] = miners['memory'].apply(lambda x: float(x))
 
         for cents in range(1, 21):
             elec_cost = cents / 100

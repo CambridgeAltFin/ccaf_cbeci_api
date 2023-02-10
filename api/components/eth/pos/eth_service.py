@@ -99,7 +99,7 @@ class EthService:
                 chart_data.append({
                     'name': str(node).capitalize(),
                     'x': timestamp,
-                    'y': item[node],
+                    'y': float(round(item[node], 4)),
                 })
         return chart_data
 

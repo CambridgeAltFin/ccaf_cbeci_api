@@ -1,0 +1,1 @@
+from console.commands.carbon_accounting_tool.calc_carbon_ratings import handle as calc_carbon_ratings

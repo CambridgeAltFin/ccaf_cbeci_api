@@ -10,6 +10,7 @@ servers:
 tags:
   - name: Index
   - name: Greenhouse Gas
+  - name: Carbon Accounting Tool
   - name: Charts
   - name: Download
   - name: Ethereum/Data
@@ -47,6 +48,11 @@ paths:
     $ref: "./endpoints/index/min_consumption.yaml"
   /consumption/guess/{price}:
     $ref: "./endpoints/index/guess_consumption.yaml"
+
+  /carbon_accounting_tool/calculate:
+    $ref: "./endpoints/carbon_accounting_tool/calculate.yaml"
+  /carbon_accounting_tool/download/calculation:
+    $ref: "./endpoints/carbon_accounting_tool/download_calculation.yaml"
 
   /charts/mining_equipment_efficiency:
     $ref: "./endpoints/charts/miners.yaml"

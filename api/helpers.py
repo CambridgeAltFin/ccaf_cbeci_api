@@ -2,6 +2,7 @@
 import calendar
 import psycopg2.extras
 from config import config
+from datetime import timedelta
 
 
 # =============================================================================
@@ -77,3 +78,8 @@ def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
     for t, hr in hash_rates.items():
         guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)
     return guess_consumption * hash_rate * 365.25 * 24 / 1e9 * 1.1
+
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)

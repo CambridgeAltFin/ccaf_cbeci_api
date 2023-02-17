@@ -23,7 +23,7 @@ class CarbonAccountingToolService:
         }, [{
             'date': str(x['date'])[:10],
             'holdings': x['holdings'],
-            'transactions': round(x['transactions'], 4),
+            'transactions': x['transactions'],
             'result': round(x['result'], 4)
         } for x in df.to_records()])
 

@@ -2,7 +2,7 @@
 import calendar
 import psycopg2.extras
 from config import config
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 # =============================================================================
@@ -78,6 +78,14 @@ def get_guess_consumption(prof_eqp, hash_rate, hash_rates, typed_avg_effciency):
     for t, hr in hash_rates.items():
         guess_consumption += hr * typed_avg_effciency.get(t.lower(), 0)
     return guess_consumption * hash_rate * 365.25 * 24 / 1e9 * 1.1
+
+
+def is_valid_date_string_format(date: str, date_format: str = '%Y-%m-%d') -> bool:
+    try:
+        datetime.strptime(date, date_format)
+    except ValueError:
+        return False
+    return True
 
 
 def daterange(start_date, end_date):

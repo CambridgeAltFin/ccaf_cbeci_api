@@ -1,0 +1,41 @@
+post:
+  summary: Calculate greenhouse gas emissions, kgCO2e
+  tags:
+    - Carbon Accounting Tool
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+                properties:
+                  from:
+                    type: string
+                    example: "2022-12-01"
+                  to:
+                    type: string
+                    example: "2022-12-31"
+                  holdings:
+                    type: number
+                    example: 3.14
+                  transactions:
+                    type: number
+                    example: 3
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  result:
+                    type: number
+                    example: 777.69

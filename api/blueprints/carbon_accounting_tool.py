@@ -23,3 +23,15 @@ def download_calculation():
         return jsonify(errors=validator.get_errors()), 422
     calculator = CarbonAccountingToolFactory.create_service()
     return calculator.download_calculation(req_body.get('data'))
+
+
+@bp.route('/charts/miners_revenue')
+def miners_revenue():
+    service = CarbonAccountingToolFactory.create_service()
+    return jsonify(data=service.miners_revenue())
+
+
+@bp.route('/download/miners_revenue')
+def download_miners_revenue():
+    service = CarbonAccountingToolFactory.create_service()
+    return service.download_miners_revenue()

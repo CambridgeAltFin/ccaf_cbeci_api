@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
+from extensions import cache
 
+from decorators.cache_control import cache_control
 from components.carbon_accounting_tool import CarbonAccountingToolFactory
 
 bp = Blueprint('carbon_accounting_tool', __name__, url_prefix='data')
@@ -26,12 +28,16 @@ def download_calculation():
 
 
 @bp.route('/charts/miners_revenue')
+@cache_control()
+@cache.memoize()
 def miners_revenue():
     service = CarbonAccountingToolFactory.create_service()
     return jsonify(data=service.miners_revenue())
 
 
 @bp.route('/download/miners_revenue')
+@cache_control()
+@cache.memoize()
 def download_miners_revenue():
     service = CarbonAccountingToolFactory.create_service()
     return service.download_miners_revenue()

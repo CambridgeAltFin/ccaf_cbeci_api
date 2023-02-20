@@ -1,0 +1,11 @@
+get:
+  summary: Download miners revenue
+  tags:
+    - Carbon Accounting Tool
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/csv:
+          schema:
+            type: string

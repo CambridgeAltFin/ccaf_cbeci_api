@@ -47,6 +47,10 @@ paths:
     $ref: "./endpoints/carbon_accounting_tool/calculate.yaml"
   /carbon_accounting_tool/download/calculation:
     $ref: "./endpoints/carbon_accounting_tool/download_calculation.yaml"
+  /carbon_accounting_tool/charts/miners_revenue:
+    $ref: "./endpoints/carbon_accounting_tool/miners_revenue.yaml"
+  /carbon_accounting_tool/download/miners_revenue:
+    $ref: "./endpoints/carbon_accounting_tool/download_miners_revenue.yaml"
 
   /charts/mining_equipment_efficiency:
     $ref: "./endpoints/charts/miners.yaml"

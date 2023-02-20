@@ -51,3 +51,24 @@ class CarbonAccountingToolService:
                     'transactions', 0) / (days_count + 1)
         df['result'] = (df['holdings'] * df['kg_per_holding']) + (df['transactions'] * df['kg_per_tx'])
         return df
+
+    def miners_revenue(self):
+        chart_data = self.repository.get_miners_revenue()
+        return [
+            {'name': i['name'], 'x': int(i['timestamp']), 'y': round(float(i['value']) / 100, 4)} for i in chart_data
+        ]
+
+    def download_miners_revenue(self):
+        chart_data = self.repository.get_miners_revenue_for_download()
+        send_file_func = send_file()
+        return send_file_func({
+            'date': 'Date',
+            'transaction_fees': 'Transaction fees, %',
+            'mining_rewards': 'Miner rewards, %',
+        }, [
+            {
+                'date': i['date'],
+                'transaction_fees': str(round(float(i['transaction_fees']), 2)) + '%',
+                'mining_rewards': str(round(float(i['mining_rewards']), 2)) + '%',
+            } for i in chart_data
+        ])

@@ -1,5 +1,5 @@
 get:
-  summary: Profitability threshold of mining equipment
+  summary: Profitability threshold of mining equipment, Mh/J
   parameters:
     - in: path
       name: price
@@ -21,7 +21,7 @@ get:
                 items:
                   type: object
                   properties:
-                    efficiency:
+                    x:
                       type: number
-                    timestamp:
+                    y:
                       type: number

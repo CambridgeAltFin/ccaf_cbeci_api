@@ -80,7 +80,7 @@ class EthRepository(CustomDataRepository):
 
     def get_profitability_threshold(self, price):
         return self._run_select_query(
-            "SELECT timestamp, machine_efficiency::float * 1000000 AS machine_efficiency "
+            "SELECT timestamp, machine_efficiency::float AS machine_efficiency "
             "FROM consumptions "
             "WHERE asset = 'eth' AND price = %s "
             "ORDER BY timestamp",

@@ -10,3 +10,9 @@ properties:
     type: number
   min_consumption:
     type: number
+  guess_power:
+    type: number
+  max_power:
+    type: number
+  min_power:
+    type: number

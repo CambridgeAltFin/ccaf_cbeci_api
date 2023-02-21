@@ -138,3 +138,30 @@ class EthService:
             'timestamp': 'Date and Time',
             'efficiency': 'Efficiency, Mh/J',
         }, list(map(lambda x: DownloadProfitabilityThresholdDto(x), chart_data)))
+
+    def source_comparison(self):
+        chart_data = self.repository.get_source_comparison()
+
+        return [{
+            'name': i['label'],
+            'x': i['timestamp'],
+            'y': round(i['value'], 4),
+        } for i in chart_data]
+
+    def download_source_comparison(self):
+        chart_data = self.repository.get_source_comparison_for_download()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Date',
+            'cbnsi': 'CBNSI, TWh',
+            'ccri': 'CCRI, TWh',
+            'km': 'Kyle McDonald, TWh',
+            'digiconomist': 'Digiconomist, TWh',
+        }, [{
+            'date': i['date'].strftime('%Y-%m-%d'),
+            'cbnsi': round(i['cbnsi'], 4) if i['cbnsi'] else '',
+            'ccri': round(i['ccri'], 4) if i['ccri'] else '',
+            'km': round(i['km'], 4) if i['km'] else '',
+            'digiconomist': round(i['digiconomist'], 4) if i['digiconomist'] else '',
+        } for i in chart_data])

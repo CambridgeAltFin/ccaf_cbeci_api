@@ -81,3 +81,12 @@ def profitability_threshold(version: str, value: float):
     if version_parse(version) == version_parse('v1.2.0'):
         return eth_service.download_profitability_threshold(value)
     raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/source_comparison')
+@cache_control()
+@cache.memoize()
+def source_comparison(version: str):
+    if version_parse(version) == version_parse('v1.2.0'):
+        return eth_service.download_source_comparison()
+    raise NotImplementedError('Not Implemented')

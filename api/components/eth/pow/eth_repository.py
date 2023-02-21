@@ -86,3 +86,28 @@ class EthRepository(CustomDataRepository):
             "ORDER BY timestamp",
             (int(price * 100),)
         )
+
+    def get_source_comparison(self):
+        return self._run_select_query("""
+            select
+             label,
+             value::float, 
+             extract(epoch from date)::int as timestamp 
+            from charts
+            where name = 'eth.source_comparison' 
+            order by date, label
+        """)
+
+    def get_source_comparison_for_download(self):
+        return self._run_select_query("""
+            select
+             date,
+             (max(case when label = 'CBNSI' then value end))::float as cbnsi, 
+             (max(case when label = 'CCRI' then value end))::float as ccri, 
+             (max(case when label = 'Kyle McDonald' then value end))::float as km, 
+             (max(case when label = 'Digiconomist' then value end))::float as digiconomist 
+            from charts
+            where name = 'eth.source_comparison' 
+            group by date
+            order by date
+        """)

@@ -1,5 +1,5 @@
 get:
-  summary: Evolution of Ethereum mining equipment efficiency, Mh/J
+  summary: Source comparison, annualised TWh
   tags:
     - Ethereum 1.0/Charts
   responses:

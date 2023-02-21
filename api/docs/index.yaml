@@ -154,6 +154,8 @@ paths:
      $ref: "./endpoints/eth/pow/charts/mining_equipment_efficiency.yaml"
   /eth/pow/charts/profitability_threshold/{price}:
      $ref: "./endpoints/eth/pow/charts/profitability_threshold.yaml"
+  /eth/pow/charts/source_comparison:
+     $ref: "./endpoints/eth/pow/charts/source_comparison.yaml"
 
   /{version}/eth/pow/download/network_power_demand/{price}:
      $ref: "./endpoints/eth/pow/download/network_power_demand.yaml"
@@ -169,6 +171,8 @@ paths:
      $ref: "./endpoints/eth/pow/download/mining_equipment_efficiency.yaml"
   /{version}/eth/pow/download/profitability_threshold/{price}:
      $ref: "./endpoints/eth/pow/download/profitability_threshold.yaml"
+  /{version}/eth/pow/download/source_comparison:
+     $ref: "./endpoints/eth/pow/download/source_comparison.yaml"
 
   /text_pages:
     $ref: "./endpoints/wysiwyg/text_pages.yaml"

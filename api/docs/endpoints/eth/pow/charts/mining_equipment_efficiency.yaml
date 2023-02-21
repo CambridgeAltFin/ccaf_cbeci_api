@@ -1,5 +1,5 @@
 get:
-  summary: Evolution of Ethereum mining equipment efficiency
+  summary: Evolution of Ethereum mining equipment efficiency, Mh/J
   tags:
     - Ethereum 1.0/Charts
   responses:
@@ -12,8 +12,10 @@ get:
             items:
               type: object
               properties:
-                efficiency:
+                name:
+                  type: string
+                x:
                   type: number
-                timestamp:
+                y:
                   type: number
 

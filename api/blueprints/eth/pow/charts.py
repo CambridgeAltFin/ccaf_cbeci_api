@@ -66,3 +66,10 @@ def mining_equipment_efficiency():
 @cache.memoize()
 def profitability_threshold(value: float):
     return jsonify(data=eth_service.profitability_threshold(value))
+
+
+@bp.route('/source_comparison')
+@cache_control()
+@cache.memoize()
+def source_comparison():
+    return jsonify(data=eth_service.source_comparison())

@@ -65,11 +65,12 @@ class EthRepository(CustomDataRepository):
         )
 
     def get_machine_efficiencies(self):
-        return self._run_select_query(
-            'SELECT name, efficiency_gh_j * 1000 AS efficiency, extract(epoch from released_at)::int AS timestamp '
-            'FROM cbsi_miners '
-            'ORDER BY released_at'
-        )
+        return self._run_select_query("""
+            SELECT name, efficiency_gh_j AS efficiency, extract(epoch from released_at)::int AS timestamp 
+            FROM cbsi_miners 
+            WHERE is_active = true
+            ORDER BY released_at, efficiency_gh_j
+        """)
 
     def get_average_machine_efficiency(self):
         return self._run_select_query(

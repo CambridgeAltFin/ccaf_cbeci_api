@@ -315,7 +315,7 @@ def handle():
                 'values %s on conflict (asset, price, timestamp, version) do nothing',
                 list(insert)
             )
-        return
+
         miners['Eff. Mh/s/W'] = miners['hashrate'] / miners['power']
         miners['available machine inclu dag'] = None
         storage_dict = {}

@@ -135,7 +135,7 @@ class EthService:
 
     def node_distribution(self, date: str = None):
         if date is None or not is_valid_date_string_format(date):
-            date = datetime.date.today().strftime('%Y-%m-%d')
+            date = (datetime.date.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
         chart_data = self.repository.get_node_distribution_by_date(date)
         meta = self.repository.get_node_distribution_meta()
 
@@ -170,3 +170,13 @@ class EthService:
             raise HttpException(f'Invalid date: {date}')
 
         return [ComparisonOfAnnualConsumptionDto(x) for x in chart_data]
+
+    def get_live_data(self):
+        stats = self.repository.get_stats()
+        live = self.repository.get_live_data()
+
+        return {
+            'cbnsi': str(round(stats['guess_consumption'], 2)) + ' GWh',
+            'ccri': str(live[0]['value']) + ' GWh',
+            'digiconomist': str(live[1]['value']) + ' GWh',
+        }

@@ -30,6 +30,7 @@ cli.add_command(commands.eth.compare_datasource)
 cli.add_command(commands.eth.pos_calc_electricity)
 cli.add_command(commands.eth.pos_sync_nodes)
 cli.add_command(commands.eth.pos_sync_nodes_distribution)
+cli.add_command(commands.eth.live_data)
 
 cli.add_command(commands.carbon_accounting_tool.calc_carbon_ratings)
 

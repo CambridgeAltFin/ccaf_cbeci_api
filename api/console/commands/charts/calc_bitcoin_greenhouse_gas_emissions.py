@@ -47,14 +47,15 @@ def handle():
         result = digiconomist.bitcoin(yesterday)
         if len(result) > 0:
             cursor.execute(
-                'INSERT INTO digiconomist_btc ("24hr_kWh", "24hr_kgCO2", "Output_kWh", "Output_kgCO2", date) '
-                'VALUES (%s, %s, %s, %s, %s)',
+                'INSERT INTO digiconomist_btc ("24hr_kWh", "24hr_kgCO2", "Output_kWh", "Output_kgCO2", date, asset) '
+                'VALUES (%s, %s, %s, %s, %s, %s)',
                 (
                     result[0]['24hr_kWh'],
                     result[0]['24hr_kgCO2'],
                     result[0]['Output_kWh'],
                     result[0]['Output_kgCO2'],
-                    yesterday
+                    yesterday,
+                    'btc'
                 )
             )
 

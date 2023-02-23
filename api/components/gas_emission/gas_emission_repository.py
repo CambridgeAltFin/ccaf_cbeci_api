@@ -142,7 +142,10 @@ class GasEmissionRepository(CustomDataRepository):
         }
 
     def get_digiconomist_emission(self):
-        sql = 'SELECT "24hr_kgCO2"' \
-              ', "Output_kgCO2" ' \
-              'FROM digiconomist_btc ORDER BY date DESC LIMIT 1'
-        return self._run_select_query(sql)[0]
+        return self._run_select_query("""
+            SELECT "24hr_kgCO2", "Output_kgCO2"
+            FROM digiconomist_btc 
+            WHERE asset = 'btc'
+            ORDER BY date DESC 
+            LIMIT 1
+        """)[0]

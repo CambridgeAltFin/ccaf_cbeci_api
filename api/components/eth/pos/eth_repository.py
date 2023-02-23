@@ -128,7 +128,7 @@ class EthRepository(CustomDataRepository):
             ") AS agg ON agg.date = eth_pos_nodes_distribution.date "
             "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
             "ORDER BY countries.country, eth_pos_nodes_distribution.date",
-            ((datetime.strptime(date, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d'),)
+            (date,)
         )
 
     def get_power_demand_legacy_vs_future(self):
@@ -178,3 +178,11 @@ class EthRepository(CustomDataRepository):
                and date <= %s
             order by asset, timestamp desc
         """, (date,))
+
+    def get_live_data(self):
+        return self._run_select_query("""
+            select distinct on (label) label, value
+            from charts
+            where name = 'eth_pos.live_data' and label in ('CCRI', 'Digiconomist')
+            order by label, date desc
+        """)

@@ -21,10 +21,18 @@ class EthRepository(CustomDataRepository):
 
     def get_network_power_demand(self):
         return self._run_select_query(
-            "SELECT timestamp, min_power::float, guess_power::float, max_power::float "
-            "FROM consumptions "
-            "WHERE asset = 'eth_pos' "
-            "ORDER BY timestamp",
+            """
+            SELECT
+             timestamp, 
+             min_power::float, 
+             guess_power::float, 
+             max_power::float, 
+             min_consumption / power(10, 6) as min_consumption, 
+             guess_consumption / power(10, 6) as guess_consumption, 
+             max_consumption / power(10, 6) as max_consumption
+            FROM consumptions 
+            WHERE asset = 'eth_pos' ORDER BY timestamp
+            """,
         )
 
     def get_annualised_consumption(self):
@@ -74,16 +82,28 @@ class EthRepository(CustomDataRepository):
 
     def get_client_distribution(self):
         return self._run_select_query(
-            "SELECT prysm, lighthouse, teku, nimbus, lodestar, grandine, others, "
-            "   extract(epoch from (date))::int as timestamp "
-            "FROM eth_pos_nodes "
-            "WHERE source = 'prometheus' "
-            "ORDER BY date",
+            """
+            SELECT prysm::numeric / t.total::numeric AS prysm,
+                   lighthouse::numeric / t.total::numeric AS lighthouse,
+                   teku::numeric / t.total::numeric AS teku,
+                   nimbus::numeric / t.total::numeric AS nimbus,
+                   lodestar::numeric / t.total::numeric AS lodestar,
+                   grandine::numeric / t.total::numeric AS grandine,
+                   others::numeric / t.total::numeric AS others,
+                   erigon::numeric / t.total::numeric AS erigon,
+                   extract(epoch from (date))::int as timestamp
+            FROM eth_pos_nodes
+                 JOIN (SELECT id, prysm + lighthouse + teku + nimbus + lodestar + grandine + others + erigon AS total
+                       FROM eth_pos_nodes
+                       WHERE source = 'prometheus') AS t ON t.id = eth_pos_nodes.id
+            WHERE source = 'prometheus'
+            ORDER BY date
+            """,
         )
 
     def get_active_nodes(self):
         return self._run_select_query(
-            "SELECT prysm + lighthouse + teku + nimbus + lodestar + grandine + others as total, "
+            "SELECT prysm + lighthouse + teku + nimbus + lodestar + grandine + others + erigon as total, "
             "   extract(epoch from (date))::int as timestamp "
             "FROM eth_pos_nodes "
             "WHERE source = 'prometheus' "
@@ -109,6 +129,13 @@ class EthRepository(CustomDataRepository):
             "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
             "ORDER BY countries.country, eth_pos_nodes_distribution.date"
         )
+
+    def get_node_distribution_meta(self):
+        return self._run_select_query("""
+            select min(date(eth_pos_nodes_distribution.date)) as min, max(date(eth_pos_nodes_distribution.date))
+            from eth_pos_nodes_distribution
+            where eth_pos_nodes_distribution.source = 'prometheus'
+        """)[0]
 
     def get_node_distribution_by_date(self, date):
         return self._run_select_query(

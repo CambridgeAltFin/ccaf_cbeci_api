@@ -16,13 +16,13 @@ class Migalabs:
         return [
             {
                 'Date': date[:10],
-                'Prysm': prysm,
-                'Lighthouse': lighthouse,
-                'Teku': teku,
-                'Nimbus': nimbus,
-                'Lodestar': lodestar,
-                'Grandine': grandine,
-                'Others': others
+                'prysm': prysm,
+                'lighthouse': lighthouse,
+                'teku': teku,
+                'nimbus': nimbus,
+                'lodestar': lodestar,
+                'grandine': grandine,
+                'others': others
             }
             for [i, date, parser, prysm, lighthouse, teku, nimbus, lodestar, grandine, others]
             in response['data']['rows']

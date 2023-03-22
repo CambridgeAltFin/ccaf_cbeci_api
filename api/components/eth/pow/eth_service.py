@@ -40,6 +40,9 @@ class EthService:
             'min_power': 'power MIN, GW',
             'guess_power': 'power GUESS, GW',
             'max_power': 'power MAX, GW',
+            'min_consumption': 'annualised consumption MIN, TWh',
+            'guess_consumption': 'annualised consumption GUESS, TWh',
+            'max_consumption': 'annualised consumption MAX, TWh',
         }, list(map(lambda x: DownloadNetworkPowerDemandDto(x), chart_data)))
 
     def annualised_consumption(self, price: float) -> list[AnnualisedConsumptionDto]:

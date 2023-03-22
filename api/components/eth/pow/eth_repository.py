@@ -21,7 +21,8 @@ class EthRepository(CustomDataRepository):
 
     def get_network_power_demand(self, price: float):
         return self._run_select_query(
-            "SELECT timestamp, min_power::float, guess_power::float, max_power::float "
+            "SELECT timestamp, min_power::float, guess_power::float, max_power::float, "
+            "min_consumption::float, guess_consumption::float, max_consumption::float "
             "FROM consumptions "
             "WHERE asset = 'eth' AND price = %s "
             "ORDER BY timestamp",

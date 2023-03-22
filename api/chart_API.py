@@ -127,7 +127,8 @@ def create_app():
         sentry_sdk.init(
             dsn=os.environ.get('SENTRY_DSN'),
             integrations=[FlaskIntegration()],
-            environment=os.environ.get('SENTRY_ENV', 'production')
+            environment=os.environ.get('SENTRY_ENV', 'production'),
+            send_default_pii=False
         )
 
     app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {

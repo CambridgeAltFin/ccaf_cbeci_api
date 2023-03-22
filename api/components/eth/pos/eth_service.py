@@ -40,9 +40,12 @@ class EthService:
 
         return send_file_func({
             'timestamp': 'Date and Time',
-            'min_power': 'Lower Electricity Demand, kW',
-            'guess_power': 'Best Electricity Demand, kW',
-            'max_power': 'Upper Electricity Demand, kW',
+            'min_power': 'power MIN, kW',
+            'guess_power': 'power GUESS, kW',
+            'max_power': 'power MAX, kW',
+            'min_consumption': 'annualised consumption MIN, GWh',
+            'guess_consumption': 'annualised consumption GUESS, GWh',
+            'max_consumption': 'annualised consumption MAX, GWh',
         }, list(map(lambda x: DownloadNetworkPowerDemandDto(x), chart_data)))
 
     def annualised_consumption(self) -> list[AnnualisedConsumptionDto]:
@@ -116,6 +119,7 @@ class EthService:
             'nimbus': 'Nimbus',
             'lodestar': 'Lodestar',
             'grandine': 'Grandine',
+            'erigon': 'Erigon',
             'others': 'Others',
         }, [DownloadClientDistributionDto(x) for x in chart_data])
 

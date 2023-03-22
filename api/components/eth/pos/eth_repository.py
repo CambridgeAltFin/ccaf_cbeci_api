@@ -21,10 +21,18 @@ class EthRepository(CustomDataRepository):
 
     def get_network_power_demand(self):
         return self._run_select_query(
-            "SELECT timestamp, min_power::float, guess_power::float, max_power::float "
-            "FROM consumptions "
-            "WHERE asset = 'eth_pos' "
-            "ORDER BY timestamp",
+            """
+            SELECT
+             timestamp, 
+             min_power::float, 
+             guess_power::float, 
+             max_power::float, 
+             min_consumption / power(10, 6) as min_consumption, 
+             guess_consumption / power(10, 6) as guess_consumption, 
+             max_consumption / power(10, 6) as max_consumption
+            FROM consumptions 
+            WHERE asset = 'eth_pos' ORDER BY timestamp
+            """,
         )
 
     def get_annualised_consumption(self):
@@ -82,11 +90,12 @@ class EthRepository(CustomDataRepository):
                    lodestar::numeric / t.total::numeric AS lodestar,
                    grandine::numeric / t.total::numeric AS grandine,
                    others::numeric / t.total::numeric AS others,
+                   erigon::numeric / t.total::numeric AS erigon,
                    extract(epoch from (date))::int as timestamp
             FROM eth_pos_nodes
-                     JOIN (SELECT id, prysm + lighthouse + teku + nimbus + lodestar + grandine + others AS total
-                           FROM eth_pos_nodes
-                           WHERE source = 'prometheus') AS t ON t.id = eth_pos_nodes.id
+                 JOIN (SELECT id, prysm + lighthouse + teku + nimbus + lodestar + grandine + others + erigon AS total
+                       FROM eth_pos_nodes
+                       WHERE source = 'prometheus') AS t ON t.id = eth_pos_nodes.id
             WHERE source = 'prometheus'
             ORDER BY date
             """,
@@ -94,7 +103,7 @@ class EthRepository(CustomDataRepository):
 
     def get_active_nodes(self):
         return self._run_select_query(
-            "SELECT prysm + lighthouse + teku + nimbus + lodestar + grandine + others as total, "
+            "SELECT prysm + lighthouse + teku + nimbus + lodestar + grandine + others + erigon as total, "
             "   extract(epoch from (date))::int as timestamp "
             "FROM eth_pos_nodes "
             "WHERE source = 'prometheus' "

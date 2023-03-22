@@ -34,7 +34,7 @@ def handle():
         consensus['Nimbus%'] = consensus['Nimbus'] / consensus['Total'] * 100
         consensus['Teku%'] = consensus['Teku'] / consensus['Total'] * 100
 
-        execution_shares = [['Geth_%exe', '84.52'], ['Erigon_%exe', '8.95'], ['Besu_%exe', '6.53']]
+        execution_shares = [['Geth_%exe', '67.76'], ['Erigon_%exe', '10.13'], ['Besu_%exe', '6.59']]
         exe_data = pd.DataFrame(execution_shares)
         execution = exe_data.transpose()
         execution.columns = execution.iloc[0]

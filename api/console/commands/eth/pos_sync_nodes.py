@@ -12,12 +12,11 @@ def handle():
     migalabs_data = Migalabs().beacon_chain_client_distribution_over_time()
     prometheus_data = Prometheus().crawler_observed_client_distribution()
     new_prometheus_data = Prometheus2().crawler_observed_client_distribution()
-    min_date = min(new_prometheus_data, key=lambda x: x['Date'])
-    new_prometheus_data.extend([x for x in prometheus_data if x['Date'] < min_date['Date']])
 
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
         save_data_prometheus(cursor, prometheus_data, 'prometheus')
+        save_data_prometheus(cursor, new_prometheus_data, 'prometheus')
         save_data(cursor, migalabs_data, 'migalabs')
 
 def save_data(cursor, data, source):

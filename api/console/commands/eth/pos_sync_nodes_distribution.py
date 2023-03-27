@@ -33,7 +33,7 @@ def handle():
         psycopg2.extras.execute_values(
             cursor,
             'insert into eth_pos_nodes_distribution (country_id, number_of_nodes, source, date)  '
-            'VALUES %s on conflict (country_id, source, date) do update set number_of_nodes = EXCLUDED.number_of_nodes',
+            'VALUES %s on conflict (country_id, source, date) do nothing',
             [(
                 countries[i['country']],
                 i.get('number_of_nodes', 0),

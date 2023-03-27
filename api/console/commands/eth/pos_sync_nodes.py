@@ -15,7 +15,7 @@ def handle():
 
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
-        save_data_prometheus(cursor, prometheus_data, 'prometheus')
+        save_data(cursor, prometheus_data, 'prometheus')
         save_data_prometheus(cursor, new_prometheus_data, 'prometheus')
         save_data(cursor, migalabs_data, 'migalabs')
 

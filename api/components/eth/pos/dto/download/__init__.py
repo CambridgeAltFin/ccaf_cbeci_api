@@ -4,4 +4,4 @@ from .monthly_total_electricity_consumption import MonthlyTotalElectricityConsum
 from .yearly_total_electricity_consumption import YearlyTotalElectricityConsumptionDto
 from .client_distribution import ClientDistributionDto
 from .active_node import ActiveNodeDto
-from .node_distribution import NodeDistributionDto
+from .node_distribution import NodeDistributionDto, MonthlyNodeDistributionDto

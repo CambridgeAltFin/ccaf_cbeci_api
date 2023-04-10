@@ -60,6 +60,17 @@ def node_distribution(date=None):
     return jsonify(data=data, meta=meta)
 
 
+@bp.route('/monthly_node_distribution')
+@bp.route('/monthly_node_distribution/<date>')
+@cache_control()
+@cache.cached(query_string=True)
+def monthly_node_distribution(date=None):
+    if date is None and request.args.get('date') is not None:
+        date = request.args.get('date')
+    data, meta = eth_service.monthly_node_distribution(date)
+    return jsonify(data=data, meta=meta)
+
+
 @bp.route('/power_demand_legacy_vs_future')
 @bp.route('/power_demand_legacy_vs_future/<date>')
 @cache_control()

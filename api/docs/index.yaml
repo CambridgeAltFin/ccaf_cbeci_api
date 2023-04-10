@@ -123,6 +123,10 @@ paths:
      $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
   /eth/pos/charts/node_distribution/{YYYY-MM-DD}:
      $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
+  /eth/pos/charts/monthly_node_distribution:
+     $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
+  /eth/pos/charts/monthly_node_distribution/{YYYY-MM}:
+     $ref: "./endpoints/eth/pos/charts/node_distribution.yaml"
   /eth/pos/charts/power_demand_legacy_vs_future:
      $ref: "./endpoints/eth/pos/charts/power_demand_legacy_vs_future.yaml"
   /eth/pos/charts/power_demand_legacy_vs_future/{YYYY-MM-DD}:
@@ -131,6 +135,7 @@ paths:
      $ref: "./endpoints/eth/pos/charts/comparison_of_annual_consumption.yaml"
   /eth/pos/charts/comparison_of_annual_consumption/{YYYY-MM-DD}:
      $ref: "./endpoints/eth/pos/charts/comparison_of_annual_consumption.yaml"
+
 
   /{version}/eth/pos/download/network_power_demand:
      $ref: "./endpoints/eth/pos/download/network_power_demand.yaml"
@@ -145,6 +150,8 @@ paths:
   /{version}/eth/pos/download/active_nodes:
      $ref: "./endpoints/eth/pos/download/active_nodes.yaml"
   /{version}/eth/pos/download/node_distribution:
+    $ref: "./endpoints/eth/pos/download/node_distribution.yaml"
+  /{version}/eth/pos/download/monthly_node_distribution:
     $ref: "./endpoints/eth/pos/download/node_distribution.yaml"
 
   /eth/pow/data/stats/{price}:

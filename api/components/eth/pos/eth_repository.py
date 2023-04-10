@@ -111,24 +111,22 @@ class EthRepository(CustomDataRepository):
         )
 
     def get_node_distribution(self):
-        return self._run_select_query(
-            "SELECT countries.country AS name, "
-            "   countries.code, "
-            "   countries.country_flag AS flag, "
-            "   eth_pos_nodes_distribution.number_of_nodes, "
-            "   eth_pos_nodes_distribution.date, "
-            "   eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric AS country_share "
-            "FROM eth_pos_nodes_distribution "
-            "JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id "
-            "JOIN ("
-            "   SELECT date, sum(number_of_nodes) AS total "
-            "   FROM eth_pos_nodes_distribution "
-            "   WHERE eth_pos_nodes_distribution.source = 'prometheus'"
-            "   GROUP BY date"
-            ") AS agg ON agg.date = eth_pos_nodes_distribution.date "
-            "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
-            "ORDER BY countries.country, eth_pos_nodes_distribution.date"
-        )
+        return self._run_select_query("""
+        SELECT countries.country AS name,
+               countries.code,
+               countries.country_flag AS flag,
+               eth_pos_nodes_distribution.number_of_nodes,
+               eth_pos_nodes_distribution.date,
+               eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric AS country_share
+        FROM eth_pos_nodes_distribution
+                 JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
+                 JOIN (SELECT date, sum(number_of_nodes) AS total
+                       FROM eth_pos_nodes_distribution
+                       WHERE eth_pos_nodes_distribution.source = 'prometheus'
+                       GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
+        WHERE eth_pos_nodes_distribution.source = 'prometheus'
+        ORDER BY countries.country, eth_pos_nodes_distribution.date
+        """)
 
     def get_node_distribution_meta(self):
         return self._run_select_query("""
@@ -155,6 +153,54 @@ class EthRepository(CustomDataRepository):
             ") AS agg ON agg.date = eth_pos_nodes_distribution.date "
             "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
             "ORDER BY countries.country, eth_pos_nodes_distribution.date",
+            (date,)
+        )
+
+    def get_monthly_node_distribution(self):
+        return self._run_select_query("""
+            SELECT countries.country                                                                      AS name,
+                   countries.code,
+                   countries.country_flag                                                                 AS flag,
+                   AVG(eth_pos_nodes_distribution.number_of_nodes)::numeric                               as number_of_nodes,
+                   substr(eth_pos_nodes_distribution.date::text, 1, 7)                                    AS date,
+                   AVG(eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric)::numeric AS country_share
+            FROM eth_pos_nodes_distribution
+                     JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
+                     JOIN (SELECT date, sum(number_of_nodes) AS total
+                           FROM eth_pos_nodes_distribution
+                           WHERE eth_pos_nodes_distribution.source = 'prometheus'
+                           GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
+            WHERE eth_pos_nodes_distribution.source = 'prometheus'
+            GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.date::text, 1, 7)
+            ORDER BY name, date
+        """)
+
+    def get_monthly_node_distribution_meta(self):
+        return self._run_select_query("""
+            select substr(min(date(eth_pos_nodes_distribution.date))::text, 1, 7) as min, substr(max(date(eth_pos_nodes_distribution.date))::text, 1, 7) as max
+            from eth_pos_nodes_distribution
+            where eth_pos_nodes_distribution.source = 'prometheus'
+        """)[0]
+
+    def get_monthly_node_distribution_by_date(self, date):
+        return self._run_select_query(
+            """
+            SELECT countries.country                                                                      AS name,
+                   countries.code,
+                   countries.country_flag                                                                 AS flag,
+                   AVG(eth_pos_nodes_distribution.number_of_nodes)::numeric                               as number_of_nodes,
+                   substr(eth_pos_nodes_distribution.date::text, 1, 7)                                    AS date,
+                   AVG(eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric)::numeric AS country_share
+            FROM eth_pos_nodes_distribution
+                     JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
+                     JOIN (SELECT date, sum(number_of_nodes) AS total
+                           FROM eth_pos_nodes_distribution
+                           WHERE eth_pos_nodes_distribution.source = 'prometheus' AND substr(eth_pos_nodes_distribution.date::text, 1, 7) = %s
+                           GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
+            WHERE eth_pos_nodes_distribution.source = 'prometheus'
+            GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.date::text, 1, 7)
+            ORDER BY name, date
+            """,
             (date,)
         )
 

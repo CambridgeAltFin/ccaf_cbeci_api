@@ -6,7 +6,9 @@ from .dto.charts import \
     ActiveNodeDto, \
     PowerDemandLegacyVsFutureDto, \
     NodeDistributionDto, \
+    MonthlyNodeDistributionDto, \
     NodeDistributionMetaDto, \
+    MonthlyNodeDistributionMetaDto, \
     ComparisonOfAnnualConsumptionDto
 from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto, \
     MonthlyTotalElectricityConsumptionDto as DownloadMonthlyTotalElectricityConsumptionDto, \
@@ -14,6 +16,7 @@ from .dto.download import NetworkPowerDemandDto as DownloadNetworkPowerDemandDto
     ClientDistributionDto as DownloadClientDistributionDto, \
     ActiveNodeDto as DownloadActiveNodeDto, \
     NodeDistributionDto as DownloadNodeDistributionDto, \
+    MonthlyNodeDistributionDto as DownloadMonthlyNodeDistributionDto, \
     AnnualisedConsumptionDto as DownloadAnnualisedConsumptionDto
 from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
@@ -154,6 +157,24 @@ class EthService:
             'name': 'Country',
             'country_share': "Country's share, %"
         }, [DownloadNodeDistributionDto(x) for x in chart_data])
+
+    def monthly_node_distribution(self, date: str = None):
+        if date is None or not is_valid_date_string_format(date, '%Y-%m'):
+            date = datetime.date.today().strftime('%Y-%m')
+        chart_data = self.repository.get_monthly_node_distribution_by_date(date)
+        meta = self.repository.get_monthly_node_distribution_meta()
+
+        return [MonthlyNodeDistributionDto(x) for x in chart_data], MonthlyNodeDistributionMetaDto(meta)
+
+    def download_monthly_node_distribution(self):
+        chart_data = self.repository.get_monthly_node_distribution()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Month',
+            'name': 'Country',
+            'country_share': "Country's share, %"
+        }, [DownloadMonthlyNodeDistributionDto(x) for x in chart_data])
 
     def power_demand_legacy_vs_future(self, date: str = None) -> list[PowerDemandLegacyVsFutureDto]:
         if date is None:

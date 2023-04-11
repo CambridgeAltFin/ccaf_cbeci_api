@@ -45,5 +45,24 @@ def handle():
             prometheus_formatted[timestamp][metric] = value
     prometheus_df = pd.DataFrame.from_records([item for ts, item in list(prometheus_formatted.items())])
 
+    ### add missing date for prometheus_df
+    start_date = prometheus_df['Date'][0]
+    end_date = prometheus_df['Date'][prometheus_df.shape[0]-1]
+    date_range = pd.date_range(start=start_date, end=end_date, freq='D')
+    new_dates = pd.DataFrame({'Date': date_range})
+    new_dates['Date'] = new_dates['Date'].astype(str)
+    prometheus_df = new_dates.merge(prometheus_df, how = 'left', on = 'Date')
+    prometheus_df = prometheus_df.ffill()
+
+
+    ### add missing date for beaconnodes_df
+    start_date = beaconnodes_df['Date'][0]
+    end_date = beaconnodes_df['Date'][beaconnodes_df.shape[0]-1]
+    date_range = pd.date_range(start=start_date, end=end_date, freq='D')
+    new_dates = pd.DataFrame({'Date': date_range})
+    new_dates['Date'] = new_dates['Date'].astype(str)
+    beaconnodes_df = new_dates.merge(beaconnodes_df, how = 'left', on = 'Date')
+    beaconnodes_df = beaconnodes_df.ffill()
+
     csv_prometheus_df = csv_df.merge(prometheus_df, on='Date', how='left', suffixes=('_csv', '_prometheus'))
     beaconnodes_csv_prometheus_df = beaconnodes_df.merge(csv_prometheus_df, on='Date', how='left', suffixes=('_beaconnodes', ''))

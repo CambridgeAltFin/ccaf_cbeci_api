@@ -35,7 +35,13 @@ def handle():
         consensus['Teku%'] = consensus['Teku'] / consensus['Total'] * 100
 
         execution_shares = [['Geth_%exe', '67.76'], ['Erigon_%exe', '10.13'], ['Besu_%exe', '6.59']]
+
+
         exe_data = pd.DataFrame(execution_shares)
+        
+        # add adjustment for execution client percentage to add-up to 100%
+        exe_data[1] = exe_data[1].astype('float')/exe_data[1].astype('float').sum()*100
+
         execution = exe_data.transpose()
         execution.columns = execution.iloc[0]
         execution = execution[1:]

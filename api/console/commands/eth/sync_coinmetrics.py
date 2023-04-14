@@ -197,7 +197,7 @@ class EnergyConsumptionCalculator:
 
 @click.command(name='eth:sync:coinmetrics')
 def handle():
-    url = 'https://charts.coinmetrics.io/pro-api/v4/timeseries/asset-metrics?page_size=10000&assets=eth&api_key={api_key}&metrics=FeeTotUSD,BlkUncRwdUSD,IssTotUSD,FeePrioTotUSD'.format(
+    url = 'https://api.coinmetrics.io/v4/timeseries/asset-metrics?page_size=10000&assets=eth&api_key={api_key}&metrics=FeeTotUSD,BlkUncRwdUSD,IssTotUSD,FeePrioTotUSD'.format(
         api_key=config['api.coinmetrics.io']['api_key'])
     response = requests.get(url)
     json = response.json()
@@ -214,7 +214,7 @@ def handle():
         else:
             miner_rev['RevUSD'] = miner_rev['IssTotUSD'] + miner_rev['FeeTotUSD'] + miner_rev['BlkUncRwdUSD']
 
-    url = 'https://charts.coinmetrics.io/pro-api/v4/timeseries/asset-metrics?page_size=10000&assets=eth&api_key={api_key}&metrics=HashRate'.format(
+    url = 'https://api.coinmetrics.io/v4/timeseries/asset-metrics?page_size=10000&assets=eth&api_key={api_key}&metrics=HashRate'.format(
         api_key=config['api.coinmetrics.io']['api_key'])
     response = requests.get(url)
     json = response.json()

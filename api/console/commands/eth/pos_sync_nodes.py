@@ -5,6 +5,7 @@ from config import config
 import click
 import psycopg2
 import psycopg2.extras
+import pandas as pd
 
 
 @click.command(name='eth-pos:sync:nodes')
@@ -14,7 +15,7 @@ def handle():
     new_prometheus_data = Prometheus2().crawler_observed_client_distribution()
 
     ### add missing date for prometheus
-    prometheus_data_ffill =  pd.DataFrame(prometheus_data)
+    prometheus_data_ffill = pd.DataFrame(prometheus_data)
     start_date = prometheus_data_ffill['Date'][0]
     end_date = prometheus_data_ffill['Date'][prometheus_data_ffill.shape[0]-1]
     date_range = pd.date_range(start=start_date, end=end_date, freq='D')

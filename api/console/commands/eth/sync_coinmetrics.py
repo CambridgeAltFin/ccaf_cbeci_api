@@ -235,7 +235,7 @@ def handle():
         miners = pd.DataFrame.from_records(cursor.fetchall())
 
         miners['Date'] = pd.to_datetime(miners['released_at'])
-        valid_asic = ["Bitmain", "Whatsminer", "Canaan", "Innosilicon", "Linzhi"]
+        valid_asic = ["Bitmain", "Whatsminer", "Canaan", "Innosilicon"]
         miners = miners.loc[~(miners['type'] == 'asic') | miners['brand'].isin(valid_asic)]
 
         ## add adjustment for gpu efficiencies

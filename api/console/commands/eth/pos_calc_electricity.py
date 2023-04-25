@@ -28,9 +28,9 @@ def handle():
         cols = ['Prysm', 'Lighthouse', 'Lodestar', 'Nimbus', 'Teku']
         consensus['Total'] = consensus[cols].sum(axis=1)
 
-        # sort the dataframe and add 7-day moving average to total nodes
-        consensus = consensus.sort_values('Date')
-        consensus['Total_7ma'] = consensus['Total'].rolling(7).mean()
+        # sort the dataframe and add 7-day moving average to total nodes (no longer needed - keep only 7-day moving average for consumption estimate)
+        #consensus = consensus.sort_values('Date')
+        #consensus['Total_7ma'] = consensus['Total'].rolling(7).mean()
 
         consensus['Prysm%'] = consensus['Prysm'] / consensus['Total'] * 100
         consensus['Lighthouse%'] = consensus['Lighthouse'] / consensus['Total'] * 100
@@ -139,7 +139,7 @@ def handle():
                                                        data_config4['TE%'] +
                                                        (data_config4['Teku_aMEC'] + data_config4['Besu_aMEC']) *
                                                        data_config4['TB%'] +
-                                                       data_config4['config4_idle']) * data_config4['Total_7ma'] / 1000
+                                                       data_config4['config4_idle']) * data_config4['Total'] / 1000
 
         data_config4['Lower Electricity Consumption kWh'] = data_config4['Lower Electricity Demand kW'] * 24 * 365.25
 
@@ -198,7 +198,7 @@ def handle():
                                                        data_config6['TE%'] +
                                                        (data_config6['Teku_aMEC'] + data_config6['Besu_aMEC']) *
                                                        data_config6['TB%'] +
-                                                       data_config6['config6_idle']) * data_config6['Total_7ma'] / 1000
+                                                       data_config6['config6_idle']) * data_config6['Total'] / 1000
 
         data_config6['Upper Electricity Consumption kWh'] = data_config6['Upper Electricity Demand kW'] * 24 * 365.25
 
@@ -257,7 +257,7 @@ def handle():
                                                          data_config5['TE%'] +
                                                          (data_config5['Teku_aMEC'] + data_config5['Besu_aMEC']) *
                                                          data_config5['TB%'] +
-                                                         data_config5['config5_idle']) * data_config5['Total_7ma'] / 1000
+                                                         data_config5['config5_idle']) * data_config5['Total'] / 1000
 
         data_config5['Config5 Electricity Consumption kWh'] = data_config5['Config5 Electricity Demand kW'] * 24 * 365.25
 

@@ -9,7 +9,7 @@ from config import config
 @click.command(name='charts:save:mining-revenue-from-fee')
 def handle():
     response = requests.get(
-        'https://charts.coinmetrics.io/pro-api/v4/timeseries/asset-metrics', {
+        'https://api.coinmetrics.io/v4/timeseries/asset-metrics', {
             'assets': 'btc',
             'metrics': 'FeeRevPct',
             'page_size': 10000,

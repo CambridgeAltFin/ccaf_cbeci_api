@@ -320,43 +320,43 @@ def handle():
                 list(insert)
             )
 
-        miners['Eff. Mh/s/W'] = miners['hashrate'] / miners['power']
-        miners['available machine inclu dag'] = None
-        storage_dict = {}
-        for index, row in miners.iterrows():
-            available_miner = miners[miners['Date'] <= row['Date']]
-
-            if row['Date'] < dag['Date'].min():
-                dag_size = 0
-            else:
-                dag_size = dag[dag['Date'] <= row['Date']]['Memory size in GB'].max()
-
-            available_miner = available_miner[available_miner['memory'] > dag_size].index.to_list()
-            storage_dict[row['Date']] = available_miner
-
-        avg_machine_efficiency = []
-
-        for key, value in storage_dict.items():
-            avg_efficiency = miners.loc[value, 'Eff. Mh/s/W'].mean()
-            tempt = {}
-            tempt['Date'] = key
-            tempt['Eff. Incl DAG file'] = avg_efficiency
-            tempt['miners'] = [[x.name, str(x['Eff. Mh/s/W'])] for x in miners.loc[value].to_records()]
-            avg_machine_efficiency.append(tempt)
-
-        efficiency_graph = pd.DataFrame(avg_machine_efficiency)
-        efficiency_graph['ts'] = efficiency_graph.Date.values.astype(np.int64) // 10 ** 9
-        insert = map(lambda x: (
-            'eth',
-            x['Eff. Incl DAG file'],
-            x['miners'],
-            x['ts'],
-            datetime.fromtimestamp(x['ts']).strftime('%Y-%m-%d'),
-        ), efficiency_graph.to_records())
-        psycopg2.extras.execute_values(
-            cursor,
-            'insert into average_machine_efficiencies '
-            '(asset, value, miners, timestamp, date) '
-            'values %s on conflict (asset, timestamp) do nothing',
-            list(insert)
-        )
+        # miners['Eff. Mh/s/W'] = miners['hashrate'] / miners['power']
+        # miners['available machine inclu dag'] = None
+        # storage_dict = {}
+        # for index, row in miners.iterrows():
+        #     available_miner = miners[miners['Date'] <= row['Date']]
+        #
+        #     if row['Date'] < dag['Date'].min():
+        #         dag_size = 0
+        #     else:
+        #         dag_size = dag[dag['Date'] <= row['Date']]['Memory size in GB'].max()
+        #
+        #     available_miner = available_miner[available_miner['memory'] > dag_size].index.to_list()
+        #     storage_dict[row['Date']] = available_miner
+        #
+        # avg_machine_efficiency = []
+        #
+        # for key, value in storage_dict.items():
+        #     avg_efficiency = miners.loc[value, 'Eff. Mh/s/W'].mean()
+        #     tempt = {}
+        #     tempt['Date'] = key
+        #     tempt['Eff. Incl DAG file'] = avg_efficiency
+        #     tempt['miners'] = [[x.name, str(x['Eff. Mh/s/W'])] for x in miners.loc[value].to_records()]
+        #     avg_machine_efficiency.append(tempt)
+        #
+        # efficiency_graph = pd.DataFrame(avg_machine_efficiency)
+        # efficiency_graph['ts'] = efficiency_graph.Date.values.astype(np.int64) // 10 ** 9
+        # insert = map(lambda x: (
+        #     'eth',
+        #     x['Eff. Incl DAG file'],
+        #     x['miners'],
+        #     x['ts'],
+        #     datetime.fromtimestamp(x['ts']).strftime('%Y-%m-%d'),
+        # ), efficiency_graph.to_records())
+        # psycopg2.extras.execute_values(
+        #     cursor,
+        #     'insert into average_machine_efficiencies '
+        #     '(asset, value, miners, timestamp, date) '
+        #     'values %s on conflict (asset, timestamp) do nothing',
+        #     list(insert)
+        # )

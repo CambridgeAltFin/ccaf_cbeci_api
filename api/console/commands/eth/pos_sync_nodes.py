@@ -10,7 +10,7 @@ import pandas as pd
 
 @click.command(name='eth-pos:sync:nodes')
 def handle():
-    migalabs_data = Migalabs().beacon_chain_client_distribution_over_time()
+    # migalabs_data = Migalabs().beacon_chain_client_distribution_over_time()
     prometheus_data = Prometheus().crawler_observed_client_distribution()
     new_prometheus_data = Prometheus2().crawler_observed_client_distribution()
 
@@ -29,7 +29,7 @@ def handle():
         cursor = conn.cursor()
         save_data(cursor, prometheus_data, 'prometheus')
         save_data_prometheus(cursor, new_prometheus_data, 'prometheus')
-        save_data(cursor, migalabs_data, 'migalabs')
+        # save_data(cursor, migalabs_data, 'migalabs')
 
 def save_data(cursor, data, source):
     psycopg2.extras.execute_values(

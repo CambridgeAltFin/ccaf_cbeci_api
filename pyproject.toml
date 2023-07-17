@@ -22,7 +22,7 @@ flask-swagger = "^0.2.14"
 flask-swagger-ui = "^3.36.0"
 firebase-admin = "^5.0.1"
 packaging = "^21.0"
-sentry-sdk = {extras = ["flask"], version = "^1.4.3"}
+sentry-sdk = {extras = ["flask"], version = "^1.14.0"}
 pytest = "^6.2.5"
 
 [tool.poetry.dev-dependencies]

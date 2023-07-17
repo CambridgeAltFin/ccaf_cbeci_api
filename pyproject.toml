@@ -6,7 +6,7 @@ authors = ["dektox <a.dek@jbs.cam.ac.uk>", "chesanovskiy_dv <chesanovskiydv@gmai
 
 [tool.poetry.dependencies]
 python = "^3.9"
-Flask = "^1.1.2"
+Flask = "^2.2.5"
 pandas = "^1.2.1"
 requests = "^2.25.1"
 Flask-Cors = "^3.0.10"

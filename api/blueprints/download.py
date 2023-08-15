@@ -4,6 +4,7 @@ from datetime import datetime
 from components.gas_emission import GreenhouseGasEmissionServiceFactory, EmissionIntensityServiceFactory, \
     PowerMixServiceFactory, EmissionServiceFactory
 from services import EnergyConsumption, EnergyConsumptionByTypes
+from components.energy_consumption.v1_3_1 import EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_3_1
 from components.energy_consumption import EnergyConsumptionServiceFactory
 from components.energy_consumption.v1_1_1 import \
     EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_1_1
@@ -66,7 +67,7 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
-        energy_consumption = EnergyConsumptionServiceFactory.create()
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
 
@@ -88,7 +89,7 @@ def get_monthly_data(version, price=.05):
     if version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0':
-        energy_consumption = EnergyConsumptionServiceFactory.create()
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
     else:
         raise NotImplementedError('Not Implemented')
 
@@ -106,7 +107,7 @@ def get_yearly_data(version, price=.05):
     if version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0':
-        energy_consumption = EnergyConsumptionServiceFactory.create()
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
     else:
         raise NotImplementedError('Not Implemented')
 
@@ -215,6 +216,8 @@ def profitability_equipment(version=None):
     elif version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0':
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
+    elif version == 'v1.4.0':
         energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')

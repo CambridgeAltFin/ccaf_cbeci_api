@@ -111,6 +111,8 @@ class EnergyConsumptionService(object):
                 'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
                 'timestamp': timestamp,
                 'profitability_equipment': 0,
+                'profitability_equipment_lower_bound': 0,
+                'profitability_equipment_upper_bound': 0,
                 'equipment_list': [],
             }
 
@@ -120,6 +122,8 @@ class EnergyConsumptionService(object):
             'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
             'timestamp': timestamp,
             'profitability_equipment': self.energy_consumption_calculator.get_avg(profitability_equipment),
+            'profitability_equipment_lower_bound': min(profitability_equipment),
+            'profitability_equipment_upper_bound': max(profitability_equipment),
             'equipment_list': equipment_list
         }
 

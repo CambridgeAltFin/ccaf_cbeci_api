@@ -1,6 +1,6 @@
 
 from config import config
-from components.energy_consumption import EnergyConsumptionServiceFactory
+from components.energy_consumption.v1_3_1 import EnergyConsumptionServiceFactory
 
 import click
 import psycopg2

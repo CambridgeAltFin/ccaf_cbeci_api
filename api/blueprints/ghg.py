@@ -1,4 +1,3 @@
-from components.energy_consumption import EnergyConsumptionServiceFactory
 from extensions import cache
 from flask import Blueprint, jsonify
 from decorators.cache_control import cache_control

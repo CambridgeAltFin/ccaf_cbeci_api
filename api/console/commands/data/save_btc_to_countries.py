@@ -1,4 +1,4 @@
-from components.energy_consumption.v1_3_1 import EnergyConsumptionServiceFactory
+from components.energy_consumption import EnergyConsumptionServiceFactory
 from components.countries import CountryFactory
 
 import click

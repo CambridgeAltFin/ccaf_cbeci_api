@@ -82,6 +82,10 @@ paths:
     $ref: "./endpoints/charts/monthly_bitcoin_power_mix.yaml"
   /charts/yearly_bitcoin_power_mix:
     $ref: "./endpoints/charts/yearly_bitcoin_power_mix.yaml"
+  /charts/energy_efficiency_of_mining_hardware/daily:
+    $ref: "./endpoints/charts/energy_efficiency_of_mining_hardware.yaml"
+  /charts/energy_efficiency_of_mining_hardware/yearly:
+    $ref: "./endpoints/charts/energy_efficiency_of_mining_hardware.yaml"
 
   /{version}/download/data:
     $ref: "./endpoints/download/data.yaml"
@@ -103,6 +107,10 @@ paths:
     $ref: "./endpoints/download/yearly_bitcoin_power_mix.yaml"
   /{version}/download/greenhouse_gas_emissions:
     $ref: "./endpoints/download/greenhouse_gas_emissions.yaml"
+  /{version}/download/energy_efficiency_of_mining_hardware/daily:
+    $ref: "./endpoints/download/energy_efficiency_of_mining_hardware.yaml"
+  /{version}/download/energy_efficiency_of_mining_hardware/yearly:
+    $ref: "./endpoints/download/energy_efficiency_of_mining_hardware.yaml"
 
   /eth/pos/data/stats:
      $ref: "./endpoints/eth/pos/data/stats.yaml"

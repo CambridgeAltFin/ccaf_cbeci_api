@@ -33,7 +33,7 @@ from extensions import cache
 from services.realtime_collection import realtime_collections
 from helpers import load_typed_hasrates
 from forms.feedback_form import FeedbackForm
-from components.energy_consumption.v1_3_1 import EnergyConsumptionServiceFactory
+from components.energy_consumption import EnergyConsumptionServiceFactory
 from exceptions import HttpException
 
 load_dotenv(override=True)

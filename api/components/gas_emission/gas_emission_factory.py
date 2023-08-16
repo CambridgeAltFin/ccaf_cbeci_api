@@ -1,6 +1,6 @@
 
 from components.gas_emission.power_mix_service import PowerMixService
-from components.energy_consumption.v1_3_1 import EnergyConsumptionServiceFactory
+from components.energy_consumption import EnergyConsumptionServiceFactory
 from components.gas_emission.gas_emission_repository import GasEmissionRepository
 from components.gas_emission.emission_intensity_service import EmissionIntensityService
 from components.gas_emission.greenhouse_gas_emission_service import GreenhouseGasEmissionService

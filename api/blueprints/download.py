@@ -507,3 +507,49 @@ def ghg_emissions(version=None):
         headers,
         [to_dict(row) for row in service.get_emissions()],
     )
+
+
+@bp.route('/energy_efficiency_of_mining_hardware/daily')
+@cache_control()
+def energy_efficiency_of_mining_hardware_daily(version=None):
+    if version != 'v1.4.0':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'date': 'Date',
+        'lower_bound': 'Lower bound efficiency, J/GH',
+        'estimated': 'Estimated efficiency, J/GH',
+        'upper_bound': 'Upper bound efficiency, J/GH',
+    }
+
+    service = EnergyConsumptionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        service.download_energy_efficiency_of_mining_hardware(),
+    )
+
+
+@bp.route('/energy_efficiency_of_mining_hardware/yearly')
+@cache_control()
+def energy_efficiency_of_mining_hardware_yearly(version=None):
+    if version != 'v1.4.0':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'year': 'Year',
+        'lower_bound': 'Lower bound efficiency, J/GH',
+        'estimated': 'Estimated efficiency, J/GH',
+        'upper_bound': 'Upper bound efficiency, J/GH',
+    }
+
+    service = EnergyConsumptionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        service.download_efficiency_of_mining_hardware_yearly(),
+    )

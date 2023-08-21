@@ -1,4 +1,3 @@
-
 from components.energy_consumption.energy_consumption_calculator import EnergyConsumptionCalculator
 from components.energy_consumption.energy_consumption_repository import EnergyConsumptionRepository
 from components.energy_consumption.v1_3_1.energy_consumption_service import EnergyConsumptionService as EnergyConsumptionService_v1_3_1
@@ -116,7 +115,7 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_3_1):
 
     def __calculate_years(self, timestamp, miner):
         date = datetime.fromtimestamp(timestamp)
-        date_of_release = datetime.fromtimestamp(miner['unix_date_of_release'])
+        date_of_release = datetime.fromtimestamp(miner['date_of_release'])
         difference = (date.year - date_of_release.year) * 12 + (date.month - date_of_release.month)
         if difference < 0:
             return "False"

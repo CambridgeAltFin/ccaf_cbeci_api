@@ -205,7 +205,7 @@ def profitability_equipment(version=None):
         return {
             'timestamp': row['timestamp'],
             'date': row['date'],
-            'profitability_equipment': row['profitability_equipment'],
+            'profitability_equipment': row['profitability_equipment'] * 1000,
             'equipment_list': '; '.join(list(map(miner_to_str, row['equipment_list']))),
         }
 
@@ -519,9 +519,9 @@ def energy_efficiency_of_mining_hardware_daily(version=None):
 
     headers = {
         'date': 'Date',
-        'lower_bound': 'Lower bound efficiency, J/GH',
-        'estimated': 'Estimated efficiency, J/GH',
-        'upper_bound': 'Upper bound efficiency, J/GH',
+        'lower_bound': 'Lower bound efficiency, J/Th',
+        'estimated': 'Estimated efficiency, J/Th',
+        'upper_bound': 'Upper bound efficiency, J/Th',
     }
 
     service = EnergyConsumptionServiceFactory.create()
@@ -542,9 +542,9 @@ def energy_efficiency_of_mining_hardware_yearly(version=None):
 
     headers = {
         'year': 'Year',
-        'lower_bound': 'Lower bound efficiency, J/GH',
-        'estimated': 'Estimated efficiency, J/GH',
-        'upper_bound': 'Upper bound efficiency, J/GH',
+        'lower_bound': 'Lower bound efficiency, J/Th',
+        'estimated': 'Estimated efficiency, J/Th',
+        'upper_bound': 'Upper bound efficiency, J/Th',
     }
 
     service = EnergyConsumptionServiceFactory.create()

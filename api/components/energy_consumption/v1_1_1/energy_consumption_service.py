@@ -174,7 +174,7 @@ class EnergyConsumptionService(object):
         if len(equipment_list) == 0:
             return result | {metrics[i]: None for i in range(len(metrics))}
 
-        profitability_equipment = list(map(lambda x: x['efficiency_j_gh'], equipment_list))
+        profitability_equipment = [x['efficiency_j_gh'] for x in equipment_list]
 
         if 'max_consumption' in metrics:
             result['max_consumption'] = self.energy_consumption_calculator.max_consumption(

@@ -71,6 +71,23 @@ def get_data(version=None, price=0.05):
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
 
+    def v1_4_0(price):
+        def to_dict(timestamp, row):
+            return {
+                'timestamp': timestamp,
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'guess_consumption': row['guess_consumption'],
+                'max_consumption': row['max_consumption'],
+                'min_consumption': row['min_consumption'],
+                'guess_power': row['guess_power'],
+                'max_power': row['max_power'],
+                'min_power': row['min_power']
+            }
+
+        energy_consumption = EnergyConsumptionServiceFactory.create()
+
+        return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
+
     func = locals().get(version.replace('.', '_'))
     if callable(func):
         return func(price)
@@ -88,8 +105,10 @@ def get_monthly_data(version, price=.05):
 
     if version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
-    elif version == 'v1.2.0':
+    elif version == 'v1.2.0' or version == 'v1.3.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
+    elif version == 'v1.4.0':
+        energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
 
@@ -106,8 +125,10 @@ def get_yearly_data(version, price=.05):
 
     if version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
-    elif version == 'v1.2.0':
+    elif version == 'v1.2.0' or version == 'v1.3.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
+    elif version == 'v1.4.0':
+        energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
 

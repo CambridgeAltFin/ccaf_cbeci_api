@@ -22,6 +22,9 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_3_1):
         super().__init__(energy_consumption_calculator=energy_consumption_calculator, repository=repository)
         self.repository = repository
 
+    def is_calculated(self, price: float) -> bool:
+        return int(price * 100) in self.calculated_prices
+
     def energy_efficiency_of_mining_hardware_chart(self):
         data = self.repository.get_daily_profitability_equipment()
         return [{

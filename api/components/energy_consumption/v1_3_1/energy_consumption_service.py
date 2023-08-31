@@ -27,7 +27,7 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_1_1):
             else self.calc_data(price)
 
     def is_calculated(self, price: float) -> bool:
-        return int(price * 100) in self.calculated_prices
+        return False
 
     def get_monthly_data(self, price: float, current_month=True):
         return map(

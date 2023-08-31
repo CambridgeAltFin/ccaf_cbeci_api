@@ -28,7 +28,7 @@ def mining_equipment_efficiency():
     def get_miners():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM miners')
+            cursor.execute('SELECT miner_name, unix_date_of_release, efficiency_j_gh FROM miners')
             return cursor.fetchall()
 
     response = []

@@ -6,21 +6,31 @@ class KernelDensityEstimationService:
         pass
 
     def get_kde(self, values, maxY = 10, bandwidth = 1, start = 0.995, end = 1.005, count = 27):
+        X_plot = [[False]]
+        add_to_end = False
         if (not bandwidth):
             bandwidth = 1
         if (not maxY):
             maxY = 10
         if (not start):
-            start = 0.995
+            X_plot = [[995]]
+            start = 0.9952
         if (not end):
-            end = 1.005
+            add_to_end = True
+            end = 1.0048
         if (not count):
-            count = 27
+            count = 25
 
-        X_plot = np.linspace(start * 1000, end * 1000, count)[:, np.newaxis]
+        if(X_plot[0][0]):
+            X_plot = np.concatenate((X_plot, np.linspace(start * 1000, end * 1000, count)[:, np.newaxis]))
+        else:
+            X_plot = np.linspace(start * 1000, end * 1000, count)[:, np.newaxis]
+        if(add_to_end):
+            X_plot = np.concatenate((X_plot, [[1005]]))
+
         data = np.array([[val * 1000] for val in values])
         kde = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(data)
-        samples = kde.score_samples(X_plot)
+        samples = np.exp(kde.score_samples(X_plot))
         result = []
         maxX = max(samples)
         minX = min(samples)

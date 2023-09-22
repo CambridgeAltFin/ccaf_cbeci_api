@@ -26,11 +26,11 @@ class KernelDensityEstimationService:
         minX = min(samples)
         k = -maxY / (minX - maxX)
         c = maxY - k * maxX
-        # for i in range(samples.size):
-        #     result.append({
-        #         "y": round(samples[i] * k + c, 4),
-        #         "x": round(X_plot[i][0] / 1000, 4)
-        #     })
         for i in range(samples.size):
-            result.append(round(samples[i] * k + c, 4))
+            result.append({
+                "y": round(samples[i] * k + c, 4),
+                "x": round(X_plot[i][0] / 1000, 4)
+            })
+        # for i in range(samples.size):
+        #     result.append(round(samples[i] * k + c, 4))
         return result

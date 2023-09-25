@@ -12,7 +12,7 @@ class KernelDensityEstimationService:
             bandwidth = 1
         if (not maxY):
             maxY = 10
-        if (not start):
+        if (not start and start != 0):
             X_plot = [[995]]
             start = 0.9952
         if (not end):

@@ -13,5 +13,11 @@ def data():
 
     service = KernelDensityEstimationFactory.create_service()
     return jsonify(
-        # data=service.get_kde(req_body.get('values'), req_body.get('bandwidth')).tolist())
-        data=service.get_kde(req_body.get('values'), req_body.get('bandwidth')))
+        data=service.get_kde(
+            values = req_body.get('values'),
+            maxY = req_body.get('maxy'), 
+            bandwidth = req_body.get('bandwidth'),
+            start = req_body.get('from'),
+            end = req_body.get('to'),
+            count = req_body.get('count')
+            ))

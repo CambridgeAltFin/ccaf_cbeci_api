@@ -1,5 +1,5 @@
 from api.prometheus import Prometheus, Prometheus2
-from api.migalabs import Migalabs
+from api.monitoreth import Monitoreth
 from config import config
 
 import click
@@ -10,7 +10,6 @@ import pandas as pd
 
 @click.command(name='eth-pos:sync:nodes')
 def handle():
-    # migalabs_data = Migalabs().beacon_chain_client_distribution_over_time()
     prometheus_data = Prometheus().crawler_observed_client_distribution()
     new_prometheus_data = Prometheus2().crawler_observed_client_distribution()
 
@@ -25,11 +24,19 @@ def handle():
     prometheus_data_ffill = prometheus_data_ffill.ffill()
     prometheus_data = prometheus_data_ffill.to_dict('records')
 
+    monitoreth_data = Monitoreth().client_diversity()
+
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
-        save_data(cursor, prometheus_data, 'prometheus')
-        save_data_prometheus(cursor, new_prometheus_data, 'prometheus')
-        # save_data(cursor, migalabs_data, 'migalabs')
+        if len(prometheus_data):
+            save_data(cursor, prometheus_data, 'prometheus')
+            save_data(cursor, prometheus_data, 'monitoreth')
+        if len(new_prometheus_data):
+            save_data_update(cursor, new_prometheus_data, 'prometheus')
+            save_data(cursor, new_prometheus_data, 'monitoreth')
+        if len(monitoreth_data):
+            save_data_update(cursor, monitoreth_data, 'monitoreth')
+
 
 def save_data(cursor, data, source):
     psycopg2.extras.execute_values(
@@ -52,7 +59,8 @@ def save_data(cursor, data, source):
         ) for i in data]
     )
 
-def save_data_prometheus(cursor, data, source):
+
+def save_data_update(cursor, data, source):
     psycopg2.extras.execute_values(
         cursor,
         """

@@ -95,8 +95,8 @@ class EthRepository(CustomDataRepository):
             FROM eth_pos_nodes
                  JOIN (SELECT id, prysm + lighthouse + teku + nimbus + lodestar + grandine + others + erigon AS total
                        FROM eth_pos_nodes
-                       WHERE source = 'prometheus') AS t ON t.id = eth_pos_nodes.id
-            WHERE source = 'prometheus'
+                       WHERE source = 'monitoreth') AS t ON t.id = eth_pos_nodes.id
+            WHERE source = 'monitoreth'
             ORDER BY date
             """,
         )
@@ -106,7 +106,7 @@ class EthRepository(CustomDataRepository):
             "SELECT prysm + lighthouse + teku + nimbus + lodestar + grandine + others + erigon as total, "
             "   extract(epoch from (date))::int as timestamp "
             "FROM eth_pos_nodes "
-            "WHERE source = 'prometheus' "
+            "WHERE source = 'monitoreth' "
             "ORDER BY date",
         )
 
@@ -122,9 +122,9 @@ class EthRepository(CustomDataRepository):
                  JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
                  JOIN (SELECT date, sum(number_of_nodes) AS total
                        FROM eth_pos_nodes_distribution
-                       WHERE eth_pos_nodes_distribution.source = 'prometheus'
+                       WHERE eth_pos_nodes_distribution.source = 'monitoreth'
                        GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
-        WHERE eth_pos_nodes_distribution.source = 'prometheus'
+        WHERE eth_pos_nodes_distribution.source = 'monitoreth'
         ORDER BY countries.country, eth_pos_nodes_distribution.date
         """)
 
@@ -132,7 +132,7 @@ class EthRepository(CustomDataRepository):
         return self._run_select_query("""
             select min(date(eth_pos_nodes_distribution.date)) as min, max(date(eth_pos_nodes_distribution.date))
             from eth_pos_nodes_distribution
-            where eth_pos_nodes_distribution.source = 'prometheus'
+            where eth_pos_nodes_distribution.source = 'monitoreth'
         """)[0]
 
     def get_node_distribution_by_date(self, date):
@@ -148,10 +148,10 @@ class EthRepository(CustomDataRepository):
             "JOIN ("
             "   SELECT date, sum(number_of_nodes) AS total "
             "   FROM eth_pos_nodes_distribution "
-            "   WHERE eth_pos_nodes_distribution.source = 'prometheus' AND date(eth_pos_nodes_distribution.date) = %s"
+            "   WHERE eth_pos_nodes_distribution.source = 'monitoreth' AND date(eth_pos_nodes_distribution.date) = %s"
             "   GROUP BY date"
             ") AS agg ON agg.date = eth_pos_nodes_distribution.date "
-            "WHERE eth_pos_nodes_distribution.source = 'prometheus' "
+            "WHERE eth_pos_nodes_distribution.source = 'monitoreth' "
             "ORDER BY countries.country, eth_pos_nodes_distribution.date",
             (date,)
         )
@@ -168,9 +168,9 @@ class EthRepository(CustomDataRepository):
                      JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
                      JOIN (SELECT date, sum(number_of_nodes) AS total
                            FROM eth_pos_nodes_distribution
-                           WHERE eth_pos_nodes_distribution.source = 'prometheus'
+                           WHERE eth_pos_nodes_distribution.source = 'monitoreth'
                            GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
-            WHERE eth_pos_nodes_distribution.source = 'prometheus'
+            WHERE eth_pos_nodes_distribution.source = 'monitoreth'
             GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.date::text, 1, 7)
             ORDER BY name, date
         """)
@@ -179,7 +179,7 @@ class EthRepository(CustomDataRepository):
         return self._run_select_query("""
             select substr(min(date(eth_pos_nodes_distribution.date))::text, 1, 7) as min, substr(max(date(eth_pos_nodes_distribution.date))::text, 1, 7) as max
             from eth_pos_nodes_distribution
-            where eth_pos_nodes_distribution.source = 'prometheus'
+            where eth_pos_nodes_distribution.source = 'monitoreth'
         """)[0]
 
     def get_monthly_node_distribution_by_date(self, date):
@@ -195,9 +195,9 @@ class EthRepository(CustomDataRepository):
                      JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
                      JOIN (SELECT date, sum(number_of_nodes) AS total
                            FROM eth_pos_nodes_distribution
-                           WHERE eth_pos_nodes_distribution.source = 'prometheus' AND substr(eth_pos_nodes_distribution.date::text, 1, 7) = %s
+                           WHERE eth_pos_nodes_distribution.source = 'monitoreth' AND substr(eth_pos_nodes_distribution.date::text, 1, 7) = %s
                            GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
-            WHERE eth_pos_nodes_distribution.source = 'prometheus'
+            WHERE eth_pos_nodes_distribution.source = 'monitoreth'
             GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.date::text, 1, 7)
             ORDER BY name, date
             """,

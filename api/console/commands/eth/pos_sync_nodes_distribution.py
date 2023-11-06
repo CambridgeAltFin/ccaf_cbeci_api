@@ -21,12 +21,14 @@ def handle():
         def save(data, source):
             psycopg2.extras.execute_values(
                 cursor,
-                'insert into eth_pos_nodes_distribution (country_id, number_of_nodes, source, date)  '
-                'VALUES %s on conflict (country_id, source, date) do update set number_of_nodes = EXCLUDED.number_of_nodes',
+                'insert into eth_pos_nodes_distribution (country_id, number_of_nodes, source, date, datetime)  '
+                'VALUES %s on conflict (country_id, source, date) do update set '
+                'number_of_nodes = EXCLUDED.number_of_nodes, datetime = EXCLUDED.datetime',
                 [(
                     countries[i['country']],
                     i.get('number_of_nodes', 0),
                     source,
+                    i['date'][:10],
                     i.get('date', None),
                 ) for i in data if i['country'] in countries]
             )

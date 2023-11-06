@@ -42,7 +42,7 @@ def save_data(cursor, data, source):
     psycopg2.extras.execute_values(
         cursor,
         """
-        insert into eth_pos_nodes (prysm, lighthouse, teku, nimbus, lodestar, grandine, others, erigon, source, date) 
+        insert into eth_pos_nodes (prysm, lighthouse, teku, nimbus, lodestar, grandine, others, erigon, source, date, datetime) 
         values %s on conflict (source, date) do nothing
         """,
         [(
@@ -55,7 +55,8 @@ def save_data(cursor, data, source):
             i.get('others', 0),
             i.get('erigon', 0),
             source,
-            i['Date']
+            i['Date'][:10],
+            i['Date'],
         ) for i in data]
     )
 
@@ -64,7 +65,7 @@ def save_data_update(cursor, data, source):
     psycopg2.extras.execute_values(
         cursor,
         """
-        insert into eth_pos_nodes (prysm, lighthouse, teku, nimbus, lodestar, grandine, others, erigon, source, date) 
+        insert into eth_pos_nodes (prysm, lighthouse, teku, nimbus, lodestar, grandine, others, erigon, source, date, datetime) 
         values %s on conflict (source, date) 
         do update set 
             prysm = EXCLUDED.prysm, 
@@ -74,7 +75,8 @@ def save_data_update(cursor, data, source):
             lodestar = EXCLUDED.lodestar, 
             grandine = EXCLUDED.grandine, 
             others = EXCLUDED.others, 
-            erigon = EXCLUDED.erigon
+            erigon = EXCLUDED.erigon,
+            datetime = EXCLUDED.datetime
         """,
         [(
             i.get('prysm', 0),
@@ -86,6 +88,7 @@ def save_data_update(cursor, data, source):
             i.get('others', 0),
             i.get('erigon', 0),
             source,
-            i['Date']
+            i['Date'][:10],
+            i['Date'],
         ) for i in data]
     )

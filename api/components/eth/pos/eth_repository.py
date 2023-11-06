@@ -91,7 +91,7 @@ class EthRepository(CustomDataRepository):
                    grandine::numeric / t.total::numeric AS grandine,
                    others::numeric / t.total::numeric AS others,
                    erigon::numeric / t.total::numeric AS erigon,
-                   extract(epoch from (date))::int as timestamp
+                   extract(epoch from (datetime))::int as timestamp
             FROM eth_pos_nodes
                  JOIN (SELECT id, prysm + lighthouse + teku + nimbus + lodestar + grandine + others + erigon AS total
                        FROM eth_pos_nodes
@@ -116,7 +116,7 @@ class EthRepository(CustomDataRepository):
                countries.code,
                countries.country_flag AS flag,
                eth_pos_nodes_distribution.number_of_nodes,
-               eth_pos_nodes_distribution.date,
+               eth_pos_nodes_distribution.datetime as date,
                eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric AS country_share
         FROM eth_pos_nodes_distribution
                  JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
@@ -125,12 +125,12 @@ class EthRepository(CustomDataRepository):
                        WHERE eth_pos_nodes_distribution.source = 'monitoreth'
                        GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
         WHERE eth_pos_nodes_distribution.source = 'monitoreth'
-        ORDER BY countries.country, eth_pos_nodes_distribution.date
+        ORDER BY countries.country, eth_pos_nodes_distribution.datetime
         """)
 
     def get_node_distribution_meta(self):
         return self._run_select_query("""
-            select min(date(eth_pos_nodes_distribution.date)) as min, max(date(eth_pos_nodes_distribution.date))
+            select min(date(eth_pos_nodes_distribution.datetime)) as min, max(date(eth_pos_nodes_distribution.datetime))
             from eth_pos_nodes_distribution
             where eth_pos_nodes_distribution.source = 'monitoreth'
         """)[0]
@@ -141,7 +141,7 @@ class EthRepository(CustomDataRepository):
             "   countries.code, "
             "   countries.country_flag AS flag, "
             "   eth_pos_nodes_distribution.number_of_nodes, "
-            "   eth_pos_nodes_distribution.date, "
+            "   eth_pos_nodes_distribution.datetime as date, "
             "   eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric AS country_share "
             "FROM eth_pos_nodes_distribution "
             "JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id "
@@ -161,8 +161,8 @@ class EthRepository(CustomDataRepository):
             SELECT countries.country                                                                      AS name,
                    countries.code,
                    countries.country_flag                                                                 AS flag,
-                   AVG(eth_pos_nodes_distribution.number_of_nodes)::numeric                               as number_of_nodes,
-                   substr(eth_pos_nodes_distribution.date::text, 1, 7)                                    AS date,
+                   AVG(eth_pos_nodes_distribution.number_of_nodes)::numeric                               AS number_of_nodes,
+                   substr(eth_pos_nodes_distribution.datetime::text, 1, 7)                                AS date,
                    AVG(eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric)::numeric AS country_share
             FROM eth_pos_nodes_distribution
                      JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
@@ -171,13 +171,13 @@ class EthRepository(CustomDataRepository):
                            WHERE eth_pos_nodes_distribution.source = 'monitoreth'
                            GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
             WHERE eth_pos_nodes_distribution.source = 'monitoreth'
-            GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.date::text, 1, 7)
+            GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.datetime::text, 1, 7)
             ORDER BY name, date
         """)
 
     def get_monthly_node_distribution_meta(self):
         return self._run_select_query("""
-            select substr(min(date(eth_pos_nodes_distribution.date))::text, 1, 7) as min, substr(max(date(eth_pos_nodes_distribution.date))::text, 1, 7) as max
+            select substr(min(date(eth_pos_nodes_distribution.datetime))::text, 1, 7) as min, substr(max(date(eth_pos_nodes_distribution.datetime))::text, 1, 7) as max
             from eth_pos_nodes_distribution
             where eth_pos_nodes_distribution.source = 'monitoreth'
         """)[0]
@@ -188,17 +188,17 @@ class EthRepository(CustomDataRepository):
             SELECT countries.country                                                                      AS name,
                    countries.code,
                    countries.country_flag                                                                 AS flag,
-                   AVG(eth_pos_nodes_distribution.number_of_nodes)::numeric                               as number_of_nodes,
-                   substr(eth_pos_nodes_distribution.date::text, 1, 7)                                    AS date,
+                   AVG(eth_pos_nodes_distribution.number_of_nodes)::numeric                               AS number_of_nodes,
+                   substr(eth_pos_nodes_distribution.datetime::text, 1, 7)                                AS date,
                    AVG(eth_pos_nodes_distribution.number_of_nodes::numeric / agg.total::numeric)::numeric AS country_share
             FROM eth_pos_nodes_distribution
                      JOIN countries ON eth_pos_nodes_distribution.country_id = countries.id
                      JOIN (SELECT date, sum(number_of_nodes) AS total
                            FROM eth_pos_nodes_distribution
-                           WHERE eth_pos_nodes_distribution.source = 'monitoreth' AND substr(eth_pos_nodes_distribution.date::text, 1, 7) = %s
+                           WHERE eth_pos_nodes_distribution.source = 'monitoreth' AND substr(eth_pos_nodes_distribution.datetime::text, 1, 7) = %s
                            GROUP BY date) AS agg ON agg.date = eth_pos_nodes_distribution.date
             WHERE eth_pos_nodes_distribution.source = 'monitoreth'
-            GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.date::text, 1, 7)
+            GROUP BY countries.country, countries.code, countries.country_flag, substr(eth_pos_nodes_distribution.datetime::text, 1, 7)
             ORDER BY name, date
             """,
             (date,)

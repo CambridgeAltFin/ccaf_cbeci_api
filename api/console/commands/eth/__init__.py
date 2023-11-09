@@ -6,3 +6,4 @@ from console.commands.eth.pos_sync_nodes import handle as pos_sync_nodes
 from console.commands.eth.pos_sync_nodes_distribution import handle as pos_sync_nodes_distribution
 from console.commands.eth.live_data import handle as live_data
 from console.commands.eth.pos_ghg_emissions import handle as pos_ghg_emissions
+from console.commands.eth.pow_ghg_emissions import handle as pow_ghg_emissions

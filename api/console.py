@@ -31,6 +31,7 @@ cli.add_command(commands.eth.pos_sync_nodes)
 cli.add_command(commands.eth.pos_sync_nodes_distribution)
 cli.add_command(commands.eth.live_data)
 cli.add_command(commands.eth.pos_ghg_emissions)
+cli.add_command(commands.eth.pow_ghg_emissions)
 
 cli.add_command(commands.carbon_accounting_tool.calc_carbon_ratings)
 

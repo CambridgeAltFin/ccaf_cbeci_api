@@ -26,6 +26,17 @@ manual_adjust_country_list = ['Gibraltar', 'Niue', 'Saint Helena', 'Western Saha
 
 map_start_date = '2022-02-07'
 
+power_sources_order = {
+    'Other renewable': 1,
+    'Solar': 2,
+    'Wind': 3,
+    'Hydro': 4,
+    'Nuclear': 5,
+    'Oil': 6,
+    'Gas': 7,
+    'Coal': 8,
+}
+
 
 def hashrate_filter(country_name):
     """
@@ -104,7 +115,7 @@ def handle():
                 psycopg2.extras.execute_values(
                     cursor,
                     'insert into power_sources '
-                    '(asset, type, name, timestamp, date, value) '
+                    '(asset, type, name, timestamp, date, value, "order") '
                     'values %s on conflict (asset, type, name, date) do nothing',
                     list([(
                         'eth_pos',
@@ -113,6 +124,7 @@ def handle():
                         int(x['Date'].timestamp()),
                         x['Date'].strftime("%Y-%m-%d"),
                         x['Power Source Share'],
+                        power_sources_order[x['Power Source']]
                     ) for x in records])
                 )
 

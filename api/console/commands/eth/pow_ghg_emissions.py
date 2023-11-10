@@ -30,6 +30,17 @@ map_end_date = '2022-01-01'
 us_map_start_date = '2021-12-01'
 this_year = datetime.now().year
 
+power_sources_order = {
+    'Other renewable': 1,
+    'Solar': 2,
+    'Wind': 3,
+    'Hydro': 4,
+    'Nuclear': 5,
+    'Oil': 6,
+    'Gas': 7,
+    'Coal': 8,
+}
+
 
 @click.command(name='eth-pow:ghg-emissions')
 def handle():
@@ -71,7 +82,7 @@ def handle():
                     ) for x in records])
                 )
 
-        def save_cumulative_ghg_emissions(records, price):
+        def save_cumulative_ghg_emissions(records, price_value):
             if len(records):
                 psycopg2.extras.execute_values(
                     cursor,
@@ -80,7 +91,7 @@ def handle():
                     'values %s on conflict (asset, price, date) do nothing',
                     list([(
                         'eth_pow',
-                        price,
+                        price_value,
                         int(datetime.strptime(x['Month'], "%Y-%m-%d").timestamp()),
                         x['Month'],
                         x['Monthly consumption TWh_CO2'],
@@ -93,7 +104,7 @@ def handle():
                 psycopg2.extras.execute_values(
                     cursor,
                     'insert into power_sources '
-                    '(asset, type, name, timestamp, date, value) '
+                    '(asset, type, name, timestamp, date, value, "order") '
                     'values %s on conflict (asset, type, name, date) do nothing',
                     list([(
                         'eth_pow',
@@ -102,13 +113,12 @@ def handle():
                         int(x['Date'].timestamp()),
                         x['Date'].strftime("%Y-%m-%d"),
                         x['Power Source Share'],
+                        power_sources_order[x['Power Source']]
                     ) for x in records])
                 )
 
         def save_geo_distribution(records):
             if len(records):
-                print(records)
-                print(countries)
                 psycopg2.extras.execute_values(
                     cursor,
                     'insert into eth_pow_distribution '

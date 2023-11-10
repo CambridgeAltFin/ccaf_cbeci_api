@@ -85,3 +85,52 @@ def power_demand_legacy_vs_future(date=None):
 @cache.memoize()
 def comparison_of_annual_consumption(date=None):
     return jsonify(data=eth_service.comparison_of_annual_consumption(date))
+
+
+@bp.route('/greenhouse_gas_emissions')
+@cache_control()
+@cache.memoize()
+def greenhouse_gas_emissions():
+    return jsonify(data=eth_service.greenhouse_gas_emissions())
+
+
+@bp.route('/total_greenhouse_gas_emissions/monthly')
+@cache_control()
+@cache.memoize()
+def total_greenhouse_gas_emissions_monthly():
+    return jsonify(data=eth_service.total_greenhouse_gas_emissions_monthly())
+
+
+@bp.route('/total_greenhouse_gas_emissions/yearly')
+@cache_control()
+@cache.memoize()
+def total_greenhouse_gas_emissions_yearly():
+    return jsonify(data=eth_service.total_greenhouse_gas_emissions_yearly())
+
+
+@bp.route('/power_mix/monthly')
+@cache_control()
+@cache.memoize()
+def power_mix_monthly():
+    return jsonify(data=eth_service.monthly_power_mix())
+
+
+@bp.route('/power_mix/yearly')
+@cache_control()
+@cache.memoize()
+def power_mix_yearly():
+    return jsonify(data=eth_service.yearly_power_mix())
+
+
+@bp.route('/emission_intensity')
+@cache_control()
+@cache.memoize()
+def emission_intensity():
+    return jsonify(data=eth_service.emission_intensity())
+
+
+@bp.route('/emission_intensity/monthly')
+@cache_control()
+@cache.memoize()
+def monthly_emission_intensity():
+    return jsonify(data=eth_service.monthly_emission_intensity())

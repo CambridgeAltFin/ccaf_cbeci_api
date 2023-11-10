@@ -390,7 +390,7 @@ def total_bitcoin_greenhouse_gas_emissions(version=None):
 
     return send_file_func(
         headers,
-        [to_dict(row) for row in service.get_total_greenhouse_gas_emissions(float(price))],
+        [to_dict(row) for row in service.get_total_greenhouse_gas_emissions_monthly(float(price))],
     )
 
 

@@ -1,13 +1,15 @@
-from config import config
-
 import os
+from datetime import datetime, timedelta
+
 import click
+import pandas as pd
 import psycopg2
 import psycopg2.extras
-import pandas as pd
-from datetime import datetime
+
+from api.digiconomist import Digiconomist
 from components.eth import EthPosFactory
 from components.eth.pos.dto.download import NetworkPowerDemandDto
+from config import config
 
 # Total Lifecycle Emissions in gCO2eq/kWh - updated version
 co2_g_p_kwh_hydro = 21
@@ -127,6 +129,8 @@ def handle():
                         power_sources_order[x['Power Source']]
                     ) for x in records])
                 )
+
+        save_digiconomist_live_data(cursor)
 
         cursor.execute("select * from eth_pos_nodes_distribution "
                        "where source = 'monitoreth' order by date")
@@ -412,3 +416,20 @@ def populate_co2(co2_emission_df, country_col, year_col, updatest_year):
     total = total.sort_values([country_col, year_col])
     total = total.reset_index(drop=True)
     return total
+
+
+def save_digiconomist_live_data(cursor):
+    digiconomist = Digiconomist()
+    yesterday = datetime.today() - timedelta(days=1)
+    result = digiconomist.ethereum(yesterday)
+    if len(result) > 0:
+        cursor.execute(
+            'INSERT INTO digiconomist_btc ("24hr_kWh", "24hr_kgCO2", date, asset) '
+            'VALUES (%s, %s, %s, %s)',
+            (
+                result[0]['24hr_kWh'],
+                result[0]['24hr_kgCO2'],
+                yesterday,
+                'eth'
+            )
+        )

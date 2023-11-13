@@ -19,3 +19,10 @@ def network_power_demand():
 @cache.memoize()
 def live_data():
     return jsonify(data=eth_service.get_live_data())
+
+
+@bp.route('/ghg/live')
+@cache_control()
+@cache.memoize()
+def ghg_live_data():
+    return jsonify(data=eth_service.get_ghg_live_data())

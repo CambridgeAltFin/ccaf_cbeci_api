@@ -347,3 +347,32 @@ class EthRepository(CustomDataRepository):
             order by DATE_TRUNC('month', date)
            """
         return self._run_select_query(sql)
+
+    def digiconomist_live_data(self):
+        sql = """
+            select "24hr_kgCO2" * 365 / 1000 as value from digiconomist_btc
+            where asset = 'eth'
+            order by date desc
+            limit 1
+        """
+        return self._run_select_query(sql)[0]
+
+    def carbon_ratings_live_data(self):
+        sql = """
+            select "emissions_365d" / 1000 as value from carbon_ratings
+            where asset = 'eth_pos'
+            order by date desc
+            limit 1
+        """
+        return self._run_select_query(sql)[0]
+
+    def btc_ghg_live_data(self):
+        sql = """
+            select value from greenhouse_gas_emissions
+            where asset = 'btc' and name = ANY (ARRAY [%s, %s, %s]) and price = '0.05'
+            order by date desc
+            limit 1
+        """
+        return self._run_select_query(sql, (
+            GhgConstants.HISTORICAL_GUESS_CO2, GhgConstants.GUESS_CO2, GhgConstants.PREDICTED_GUESS_CO2,
+        ))[0]

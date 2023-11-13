@@ -1,0 +1,23 @@
+get:
+  summary: Ethereum greenhouse gas emissions
+  tags:
+    - Ethereum/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    x:
+                      type: number
+                    y:
+                      type: number
+                    name:
+                      type: string

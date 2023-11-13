@@ -143,7 +143,20 @@ paths:
      $ref: "./endpoints/eth/pos/charts/comparison_of_annual_consumption.yaml"
   /eth/pos/charts/comparison_of_annual_consumption/{YYYY-MM-DD}:
      $ref: "./endpoints/eth/pos/charts/comparison_of_annual_consumption.yaml"
-
+  /eth/pos/charts/greenhouse_gas_emissions:
+     $ref: "./endpoints/eth/pos/charts/greenhouse_gas_emissions.yaml"
+  /eth/pos/charts/total_greenhouse_gas_emissions/monthly:
+     $ref: "./endpoints/eth/pos/charts/total_greenhouse_gas_emissions_monthly.yaml"
+  /eth/pos/charts/total_greenhouse_gas_emissions/yearly:
+     $ref: "./endpoints/eth/pos/charts/total_greenhouse_gas_emissions_yearly.yaml"
+  /eth/pos/charts/power_mix/monthly:
+     $ref: "./endpoints/eth/pos/charts/power_mix_monthly.yaml"
+  /eth/pos/charts/power_mix/yearly:
+     $ref: "./endpoints/eth/pos/charts/power_mix_yearly.yaml"
+  /eth/pos/charts/emission_intensity:
+     $ref: "./endpoints/eth/pos/charts/emission_intensity.yaml"
+  /eth/pos/charts/emission_intensity/monthly:
+     $ref: "./endpoints/eth/pos/charts/emission_intensity_monthly.yaml"
 
   /{version}/eth/pos/download/network_power_demand:
      $ref: "./endpoints/eth/pos/download/network_power_demand.yaml"
@@ -161,6 +174,20 @@ paths:
     $ref: "./endpoints/eth/pos/download/node_distribution.yaml"
   /{version}/eth/pos/download/monthly_node_distribution:
     $ref: "./endpoints/eth/pos/download/node_distribution.yaml"
+  /{version}/eth/pos/download/greenhouse_gas_emissions:
+    $ref: "./endpoints/eth/pos/download/greenhouse_gas_emissions.yaml"
+  /{version}/eth/pos/download/total_greenhouse_gas_emissions/monthly:
+    $ref: "./endpoints/eth/pos/download/total_greenhouse_gas_emissions_monthly.yaml"
+  /{version}/eth/pos/download/total_greenhouse_gas_emissions/yearly:
+    $ref: "./endpoints/eth/pos/download/total_greenhouse_gas_emissions_yearly.yaml"
+  /{version}/eth/pos/download/power_mix/monthly:
+    $ref: "./endpoints/eth/pos/download/power_mix_monthly.yaml"
+  /{version}/eth/pos/download/power_mix/yearly:
+    $ref: "./endpoints/eth/pos/download/power_mix_yearly.yaml"
+  /{version}/eth/pos/download/emission_intensity:
+    $ref: "./endpoints/eth/pos/download/emission_intensity.yaml"
+  /{version}/eth/pos/download/emission_intensity/monthly:
+    $ref: "./endpoints/eth/pos/download/emission_intensity_monthly.yaml"
 
   /eth/pow/data/stats/{price}:
      $ref: "./endpoints/eth/pow/data/stats.yaml"
@@ -181,6 +208,20 @@ paths:
      $ref: "./endpoints/eth/pow/charts/profitability_threshold.yaml"
   /eth/pow/charts/source_comparison:
      $ref: "./endpoints/eth/pow/charts/source_comparison.yaml"
+  /eth/pow/charts/greenhouse_gas_emissions:
+     $ref: "./endpoints/eth/pow/charts/greenhouse_gas_emissions.yaml"
+  /eth/pow/charts/total_greenhouse_gas_emissions/monthly:
+     $ref: "./endpoints/eth/pow/charts/total_greenhouse_gas_emissions_monthly.yaml"
+  /eth/pow/charts/total_greenhouse_gas_emissions/yearly:
+     $ref: "./endpoints/eth/pow/charts/total_greenhouse_gas_emissions_yearly.yaml"
+  /eth/pow/charts/power_mix/monthly:
+     $ref: "./endpoints/eth/pow/charts/power_mix_monthly.yaml"
+  /eth/pow/charts/power_mix/yearly:
+     $ref: "./endpoints/eth/pow/charts/power_mix_yearly.yaml"
+  /eth/pow/charts/emission_intensity:
+     $ref: "./endpoints/eth/pow/charts/emission_intensity.yaml"
+  /eth/pow/charts/emission_intensity/monthly:
+     $ref: "./endpoints/eth/pow/charts/emission_intensity_monthly.yaml"
 
   /{version}/eth/pow/download/network_power_demand/{price}:
      $ref: "./endpoints/eth/pow/download/network_power_demand.yaml"
@@ -198,6 +239,20 @@ paths:
      $ref: "./endpoints/eth/pow/download/profitability_threshold.yaml"
   /{version}/eth/pow/download/source_comparison:
      $ref: "./endpoints/eth/pow/download/source_comparison.yaml"
+  /{version}/eth/pow/download/greenhouse_gas_emissions:
+    $ref: "./endpoints/eth/pow/download/greenhouse_gas_emissions.yaml"
+  /{version}/eth/pow/download/total_greenhouse_gas_emissions/monthly:
+    $ref: "./endpoints/eth/pow/download/total_greenhouse_gas_emissions_monthly.yaml"
+  /{version}/eth/pow/download/total_greenhouse_gas_emissions/yearly:
+    $ref: "./endpoints/eth/pow/download/total_greenhouse_gas_emissions_yearly.yaml"
+  /{version}/eth/pow/download/power_mix/monthly:
+    $ref: "./endpoints/eth/pow/download/power_mix_monthly.yaml"
+  /{version}/eth/pow/download/power_mix/yearly:
+    $ref: "./endpoints/eth/pow/download/power_mix_yearly.yaml"
+  /{version}/eth/pow/download/emission_intensity:
+    $ref: "./endpoints/eth/pow/download/emission_intensity.yaml"
+  /{version}/eth/pow/download/emission_intensity/monthly:
+    $ref: "./endpoints/eth/pow/download/emission_intensity_monthly.yaml"
 
   /text_pages:
     $ref: "./endpoints/wysiwyg/text_pages.yaml"

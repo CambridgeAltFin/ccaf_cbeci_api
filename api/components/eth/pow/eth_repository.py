@@ -199,3 +199,14 @@ class EthRepository(CustomDataRepository):
             order by DATE_TRUNC('month', date)
            """
         return self._run_select_query(sql)
+
+    def get_ethereum_mining_map(self):
+        sql = """
+            select continent as name,
+                   sum(value) as value, 
+                   extract(epoch from date) as timestamp
+            from eth_pow_distribution
+            group by continent, date
+            order by date, continent
+        """
+        return self._run_select_query(sql)

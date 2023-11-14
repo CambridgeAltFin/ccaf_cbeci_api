@@ -222,6 +222,8 @@ paths:
      $ref: "./endpoints/eth/pow/charts/emission_intensity.yaml"
   /eth/pow/charts/emission_intensity/monthly:
      $ref: "./endpoints/eth/pow/charts/emission_intensity_monthly.yaml"
+  /eth/pow/charts/mining_map:
+     $ref: "./endpoints/eth/pow/charts/mining_map.yaml"
 
   /{version}/eth/pow/download/network_power_demand/{price}:
      $ref: "./endpoints/eth/pow/download/network_power_demand.yaml"

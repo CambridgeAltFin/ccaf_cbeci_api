@@ -41,6 +41,20 @@ power_sources_order = {
     'Coal': 8,
 }
 
+mining_map_continents = {
+    'China': 'Asia',
+    'Korea, Rep.': 'Asia',
+    'Singapore': 'Asia',
+    'Russian Federation': 'Europe',
+    'Germany': 'Europe',
+    'Sweden': 'Europe',
+    'Netherlands': 'Europe',
+    'Belgium': 'Europe',
+    'Austria': 'Europe',
+    'United States': 'North America',
+    'Canada': 'North America',
+}
+
 
 @click.command(name='eth-pow:ghg-emissions')
 def handle():
@@ -122,13 +136,14 @@ def handle():
                 psycopg2.extras.execute_values(
                     cursor,
                     'insert into eth_pow_distribution '
-                    '(country_id, name, value, date)  '
+                    '(country_id, name, value, date, continent)  '
                     'values %s on conflict (name, date) do nothing',
                     list([(
                         next((c['id'] for c in countries if c['country'] == x['country']), None),
                         x['country'],
                         x['value'],
                         x['date'].strftime("%Y-%m-%d"),
+                        mining_map_continents[x['country']] if x['country'] in mining_map_continents else 'Others'
                     ) for x in records])
                 )
 

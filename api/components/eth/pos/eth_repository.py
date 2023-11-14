@@ -350,7 +350,7 @@ class EthRepository(CustomDataRepository):
 
     def digiconomist_live_data(self):
         sql = """
-            select "24hr_kgCO2" * 365 / 1000 as value from digiconomist_btc
+            select "24hr_kgCO2" * 365 / 1000000 as value from digiconomist_btc
             where asset = 'eth'
             order by date desc
             limit 1

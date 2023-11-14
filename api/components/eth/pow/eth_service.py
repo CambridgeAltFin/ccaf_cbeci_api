@@ -1,3 +1,4 @@
+import datetime
 from calendar import month_name
 
 from .eth_repository import EthRepository
@@ -363,3 +364,15 @@ class EthService:
             }
             for x in chart_data
         ])
+
+    def mining_map(self):
+        chart_data = self.repository.get_ethereum_mining_map()
+
+        return [
+            {
+                'name': x['name'],
+                'x': round(x['value'], 6),
+                'y': int(x['timestamp']),
+            }
+            for x in chart_data
+        ]

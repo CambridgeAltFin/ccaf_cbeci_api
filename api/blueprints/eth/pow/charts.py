@@ -128,3 +128,10 @@ def emission_intensity():
 @cache.memoize()
 def monthly_emission_intensity():
     return jsonify(data=eth_service.monthly_emission_intensity())
+
+
+@bp.route('/mining_map')
+@cache_control()
+@cache.memoize()
+def mining_map():
+    return jsonify(data=eth_service.mining_map())

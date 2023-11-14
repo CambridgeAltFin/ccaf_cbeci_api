@@ -403,10 +403,10 @@ class EthService:
     def get_ghg_live_data(self):
         digiconomist = self.repository.digiconomist_live_data()
         carbon_ratings = self.repository.carbon_ratings_live_data()
-        cbnsi = self.repository.btc_ghg_live_data()
+        cbnsi = self.repository.ghg_live_data()
 
         return {
-            'cbnsi': str(round(cbnsi['value'], 2)) + ' MtCO2e',
-            'carbon-ratings': str(carbon_ratings['value']) + ' KtCO2e',
-            'digiconomist': str(digiconomist['value']) + ' KtCO2e',
+            'cbnsi': str(round(cbnsi['value'], 2)),
+            'carbon_ratings': str(round(carbon_ratings['value'], 2)),
+            'digiconomist': str(round(digiconomist['value'], 2)),
         }

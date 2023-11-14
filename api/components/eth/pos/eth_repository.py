@@ -262,16 +262,16 @@ class EthRepository(CustomDataRepository):
 
     def get_greenhouse_gas_emissions(self):
         return self._run_select_query("""
-            select name, timestamp, value from greenhouse_gas_emissions
+            select name, timestamp, value / 1000 as value from greenhouse_gas_emissions
             where asset = 'eth_pos'
             order by timestamp, name
         """)
 
     def get_flat_greenhouse_gas_emissions(self):
         sql = "SELECT timestamp, to_char(MAX(DATE), 'YYYY-MM-DD HH24:MI:SS') AS date " \
-              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS min_co2 " \
-              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS guess_co2 " \
-              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS max_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value / 1000 END) AS min_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value / 1000 END) AS guess_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value / 1000 END) AS max_co2 " \
               "FROM greenhouse_gas_emissions " \
               "WHERE greenhouse_gas_emissions.asset = 'eth_pos' " \
               "GROUP BY greenhouse_gas_emissions.timestamp " \
@@ -284,7 +284,7 @@ class EthRepository(CustomDataRepository):
 
     def get_total_greenhouse_gas_emissions_monthly(self):
         sql = """
-            select date, timestamp, value, cumulative_value
+            select date, timestamp, value / 1000 as value, cumulative_value
             from cumulative_greenhouse_gas_emissions
             where asset = 'eth_pos'
             order by timestamp
@@ -296,7 +296,7 @@ class EthRepository(CustomDataRepository):
             select 
                 extract(year from date)::int as date,
                 min(timestamp) as timestamp,
-                sum(value) as value,
+                sum(value) / 1000 as value,
                 max(cumulative_value) as cumulative_value
             from cumulative_greenhouse_gas_emissions
             where asset = 'eth_pos'
@@ -350,7 +350,7 @@ class EthRepository(CustomDataRepository):
 
     def digiconomist_live_data(self):
         sql = """
-            select "24hr_kgCO2" * 365 / 1000000 as value from digiconomist_btc
+            select "24hr_kgCO2" * 365 / 1000::numeric as value from digiconomist_btc
             where asset = 'eth'
             order by date desc
             limit 1
@@ -359,17 +359,17 @@ class EthRepository(CustomDataRepository):
 
     def carbon_ratings_live_data(self):
         sql = """
-            select "emissions_365d" / 1000 as value from carbon_ratings
+            select "emissions_365d" as value from carbon_ratings
             where asset = 'eth_pos'
             order by date desc
             limit 1
         """
         return self._run_select_query(sql)[0]
 
-    def btc_ghg_live_data(self):
+    def ghg_live_data(self):
         sql = """
             select value from greenhouse_gas_emissions
-            where asset = 'btc' and name = ANY (ARRAY [%s, %s, %s]) and price = '0.05'
+            where asset = 'eth_pos' and name = ANY (ARRAY [%s, %s, %s])
             order by date desc
             limit 1
         """

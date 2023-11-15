@@ -42,6 +42,14 @@ def yearly_data(value):
                          energy_consumption_service.get_yearly_data(float(value))])
 
 
+@bp.route('stats/live')
+@cache_control()
+@cache.memoize()
+def live():
+    energy_consumption_service = EnergyConsumptionServiceFactory.create()
+    return jsonify(energy_consumption_service.get_live_data())
+
+
 @bp.route('stats/')
 @bp.route('stats/<value>')
 @price.get_price()

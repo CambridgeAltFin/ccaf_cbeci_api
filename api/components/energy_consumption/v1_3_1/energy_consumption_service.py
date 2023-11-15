@@ -42,6 +42,12 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_1_1):
 
         return list(result)[-1]
 
+    def get_live_data(self):
+        digiconomist = self.repository.get_digiconomist_consumption()
+        return {
+            'digiconomist': str(round(digiconomist['value'], 2)),
+        }
+
     def _get_equipment_list(
             self,
             price: float,

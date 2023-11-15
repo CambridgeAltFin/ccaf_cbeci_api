@@ -200,7 +200,7 @@ def bitcoin_greenhouse_gas_emissions(price=0.05):
 def total_bitcoin_greenhouse_gas_emissions(price=0.05):
     service = GreenhouseGasEmissionServiceFactory.create()
     return jsonify(data=[TotalBitcoinGreenhouseGasEmissionChartPoint(point) for point in
-                         service.get_total_greenhouse_gas_emissions_monthly(float(price))])
+                         service.get_total_greenhouse_gas_emissions(float(price))])
 
 
 @bp.route('/total_yearly_bitcoin_greenhouse_gas_emissions')

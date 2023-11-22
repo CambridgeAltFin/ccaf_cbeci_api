@@ -21,3 +21,6 @@ api.coinmetrics.io:
 
 api_carbon_ratings:
   api_key: "apikey"
+
+monitoreth:
+  api_key: "api key"

@@ -1,6 +1,9 @@
-import requests as requests
-from urllib.parse import urljoin
 from datetime import datetime
+from urllib.parse import urljoin
+
+import requests as requests
+
+from config import config
 
 
 class Monitoreth:
@@ -13,7 +16,10 @@ class Monitoreth:
                 urljoin(self.base_url, 'eth/v1/nodes/consensus/all/geographical_distribution/historic'),
                 {
                     'start_time': '2022-01-01T00:00:00Z',
-                    'end_time': f'{datetime.now().year + 1}T00:00:00Z',
+                    'end_time': f'{datetime.now().year + 1}-01-01T00:00:00Z',
+                },
+                headers={
+                    'X-Api-Key': config['monitoreth']['api_key']
                 }
             ).json()
 
@@ -37,7 +43,10 @@ class Monitoreth:
                 urljoin(self.base_url, 'eth/v1/nodes/consensus/all/client_diversity/historic'),
                 {
                     'start_time': '2022-01-01T00:00:00Z',
-                    'end_time': f'{datetime.now().year + 1}T00:00:00Z',
+                    'end_time': f'{datetime.now().year + 1}-01-01T00:00:00Z',
+                },
+                headers={
+                    'X-Api-Key': config['monitoreth']['api_key']
                 }
             ).json()
 

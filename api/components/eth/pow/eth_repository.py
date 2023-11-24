@@ -180,23 +180,44 @@ class EthRepository(CustomDataRepository):
 
     def get_emission_intensity(self):
         sql = """
-            select name, co2_coef as value, timestamp, date from co2_coefficients
-            where asset = 'eth_pow'
-            order by timestamp
+        SELECT
+        min(name) AS name,
+        min(co2_coef) AS value, 
+        min(timestamp) AS timestamp,
+        date
+        FROM co2_coefficients
+        WHERE asset ='eth_pow'
+        GROUP BY date
+        ORDER BY date
         """
         return self._run_select_query(sql)
 
     def get_monthly_emission_intensity(self):
         sql = """
-            select min(name)                                                                                    as name,
-                   min(timestamp)                                                                               as timestamp,
-                   min(date)                                                                                    as date,
-                   sum(co2_coef)
-                       / DATE_PART('days', DATE_TRUNC('month', date) + '1 MONTH'::INTERVAL - '1 DAY'::INTERVAL) as value
-            from co2_coefficients
-            where asset = 'eth_pow'
-            group by DATE_TRUNC('month', date)
-            order by DATE_TRUNC('month', date)
+            WITH daily_emission_intensity AS (SELECT
+            min(name) AS name,
+            min(co2_coef) AS value, 
+            min(timestamp) AS timestamp,
+            date
+            FROM co2_coefficients
+            WHERE asset ='eth_pow'
+            GROUP BY date
+            ORDER BY date),
+		
+		    monthly_emission_intensity AS (
+		    SELECT  min(name) as name,
+    	    min(timestamp) as timestamp,
+    	    DATE_TRUNC('month', date)::date AS month,
+    	    AVG(value) AS value
+		    FROM daily_emission_intensity
+		    GROUP BY month
+		    ORDER BY month)
+		
+		    SELECT name AS name,
+		    timestamp AS timestamp,
+		    month AS date,
+		    value AS value
+		    FROM monthly_emission_intensity
            """
         return self._run_select_query(sql)
 

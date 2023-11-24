@@ -145,7 +145,8 @@ def create_app():
         data,\
         ghg,\
         eth,\
-        carbon_accounting_tool
+        carbon_accounting_tool,\
+        dmd
 
     app.register_blueprint(charts.bp, url_prefix='/api/charts')
     app.register_blueprint(text_pages.bp, url_prefix='/api/text_pages')
@@ -164,6 +165,7 @@ def create_app():
     app.register_blueprint(eth.pos.charts.bp, url_prefix='/api/eth/pos/charts')
     app.register_blueprint(eth.pos.download.bp, url_prefix='/api/<string:version>/eth/pos/download')
     app.register_blueprint(eth.pos.data.bp, url_prefix='/api/eth/pos/data')
+    app.register_blueprint(dmd.bp, url_prefix='/api/dmd')
 
     swaggerui_bp = get_swaggerui_blueprint(
         '/cbeci' + SWAGGER_URL,

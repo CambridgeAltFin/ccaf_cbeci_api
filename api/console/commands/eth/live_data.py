@@ -15,7 +15,7 @@ def handle():
         'https://digiconomist.net/wp-json/mo/v1/ethereum/stats/' + yesterday.strftime('%y%m%d')
     ).json()
     digiconomist = None
-    if digiconomist_response[0]:
+    if len(digiconomist_response) and digiconomist_response[0]:
         digiconomist = round(float(digiconomist_response[0]['24hr_kWh']) * 365.25 / 10 ** 6, 2)
     ccri_response = requests.get(
         f"https://v2.api.carbon-ratings.com/currencies/eth2/electricity-consumption/network?key={config['api_carbon_ratings']['api_key']}"

@@ -22,6 +22,7 @@ from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
 import datetime
+from calendar import month_name
 
 
 class EthService:
@@ -204,4 +205,208 @@ class EthService:
             'cbnsi': str(round(stats['guess_consumption'], 2)) + ' GWh',
             'ccri': str(live[0]['value']) + ' GWh',
             'digiconomist': str(live[1]['value']) + ' GWh',
+        }
+
+    def greenhouse_gas_emissions(self):
+        chart_data = self.repository.get_greenhouse_gas_emissions()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': round(x['value'], 2),
+                'name': x['name'],
+            }
+            for x in chart_data
+        ]
+
+    def download_greenhouse_gas_emissions(self):
+        chart_data = self.repository.get_flat_greenhouse_gas_emissions()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Date and Time',
+            'min_co2': 'Hydro-only, KtCO2e',
+            'guess_co2': 'Estimated, KtCO2e',
+            'max_co2': 'Coal-only, KtCO2e',
+        }, chart_data)
+
+    def total_greenhouse_gas_emissions_monthly(self):
+        chart_data = self.repository.get_total_greenhouse_gas_emissions_monthly()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': round(x['value'], 2),
+                'cumulative_y': round(x['cumulative_value'], 2),
+            }
+            for x in chart_data
+        ]
+
+    def download_total_greenhouse_gas_emissions_monthly(self):
+        chart_data = self.repository.get_total_greenhouse_gas_emissions_monthly()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Month',
+            'value': 'Monthly emissions, KtCO2e',
+            'cumulative_value': 'Cumulative emissions, KtCO2e',
+        }, [
+            {
+                'date': month_name[x['date'].month] + x['date'].strftime(' %Y'),
+                'value': round(x['value'], 4),
+                'cumulative_value': round(x['cumulative_value'], 4),
+            }
+            for x in chart_data
+        ])
+
+    def total_greenhouse_gas_emissions_yearly(self):
+        chart_data = self.repository.get_total_greenhouse_gas_emissions_yearly()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': round(x['value'], 2),
+                'cumulative_y': round(x['cumulative_value'], 2),
+            }
+            for x in chart_data
+        ]
+
+    def download_total_greenhouse_gas_emissions_yearly(self):
+        chart_data = self.repository.get_total_greenhouse_gas_emissions_yearly()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Year',
+            'value': 'Yearly emissions, KtCO2e',
+            'cumulative_value': 'Cumulative emissions, KtCO2e',
+        }, [
+            {
+                'date': x['date'],
+                'value': round(x['value'], 4),
+                'cumulative_value': round(x['cumulative_value'], 4),
+            }
+            for x in chart_data
+        ])
+
+    def monthly_power_mix(self):
+        chart_data = self.repository.get_monthly_power_mix()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': round(x['value'], 4),
+                'name': x['name'],
+            }
+            for x in chart_data
+        ]
+
+    def download_monthly_power_mix(self):
+        chart_data = self.repository.get_monthly_power_mix()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Date',
+            'name': 'Energy source',
+            'value': "% of total",
+        }, [
+            {
+                'date': month_name[x['date'].month] + x['date'].strftime(' %Y'),
+                'value': round(x['value'], 4),
+                'name': x['name'],
+            }
+            for x in chart_data
+        ])
+
+    def yearly_power_mix(self):
+        chart_data = self.repository.get_yearly_power_mix()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': round(x['value'], 4),
+                'name': x['name'],
+            }
+            for x in chart_data
+        ]
+
+    def download_yearly_power_mix(self):
+        chart_data = self.repository.get_yearly_power_mix()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Date',
+            'name': 'Energy source',
+            'value': "% of total",
+        }, [
+            {
+                'date': x['date'].strftime('%Y'),
+                'value': round(x['value'], 4),
+                'name': x['name'],
+            }
+            for x in chart_data
+        ])
+
+    def emission_intensity(self):
+        chart_data = self.repository.get_emission_intensity()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': round(x['value'], 2),
+                'name': x['name'],
+            }
+            for x in chart_data
+        ]
+
+    def download_emission_intensity(self):
+        chart_data = self.repository.get_emission_intensity()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Date and Time',
+            'value': 'Emission intensity, gCO2e/kWh',
+        }, [
+            {
+                'date': x['date'].strftime('%Y-%m-%d %H:%M:%S'),
+                'value': round(x['value'], 4),
+            }
+            for x in chart_data
+        ])
+
+    def monthly_emission_intensity(self):
+        chart_data = self.repository.get_monthly_emission_intensity()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': round(x['value'], 2),
+                'name': x['name'],
+            }
+            for x in chart_data
+        ]
+
+    def download_monthly_emission_intensity(self):
+        chart_data = self.repository.get_monthly_emission_intensity()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'date': 'Date and Time',
+            'value': 'Emission intensity, gCO2e/kWh',
+        }, [
+            {
+                'date': x['date'].strftime('%Y-%m-%d %H:%M:%S'),
+                'value': round(x['value'], 4),
+            }
+            for x in chart_data
+        ])
+
+    def get_ghg_live_data(self):
+        digiconomist = self.repository.digiconomist_live_data()
+        carbon_ratings = self.repository.carbon_ratings_live_data()
+        cbnsi = self.repository.ghg_live_data()
+
+        return {
+            'cbnsi': str(round(cbnsi['value'], 2)),
+            'carbon_ratings': str(round(carbon_ratings['value'], 2)),
+            'digiconomist': str(round(digiconomist['value'], 2)),
         }

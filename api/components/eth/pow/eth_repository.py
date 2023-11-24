@@ -1,4 +1,5 @@
 from components.BaseRepository import CustomDataRepository
+from components.gas_emission.ghg_constants import GhgConstants
 
 
 class EthRepository(CustomDataRepository):
@@ -112,3 +113,100 @@ class EthRepository(CustomDataRepository):
             group by date
             order by date
         """)
+
+    def get_greenhouse_gas_emissions(self, price):
+        return self._run_select_query("""
+            select name, timestamp, value from greenhouse_gas_emissions
+            where asset = 'eth_pow' and price = %s
+            order by timestamp, name
+        """, (str(price),))
+
+    def get_flat_greenhouse_gas_emissions(self, price):
+        sql = "SELECT timestamp, to_char(MAX(DATE), 'YYYY-MM-DD HH24:MI:SS') AS date " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS min_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS guess_co2 " \
+              ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS max_co2 " \
+              "FROM greenhouse_gas_emissions " \
+              "WHERE greenhouse_gas_emissions.asset = 'eth_pow' and greenhouse_gas_emissions.price = %s " \
+              "GROUP BY greenhouse_gas_emissions.timestamp " \
+              "ORDER BY timestamp"
+        return self._run_select_query(sql, (
+            GhgConstants.HISTORICAL_MIN_CO2, GhgConstants.MIN_CO2, GhgConstants.PREDICTED_MIN_CO2,
+            GhgConstants.HISTORICAL_GUESS_CO2, GhgConstants.GUESS_CO2, GhgConstants.PREDICTED_GUESS_CO2,
+            GhgConstants.HISTORICAL_MAX_CO2, GhgConstants.MAX_CO2, GhgConstants.PREDICTED_MAX_CO2,
+            str(price),
+        ))
+
+    def get_total_greenhouse_gas_emissions_monthly(self, price):
+        sql = """
+            select date, timestamp, value, cumulative_value
+            from cumulative_greenhouse_gas_emissions
+            where asset = 'eth_pow' and price = %s
+            order by timestamp
+        """
+        return self._run_select_query(sql, (str(price),))
+
+    def get_total_greenhouse_gas_emissions_yearly(self, price):
+        sql = """
+            select 
+                extract(year from date)::int as date,
+                min(timestamp) as timestamp,
+                sum(value) as value,
+                max(cumulative_value) as cumulative_value
+            from cumulative_greenhouse_gas_emissions
+            where asset = 'eth_pow' and price = %s
+            group by extract(year from date)
+            order by timestamp
+        """
+        return self._run_select_query(sql, (str(price),))
+
+    def get_monthly_power_mix(self):
+        sql = """
+            select timestamp, date, name, value
+            from power_sources
+            where asset = 'eth_pow' and type = 'monthly'
+            order by timestamp, power_sources.order
+        """
+        return self._run_select_query(sql)
+
+    def get_yearly_power_mix(self):
+        sql = """
+            select timestamp, date, name, value
+            from power_sources
+            where asset = 'eth_pow' and type = 'yearly'
+            order by timestamp, power_sources.order
+        """
+        return self._run_select_query(sql)
+
+    def get_emission_intensity(self):
+        sql = """
+            select name, co2_coef as value, timestamp, date from co2_coefficients
+            where asset = 'eth_pow'
+            order by timestamp
+        """
+        return self._run_select_query(sql)
+
+    def get_monthly_emission_intensity(self):
+        sql = """
+            select min(name)                                                                                    as name,
+                   min(timestamp)                                                                               as timestamp,
+                   min(date)                                                                                    as date,
+                   sum(co2_coef)
+                       / DATE_PART('days', DATE_TRUNC('month', date) + '1 MONTH'::INTERVAL - '1 DAY'::INTERVAL) as value
+            from co2_coefficients
+            where asset = 'eth_pow'
+            group by DATE_TRUNC('month', date)
+            order by DATE_TRUNC('month', date)
+           """
+        return self._run_select_query(sql)
+
+    def get_ethereum_mining_map(self):
+        sql = """
+            select continent as name,
+                   sum(value) as value, 
+                   extract(epoch from date) as timestamp
+            from eth_pow_distribution
+            group by continent, date
+            order by date, continent
+        """
+        return self._run_select_query(sql)

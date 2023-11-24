@@ -1,0 +1,19 @@
+get:
+  summary: Total Ethereum greenhouse gas emissions (monthly)
+  parameters:
+    - in: path
+      name: version
+      required: true
+      schema:
+        type: string
+        enum:
+          - v1.4.0
+  tags:
+    - Ethereum/Download
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/csv:
+          schema:
+            type: string

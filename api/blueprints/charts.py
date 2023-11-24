@@ -16,6 +16,7 @@ from resources.gas_emission.total_yearly_bitcoin_greenhouse_gas_emission import 
     TotalYearlyBitcoinGreenhouseGasEmissionChartPoint
 from components.gas_emission import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory, \
     PowerMixServiceFactory
+from components.energy_consumption import EnergyConsumptionServiceFactory
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -27,7 +28,7 @@ def mining_equipment_efficiency():
     def get_miners():
         with psycopg2.connect(**config['custom_data']) as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM miners')
+            cursor.execute('SELECT miner_name, unix_date_of_release, efficiency_j_gh FROM miners')
             return cursor.fetchall()
 
     response = []
@@ -226,3 +227,19 @@ def monthly_bitcoin_power_mix():
 def yearly_bitcoin_power_mix():
     service = PowerMixServiceFactory.create()
     return jsonify(data=[YearlyBitcoinPowerMixChartPoint(point) for point in service.get_yearly_data()])
+
+
+@bp.route('/energy_efficiency_of_mining_hardware/daily')
+@cache_control()
+@cache.memoize()
+def energy_efficiency_of_mining_hardware_daily():
+    service = EnergyConsumptionServiceFactory.create()
+    return jsonify(data=service.energy_efficiency_of_mining_hardware_chart())
+
+
+@bp.route('/energy_efficiency_of_mining_hardware/yearly')
+@cache_control()
+@cache.memoize()
+def energy_efficiency_of_mining_hardware_yearly():
+    service = EnergyConsumptionServiceFactory.create()
+    return jsonify(data=service.energy_efficiency_of_mining_hardware_yearly_chart())

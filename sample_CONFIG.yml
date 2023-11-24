@@ -18,3 +18,9 @@ api_eia_gov:
 
 api.coinmetrics.io:
   api_key: "api key"
+
+api_carbon_ratings:
+  api_key: "apikey"
+
+monitoreth:
+  api_key: "api key"

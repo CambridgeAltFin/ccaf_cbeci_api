@@ -47,5 +47,5 @@ def to_tuple(timestamp, row, cents):
         row['max_consumption'],
         timestamp,
         datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
-        '1.2.0'
+        '1.4.0'
     )

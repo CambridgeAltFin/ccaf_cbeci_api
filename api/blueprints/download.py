@@ -4,6 +4,7 @@ from datetime import datetime
 from components.gas_emission import GreenhouseGasEmissionServiceFactory, EmissionIntensityServiceFactory, \
     PowerMixServiceFactory, EmissionServiceFactory
 from services import EnergyConsumption, EnergyConsumptionByTypes
+from components.energy_consumption.v1_3_1 import EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_3_1
 from components.energy_consumption import EnergyConsumptionServiceFactory
 from components.energy_consumption.v1_1_1 import \
     EnergyConsumptionServiceFactory as EnergyConsumptionServiceFactory_v1_1_1
@@ -66,6 +67,23 @@ def get_data(version=None, price=0.05):
                 'min_power': row['min_power']
             }
 
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
+
+        return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
+
+    def v1_4_0(price):
+        def to_dict(timestamp, row):
+            return {
+                'timestamp': timestamp,
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'guess_consumption': row['guess_consumption'],
+                'max_consumption': row['max_consumption'],
+                'min_consumption': row['min_consumption'],
+                'guess_power': row['guess_power'],
+                'max_power': row['max_power'],
+                'min_power': row['min_power']
+            }
+
         energy_consumption = EnergyConsumptionServiceFactory.create()
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
@@ -87,7 +105,9 @@ def get_monthly_data(version, price=.05):
 
     if version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
-    elif version == 'v1.2.0':
+    elif version == 'v1.2.0' or version == 'v1.3.1':
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
+    elif version == 'v1.4.0':
         energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
@@ -105,7 +125,9 @@ def get_yearly_data(version, price=.05):
 
     if version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
-    elif version == 'v1.2.0':
+    elif version == 'v1.2.0' or version == 'v1.3.1':
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
+    elif version == 'v1.4.0':
         energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
@@ -204,7 +226,7 @@ def profitability_equipment(version=None):
         return {
             'timestamp': row['timestamp'],
             'date': row['date'],
-            'profitability_equipment': row['profitability_equipment'],
+            'profitability_equipment': row['profitability_equipment'] * 1000,
             'equipment_list': '; '.join(list(map(miner_to_str, row['equipment_list']))),
         }
 
@@ -215,6 +237,8 @@ def profitability_equipment(version=None):
     elif version == 'v1.1.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0':
+        energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
+    elif version == 'v1.4.0':
         energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
@@ -503,4 +527,50 @@ def ghg_emissions(version=None):
     return send_file_func(
         headers,
         [to_dict(row) for row in service.get_emissions()],
+    )
+
+
+@bp.route('/energy_efficiency_of_mining_hardware/daily')
+@cache_control()
+def energy_efficiency_of_mining_hardware_daily(version=None):
+    if version != 'v1.4.0':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'date': 'Date',
+        'lower_bound': 'Lower bound efficiency, J/Th',
+        'estimated': 'Estimated efficiency, J/Th',
+        'upper_bound': 'Upper bound efficiency, J/Th',
+    }
+
+    service = EnergyConsumptionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        service.download_energy_efficiency_of_mining_hardware(),
+    )
+
+
+@bp.route('/energy_efficiency_of_mining_hardware/yearly')
+@cache_control()
+def energy_efficiency_of_mining_hardware_yearly(version=None):
+    if version != 'v1.4.0':
+        raise NotImplementedError('Not Implemented')
+
+    send_file_func = send_file()
+
+    headers = {
+        'year': 'Year',
+        'lower_bound': 'Lower bound efficiency, J/Th',
+        'estimated': 'Estimated efficiency, J/Th',
+        'upper_bound': 'Upper bound efficiency, J/Th',
+    }
+
+    service = EnergyConsumptionServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        service.download_efficiency_of_mining_hardware_yearly(),
     )

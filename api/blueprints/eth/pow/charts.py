@@ -73,3 +73,65 @@ def profitability_threshold(value: float):
 @cache.memoize()
 def source_comparison():
     return jsonify(data=eth_service.source_comparison())
+
+
+@bp.route('/greenhouse_gas_emissions')
+@bp.route('/greenhouse_gas_emissions/<value>')
+@price.get_price()
+@cache_control()
+@cache.memoize()
+def greenhouse_gas_emissions(value: float):
+    return jsonify(data=eth_service.greenhouse_gas_emissions(value))
+
+
+@bp.route('/total_greenhouse_gas_emissions/monthly')
+@bp.route('/total_greenhouse_gas_emissions/monthly/<value>')
+@price.get_price()
+@cache_control()
+@cache.memoize()
+def total_greenhouse_gas_emissions_monthly(value: float):
+    return jsonify(data=eth_service.total_greenhouse_gas_emissions_monthly(value))
+
+
+@bp.route('/total_greenhouse_gas_emissions/yearly')
+@bp.route('/total_greenhouse_gas_emissions/yearly/<value>')
+@price.get_price()
+@cache_control()
+@cache.memoize()
+def total_greenhouse_gas_emissions_yearly(value: float):
+    return jsonify(data=eth_service.total_greenhouse_gas_emissions_yearly(value))
+
+
+@bp.route('/power_mix/monthly')
+@cache_control()
+@cache.memoize()
+def power_mix_monthly():
+    return jsonify(data=eth_service.monthly_power_mix())
+
+
+@bp.route('/power_mix/yearly')
+@cache_control()
+@cache.memoize()
+def power_mix_yearly():
+    return jsonify(data=eth_service.yearly_power_mix())
+
+
+@bp.route('/emission_intensity')
+@cache_control()
+@cache.memoize()
+def emission_intensity():
+    return jsonify(data=eth_service.emission_intensity())
+
+
+@bp.route('/emission_intensity/monthly')
+@cache_control()
+@cache.memoize()
+def monthly_emission_intensity():
+    return jsonify(data=eth_service.monthly_emission_intensity())
+
+
+@bp.route('/mining_map')
+@cache_control()
+@cache.memoize()
+def mining_map():
+    return jsonify(data=eth_service.mining_map())

@@ -111,6 +111,8 @@ class EnergyConsumptionService(object):
                 'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
                 'timestamp': timestamp,
                 'profitability_equipment': 0,
+                'profitability_equipment_lower_bound': 0,
+                'profitability_equipment_upper_bound': 0,
                 'equipment_list': [],
             }
 
@@ -120,6 +122,8 @@ class EnergyConsumptionService(object):
             'date': datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d'),
             'timestamp': timestamp,
             'profitability_equipment': self.energy_consumption_calculator.get_avg(profitability_equipment),
+            'profitability_equipment_lower_bound': min(profitability_equipment),
+            'profitability_equipment_upper_bound': max(profitability_equipment),
             'equipment_list': equipment_list
         }
 
@@ -170,7 +174,7 @@ class EnergyConsumptionService(object):
         if len(equipment_list) == 0:
             return result | {metrics[i]: None for i in range(len(metrics))}
 
-        profitability_equipment = list(map(lambda x: x['efficiency_j_gh'], equipment_list))
+        profitability_equipment = [x['efficiency_j_gh'] for x in equipment_list]
 
         if 'max_consumption' in metrics:
             result['max_consumption'] = self.energy_consumption_calculator.max_consumption(

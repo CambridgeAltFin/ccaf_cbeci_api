@@ -78,6 +78,15 @@ class EnergyConsumptionRepository:
         sql = 'SELECT miner_name, unix_date_of_release, efficiency_j_gh, qty, type FROM miners WHERE is_active is true'
         return self._run_select_query(sql, (), Connection.custom_data)
 
+    def get_digiconomist_consumption(self):
+        sql = """
+            select "24hr_kWh" / 1000000000::numeric * 365 as value from digiconomist_btc
+            where asset = 'btc'
+            order by date
+            limit 1
+        """
+        return self._run_select_query(sql)[0]
+
     @staticmethod
     def _run_select_query(sql: str, bindings: tuple = None, connection: str = Connection.custom_data):
         with psycopg2.connect(**config[connection]) as conn:

@@ -1,0 +1,25 @@
+get:
+  summary: Energy efficiency of bitcoin mining hardware
+  tags:
+    - Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    lower_bound:
+                      type: number
+                    estimated:
+                      type: number
+                    upper_bound:
+                      type: number
+                    x:
+                      type: number

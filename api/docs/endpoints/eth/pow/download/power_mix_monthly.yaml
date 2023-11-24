@@ -1,0 +1,19 @@
+get:
+  summary: Ethereum electricity consumption by source (monthly)
+  parameters:
+    - in: path
+      name: version
+      required: true
+      schema:
+        type: string
+        enum:
+          - v1.4.0
+  tags:
+    - Ethereum 1.0/Download
+  responses:
+    200:
+      description: Successful operation
+      content:
+        text/csv:
+          schema:
+            type: string

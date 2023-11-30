@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import click
 import pandas as pd
@@ -68,11 +68,12 @@ def handle():
                     cursor,
                     'insert into co2_coefficients '
                     '(asset, name, timestamp, date, co2_coef) '
-                    'values %s on conflict (timestamp, asset) do nothing',
+                    'values %s on conflict (asset, date) do nothing',
                     list([(
                         'eth_pos',
                         name,
-                        int(datetime.strptime(x['timestamp'], "%Y-%m-%dT%H:%M:%S").timestamp()),
+                        int(datetime.strptime(x['timestamp'], "%Y-%m-%dT%H:%M:%S").replace(
+                            hour=0, minute=0, tzinfo=timezone.utc).timestamp()),
                         x['timestamp'][:10],
                         x['intensity'],
                     ) for x in records])
@@ -89,7 +90,8 @@ def handle():
                         'eth_pos',
                         '0',
                         name,
-                        int(datetime.strptime(x['timestamp'], "%Y-%m-%dT%H:%M:%S").timestamp()),
+                        int(datetime.strptime(x['timestamp'], "%Y-%m-%dT%H:%M:%S").replace(
+                            hour=0, minute=0, tzinfo=timezone.utc).timestamp()),
                         x['timestamp'][:10],
                         x[value_key],
                     ) for x in records])

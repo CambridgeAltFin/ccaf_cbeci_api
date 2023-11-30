@@ -1,13 +1,14 @@
-from config import config
-
 import os
+from calendar import month_name
+from datetime import datetime, timezone
+
 import click
+import pandas as pd
 import psycopg2
 import psycopg2.extras
-import pandas as pd
-from datetime import datetime
+
 from components.eth import EthPowFactory
-from calendar import month_name
+from config import config
 
 # Total Lifecycle Emissions in gCO2eq/kWh - updated version
 co2_g_p_kwh_hydro = 21
@@ -69,11 +70,12 @@ def handle():
                     cursor,
                     'insert into co2_coefficients '
                     '(asset, name, timestamp, date, co2_coef) '
-                    'values %s on conflict (timestamp, asset) do nothing',
+                    'values %s on conflict (asset, date) do nothing',
                     list([(
                         'eth_pow',
                         name,
-                        int(datetime.strptime(x['Date and Time'], "%Y-%m-%d").timestamp()),
+                        int(datetime.strptime(x['Date and Time'], "%Y-%m-%d").replace(
+                            hour=0, minute=0, tzinfo=timezone.utc).timestamp()),
                         x['Date and Time'],
                         x['intensity'],
                     ) for x in records])
@@ -106,7 +108,8 @@ def handle():
                     list([(
                         'eth_pow',
                         price_value,
-                        int(datetime.strptime(x['Month'], "%Y-%m-%d").timestamp()),
+                        int(datetime.strptime(x['Month'], "%Y-%m-%d").replace(
+                            hour=0, minute=0, tzinfo=timezone.utc).timestamp()),
                         x['Month'],
                         x['Monthly consumption TWh_CO2'],
                         x['Cumulative consumption TWh_CO2'],
@@ -213,7 +216,8 @@ def handle():
 
             ele_cum['Month'] = ele_cum['Month'].astype('str')
             co2_intensity_cp.rename({'monthly date': 'Date and Time'}, axis=1, inplace=True)
-            ele_cum_with_co2 = pd.merge(ele_cum, co2_intensity_cp, how='left', left_on='Month', right_on='Date and Time')
+            ele_cum_with_co2 = pd.merge(ele_cum, co2_intensity_cp, how='left', left_on='Month',
+                                        right_on='Date and Time')
             ele_cum_with_co2['Monthly consumption TWh_CO2'] = (ele_cum_with_co2['Monthly consumption, TWh'] * 10 ** 9 *
                                                                ele_cum_with_co2['intensity']) / 1000000000000
             # 10**6 = conversion to tons and 10**9 # conversion from twh to kwh
@@ -923,7 +927,7 @@ def calculate_weighted_country_share_within_region(eth_miner_share_total_filled,
         ['date', 'region'])['country/state'].transform('count')
     eth_miner_share_total_filled = pd.merge(eth_miner_share_total_filled, region_mix, how='left', on=['Code', 'Year'])
     filt = (eth_miner_share_total_filled['Code'] == 'OWID_WRL') & (
-        eth_miner_share_total_filled['country/state'] != 'Others')
+            eth_miner_share_total_filled['country/state'] != 'Others')
     eth_miner_share_total_filled.loc[filt, 'Total Electricity (TWh)'] = 0
 
     # historical - electricity generation weight for US state level
@@ -945,7 +949,7 @@ def calculate_weighted_country_share_within_region(eth_miner_share_total_filled,
 
     eth_miner_share_total_filled = eth_miner_share_total_filled.sort_values(['country/state', 'region', 'date'])
     future_filt_us = (eth_miner_share_total_filled['date'] < us_map_start_date) & (
-        eth_miner_share_total_filled['date'] >= map_start_date) & (eth_miner_share_total_filled['Code'] == 'USA')
+            eth_miner_share_total_filled['date'] >= map_start_date) & (eth_miner_share_total_filled['Code'] == 'USA')
 
     eth_miner_share_total_filled.loc[future_filt_us, 'btc miner share std'] = eth_miner_share_total_filled.loc[
         future_filt_us, 'Region Electricity Share']
@@ -956,14 +960,14 @@ def calculate_weighted_country_share_within_region(eth_miner_share_total_filled,
     # future forward fill
     # fill China and US states-level data (using the last avaialbe date)
     forward_fill_filt = (eth_miner_share_total_filled['level'] == 'states') & (
-        eth_miner_share_total_filled['date'] >= map_start_date)
+            eth_miner_share_total_filled['date'] >= map_start_date)
     eth_miner_share_total_filled.loc[forward_fill_filt, 'btc miner share std'] = eth_miner_share_total_filled.loc[
         forward_fill_filt, 'btc miner share std'].ffill()
 
     # fill mining map data period na value with 0
     current_filt = (eth_miner_share_total_filled['date'] >= map_start_date) & (
-        eth_miner_share_total_filled['date'] <= map_end_date) & (
-                       eth_miner_share_total_filled['level'] == 'countries')
+            eth_miner_share_total_filled['date'] <= map_end_date) & (
+                           eth_miner_share_total_filled['level'] == 'countries')
     eth_miner_share_total_filled.loc[current_filt, 'btc miner share std'] = eth_miner_share_total_filled.loc[
         current_filt, 'btc miner share std'].fillna(0)
 

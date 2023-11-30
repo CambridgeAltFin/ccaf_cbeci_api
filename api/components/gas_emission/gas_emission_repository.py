@@ -39,7 +39,7 @@ class GasEmissionRepository(CustomDataRepository):
 
     def create_co2_coefficient_record(self, date: str, co2_coefficient: float, coefficient_type: str):
         sql = "INSERT INTO co2_coefficients (timestamp, date, co2_coef, name, asset) VALUES (%s, %s, %s, %s, 'btc') " \
-              "ON CONFLICT (timestamp, asset) DO UPDATE SET co2_coef = %s, name = %s " \
+              "ON CONFLICT (asset, date) DO UPDATE SET co2_coef = %s, name = %s " \
               "WHERE co2_coefficients.timestamp = %s"
         timestamp = int(time.mktime(datetime.strptime(date, '%Y-%m-%d').timetuple()))
         self._run_query(

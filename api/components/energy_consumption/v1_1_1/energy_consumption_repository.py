@@ -82,7 +82,7 @@ class EnergyConsumptionRepository:
         sql = """
             select "24hr_kWh" / 1000000000::numeric * 365 as value from digiconomist_btc
             where asset = 'btc'
-            order by date
+            order by date desc
             limit 1
         """
         return self._run_select_query(sql)[0]

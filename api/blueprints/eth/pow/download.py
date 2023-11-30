@@ -16,7 +16,7 @@ eth_service = EthPowFactory.create_service()
 @cache_control()
 @cache.memoize()
 def network_power_demand(version: str, value: float):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_network_power_demand(value)
     raise NotImplementedError('Not Implemented')
 
@@ -98,7 +98,7 @@ def source_comparison(version: str):
 @cache_control()
 @cache.memoize()
 def greenhouse_gas_emissions(version: str, value: float):
-    if version_parse(version) == version_parse('v1.4.0'):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_greenhouse_gas_emissions(value)
     raise NotImplementedError('Not Implemented')
 
@@ -109,7 +109,7 @@ def greenhouse_gas_emissions(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def total_greenhouse_gas_emissions_monthly(version: str, value: float):
-    if version_parse(version) == version_parse('v1.4.0'):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_total_greenhouse_gas_emissions_monthly(value)
     raise NotImplementedError('Not Implemented')
 
@@ -120,7 +120,7 @@ def total_greenhouse_gas_emissions_monthly(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def total_greenhouse_gas_emissions_yearly(version: str, value: float):
-    if version_parse(version) == version_parse('v1.4.0'):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_total_greenhouse_gas_emissions_yearly(value)
     raise NotImplementedError('Not Implemented')
 
@@ -129,7 +129,7 @@ def total_greenhouse_gas_emissions_yearly(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def monthly_power_mix(version=None):
-    if version_parse(version) == version_parse('v1.4.0'):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_monthly_power_mix()
     raise NotImplementedError('Not Implemented')
 
@@ -138,7 +138,7 @@ def monthly_power_mix(version=None):
 @cache_control()
 @cache.memoize()
 def yearly_power_mix(version=None):
-    if version_parse(version) == version_parse('v1.4.0'):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_yearly_power_mix()
     raise NotImplementedError('Not Implemented')
 
@@ -147,7 +147,7 @@ def yearly_power_mix(version=None):
 @cache_control()
 @cache.memoize()
 def emission_intensity(version=None):
-    if version_parse(version) == version_parse('v1.4.0'):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_emission_intensity()
     raise NotImplementedError('Not Implemented')
 
@@ -156,6 +156,6 @@ def emission_intensity(version=None):
 @cache_control()
 @cache.memoize()
 def emission_intensity_monthly(version=None):
-    if version_parse(version) == version_parse('v1.4.0'):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_monthly_emission_intensity()
     raise NotImplementedError('Not Implemented')

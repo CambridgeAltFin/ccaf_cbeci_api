@@ -25,6 +25,7 @@ jobs:
         key:  ${{ secrets.CBECI_USER_KEY }}
         script: |
           export PATH="/home/cbeci/.pyenv/bin:$PATH"
+          export PATH="/home/cbeci/.local/bin:$PATH"
           eval "$(pyenv init -)"
           eval "$(pyenv virtualenv-init -)"
           source $HOME/.poetry/env

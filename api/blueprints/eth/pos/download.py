@@ -79,3 +79,66 @@ def monthly_node_distribution(version: str):
     if version_parse(version) == version_parse('v1.2.0'):
         return eth_service.download_monthly_node_distribution()
     raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/greenhouse_gas_emissions')
+@cache_control()
+@cache.memoize()
+def greenhouse_gas_emissions(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_greenhouse_gas_emissions()
+    raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/total_greenhouse_gas_emissions/monthly')
+@cache_control()
+@cache.memoize()
+def total_greenhouse_gas_emissions_monthly(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_total_greenhouse_gas_emissions_monthly()
+    raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/total_greenhouse_gas_emissions/yearly')
+@cache_control()
+@cache.memoize()
+def total_greenhouse_gas_emissions_yearly(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_total_greenhouse_gas_emissions_yearly()
+    raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/power_mix/monthly')
+@cache_control()
+@cache.memoize()
+def monthly_power_mix(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_monthly_power_mix()
+    raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/power_mix/yearly')
+@cache_control()
+@cache.memoize()
+def yearly_power_mix(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_yearly_power_mix()
+    raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/emission_intensity')
+@cache_control()
+@cache.memoize()
+def emission_intensity(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_emission_intensity()
+    raise NotImplementedError('Not Implemented')
+
+
+@bp.route('/emission_intensity/monthly')
+@cache_control()
+@cache.memoize()
+def emission_intensity_monthly(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_monthly_emission_intensity()
+    raise NotImplementedError('Not Implemented')

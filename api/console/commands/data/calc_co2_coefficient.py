@@ -132,8 +132,8 @@ def handle(directory):
             'Weighted Share of (.+)')
 
         for i, row in g_monthly_bitcoin_energy_mix.iterrows():
-            cursor.execute('insert into power_sources (type, name, value, timestamp, date) VALUES (%s, %s, %s, %s, %s)',
-                           ('monthly', row['Power Source'], round(row['Power Source Share'], 6), row['Date'].timestamp(), row['Date']))
+            cursor.execute('insert into power_sources (type, name, value, timestamp, date, asset) VALUES (%s, %s, %s, %s, %s, %s)',
+                           ('monthly', row['Power Source'], round(row['Power Source Share'], 6), row['Date'].timestamp(), row['Date'], 'btc'))
 
         yearly_bitcoin_energy_mix = yearly_bitcoin_energy_mix.reset_index(drop=False)
         graph_bitcoin_energy_mix = pd.melt(yearly_bitcoin_energy_mix, id_vars='Year', value_vars=weighted_source_share,
@@ -147,8 +147,8 @@ def handle(directory):
         graph_bitcoin_energy_mix['Power Source Share'] = round(graph_bitcoin_energy_mix['Power Source Share'] * 100, 2)
 
         for i, row in graph_bitcoin_energy_mix.iterrows():
-            cursor.execute('insert into power_sources (type, name, value, timestamp, date) VALUES (%s, %s, %s, %s, %s)',
-                           ('yearly', row['Power Source'], round(row['Power Source Share'], 6), row['Year'].timestamp(), row['Year']))
+            cursor.execute('insert into power_sources (type, name, value, timestamp, date, asset) VALUES (%s, %s, %s, %s, %s, %s)',
+                           ('yearly', row['Power Source'], round(row['Power Source Share'], 6), row['Year'].timestamp(), row['Year'], 'btc'))
 
 
 def hashrate_filter(country_name, manual_adjust_country_list):

@@ -1,0 +1,23 @@
+get:
+  summary: Total Ethereum greenhouse gas emissions (yearly)
+  tags:
+    - Ethereum/Charts
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    x:
+                      type: number
+                    y:
+                      type: number
+                    cumulative_y:
+                      type: number

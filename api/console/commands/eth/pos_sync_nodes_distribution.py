@@ -18,7 +18,21 @@ def handle():
         cursor.execute('select id, code from countries')
         countries = {code: i for (i, code) in cursor.fetchall()}
 
-        def save(data, source):
+        def insert(data, source):
+            psycopg2.extras.execute_values(
+                cursor,
+                'insert into eth_pos_nodes_distribution (country_id, number_of_nodes, source, date, datetime)  '
+                'VALUES %s on conflict (country_id, source, date) do nothing',
+                [(
+                    countries[i['country']],
+                    i.get('number_of_nodes', 0),
+                    source,
+                    i['date'][:10],
+                    i.get('date', None),
+                ) for i in data if i['country'] in countries]
+            )
+
+        def insert_and_update(data, source):
             psycopg2.extras.execute_values(
                 cursor,
                 'insert into eth_pos_nodes_distribution (country_id, number_of_nodes, source, date, datetime)  '
@@ -34,12 +48,12 @@ def handle():
             )
 
         if len(prometheus_data):
-            save(prometheus_data, 'prometheus')
-            save(prometheus_data, 'monitoreth')
+            insert(prometheus_data, 'prometheus')
+            insert(prometheus_data, 'monitoreth')
 
         if len(new_prometheus_data):
-            save(new_prometheus_data, 'prometheus')
-            save(new_prometheus_data, 'monitoreth')
+            insert_and_update(new_prometheus_data, 'prometheus')
+            insert(new_prometheus_data, 'monitoreth')
 
         if len(monitoreth_data):
-            save(monitoreth_data, 'monitoreth')
+            insert_and_update(monitoreth_data, 'monitoreth')

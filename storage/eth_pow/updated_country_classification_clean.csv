@@ -1,0 +1,246 @@
+region,country/state,level,code3,country,country_id,province_code
+europe,Russia,countries,RUS,Russian Federation,181,
+europe,Germany,countries,DEU,Germany,144,
+europe,United Kingdom,countries,GBR,United Kingdom,212,
+europe,France,countries,FRA,France,56,
+europe,Italy,countries,ITA,Italy,67,
+europe,Spain,countries,ESP,Spain,188,
+europe,Ukraine,countries,UKR,Ukraine,207,
+europe,Poland,countries,POL,Poland,88,
+europe,Romania,countries,ROU,Romania,90,
+europe,Netherlands,countries,NLD,Netherlands,80,
+europe,Belgium,countries,BEL,Belgium,32,
+europe,Czech Republic (Czechia),countries,CZE,Czech Republic,20,
+europe,Greece,countries,GRC,Greece,45,
+europe,Portugal,countries,PRT,Portugal,179,
+europe,Sweden,countries,SWE,Sweden,208,
+europe,Hungary,countries,HUN,Hungary,59,
+europe,Belarus,countries,BLR,Belarus,115,
+europe,Austria,countries,AUT,Austria,106,
+europe,Serbia,countries,SRB,Serbia,183,
+europe,Switzerland,countries,CHE,Switzerland,218,
+europe,Bulgaria,countries,BGR,Bulgaria,121,
+europe,Denmark,countries,DNK,Denmark,156,
+europe,Finland,countries,FIN,Finland,53,
+europe,Slovakia,countries,SVK,Slovak Republic,185,
+europe,Norway,countries,NOR,Norway,84,
+europe,Ireland,countries,IRL,Ireland,149,
+europe,Croatia,countries,HRV,Croatia,12,
+europe,Moldova,countries,MDA,Moldova,91,
+europe,Bosnia and Herzegovina,countries,BIH,Bosnia and Herzegovina,119,
+europe,Albania,countries,ALB,Albania,24,
+europe,Lithuania,countries,LTU,Lithuania,192,
+europe,North Macedonia,countries,MKD,North Macedonia,105,
+europe,Slovenia,countries,SVN,Slovenia,99,
+europe,Latvia,countries,LVA,Latvia,28,
+europe,Estonia,countries,EST,Estonia,140,
+europe,Montenegro,countries,MNE,Montenegro,165,
+europe,Luxembourg,countries,LUX,Luxembourg,72,
+europe,Malta,countries,MLT,Malta,76,
+europe,Iceland,countries,ISL,Iceland,147,
+europe,Andorra,countries,AND,Andorra,22,
+europe,Monaco,countries,MCO,Monaco,2,
+europe,Liechtenstein,countries,LIE,Liechtenstein,161,
+europe,San Marino,countries,SMR,San Marino,5,
+europe,Holy See (Vatican City),countries,OWID_WRL,,,
+europe-west,Germany,countries,DEU,Germany,144,
+europe-west,France,countries,FRA,France,56,
+europe-west,Netherlands,countries,NLD,Netherlands,80,
+europe-west,Belgium,countries,BEL,Belgium,32,
+europe-west,Austria,countries,AUT,Austria,106,
+europe-west,Switzerland,countries,CHE,Switzerland,218,
+europe-west,Luxembourg,countries,LUX,Luxembourg,72,
+europe-west,Monaco,countries,MCO,Monaco,2,
+europe-west,Liechtenstein,countries,LIE,Liechtenstein,161,
+europe-north,United Kingdom,countries,GBR,United Kingdom,212,
+europe-north,Sweden,countries,SWE,Sweden,208,
+europe-north,Denmark,countries,DNK,Denmark,156,
+europe-north,Finland,countries,FIN,Finland,53,
+europe-north,Norway,countries,NOR,Norway,84,
+europe-north,Ireland,countries,IRL,Ireland,149,
+europe-north,Lithuania,countries,LTU,Lithuania,192,
+europe-north,Latvia,countries,LVA,Latvia,28,
+europe-north,Estonia,countries,EST,Estonia,140,
+europe-north,Iceland,countries,ISL,Iceland,147,
+europe-east,Belarus,countries,BLR,Belarus,115,
+europe-east,Bulgaria,countries,BGR,Bulgaria,121,
+europe-east,Czech Republic (Czechia),countries,CZE,Czech Republic,20,
+europe-east,Hungary,countries,HUN,Hungary,59,
+europe-east,Poland,countries,POL,Poland,88,
+europe-east,Republic of Moldova,countries,MDA,Moldova,91,
+europe-east,Romania,countries,ROU,Romania,90,
+europe-east,Russian Federation,countries,RUS,Russian Federation,181,
+europe-east,Slovakia,countries,SVK,Slovak Republic,185,
+europe-east,Ukraine,countries,UKR,Ukraine,207,
+north-america,Bermuda,countries,BMU,Bermuda,113,
+north-america,Canada,countries,CAN,Canada,35,
+north-america,Greenland,countries,GRL,Greenland,55,
+north-america,Saint Pierre and Miquelon,countries,SPM,Saint Pierre and Miquelon,,
+north-america,United States,countries,USA,United States,123,
+asia,China,countries,CHN,China,129,
+asia,India,countries,IND,India,60,
+asia,Indonesia,countries,IDN,Indonesia,62,
+asia,Pakistan,countries,PAK,Pakistan,85,
+asia,Bangladesh,countries,BGD,Bangladesh,111,
+asia,Japan,countries,JPN,Japan,151,
+asia,Philippines,countries,PHL,Philippines,178,
+asia,Vietnam,countries,VNM,Vietnam,214,
+asia,Turkey,countries,TUR,Turkey,206,
+asia,Iran,countries,IRN,"Iran, Islamic Rep.",66,
+asia,Thailand,countries,THA,Thailand,101,
+asia,Myanmar,countries,MMR,Myanmar,174,
+asia,South Korea,countries,KOR,"Korea, Rep.",154,
+asia,Iraq,countries,IRQ,Iraq,148,
+asia,Afghanistan,countries,AFG,Afghanistan,23,
+asia,Saudi Arabia,countries,SAU,Saudi Arabia,96,
+asia,Uzbekistan,countries,UZB,Uzbekistan,104,
+asia,Malaysia,countries,MYS,Malaysia,73,
+asia,Yemen,countries,YEM,"Yemen, Rep.",201,
+asia,Nepal,countries,NPL,Nepal,79,
+asia,North Korea,countries,PRK,"Korea, Dem. People's Rep.",153,
+asia,Sri Lanka,countries,LKA,Sri Lanka,189,
+asia,Kazakhstan,countries,KAZ,Kazakhstan,69,
+asia,Syria,countries,SYR,Syrian Arab Republic,102,
+asia,Cambodia,countries,KHM,Cambodia,125,
+asia,Jordan,countries,JOR,Jordan,68,
+asia,Azerbaijan,countries,AZE,Azerbaijan,29,
+asia,United Arab Emirates,countries,ARE,United Arab Emirates,211,
+asia,Tajikistan,countries,TJK,Tajikistan,219,
+asia,Israel,countries,ISR,Israel,150,
+asia,Laos,countries,LAO,Lao PDR,65,
+asia,Lebanon,countries,LBN,Lebanon,190,
+asia,Kyrgyzstan,countries,KGZ,Kyrgyz Republic,64,
+asia,Turkmenistan,countries,TKM,Turkmenistan,198,
+asia,Singapore,countries,SGP,Singapore,184,
+asia,Oman,countries,OMN,Oman,176,
+asia,State of Palestine,countries,PSE,West Bank and Gaza,203,
+asia,Kuwait,countries,KWT,Kuwait,137,
+asia,Georgia,countries,GEO,Georgia,143,
+asia,Mongolia,countries,MNG,Mongolia,164,
+asia,Armenia,countries,ARM,Armenia,14,
+asia,Qatar,countries,QAT,Qatar,89,
+asia,Bahrain,countries,BHR,Bahrain,109,
+asia,Timor-Leste,countries,TLS,Timor-Leste,9,
+asia,Cyprus,countries,CYP,Cyprus,16,
+asia,Bhutan,countries,BTN,Bhutan,33,
+asia,Maldives,countries,MDV,Maldives,74,
+asia,Brunei,countries,BRN,Brunei Darussalam,116,
+asia,Taiwan (China),countries,TWN,"Taiwan, China",100,
+asia,Hong Kong (China),countries,HKG,"Hong Kong SAR, China",61,
+asia,Macao (China),countries,MAC,"Macao SAR, China",162,
+asia-east,China,countries,CHN,China,129,
+asia-east,Mongolia,countries,MNG,Mongolia,164,
+asia-east,Taiwan,countries,TWN,"Taiwan, China",100,
+asia-east,Japan,countries,JPN,Japan,151,
+asia-east,South Korea,countries,KOR,"Korea, Rep.",154,
+asia-east,Hong Kong,countries,HKG,"Hong Kong SAR, China",61,
+asia-east,North Korea,countries,PRK,"Korea, Dem. People's Rep.",153,
+asia-east,Macao,countries,MAC,"Macao SAR, China",162,
+russia,Russia,countries,RUS,Russian Federation,181,
+canada,Canada,countries,CAN,Canada,35,
+germany,Germany,countries,DEU,Germany,144,
+south korea,South Korea,countries,KOR,"Korea, Rep.",154,
+singapore,Singapore,countries,SGP,Singapore,184,
+taiwan,Taiwan (China),countries,TWN,"Taiwan, China",100,
+ukraine,Ukraine,countries,UKR,Ukraine,207,
+japan,Japan,countries,JPN,Japan,151,
+sweden,Sweden,countries,SWE,Sweden,208,
+others,Others,countries,OWID_WRL,,,
+us,Alabama,states,USA,United States,123,AL
+us,Alaska,states,USA,United States,123,AK
+us,Arizona,states,USA,United States,123,AZ
+us,Arkansas,states,USA,United States,123,AR
+us,California,states,USA,United States,123,CA
+us,Colorado,states,USA,United States,123,CO
+us,Connecticut,states,USA,United States,123,CT
+us,Delaware,states,USA,United States,123,DE
+us,Florida,states,USA,United States,123,FL
+us,Georgia,states,USA,United States,123,GA
+us,Hawaii,states,USA,United States,123,HI
+us,Idaho,states,USA,United States,123,ID
+us,Illinois,states,USA,United States,123,IL
+us,Indiana,states,USA,United States,123,IN
+us,Iowa,states,USA,United States,123,IA
+us,Kansas,states,USA,United States,123,KS
+us,Kentucky,states,USA,United States,123,KY
+us,Louisiana,states,USA,United States,123,LA
+us,Maine,states,USA,United States,123,ME
+us,Maryland,states,USA,United States,123,MD
+us,Massachusetts,states,USA,United States,123,MA
+us,Michigan,states,USA,United States,123,MI
+us,Minnesota,states,USA,United States,123,MN
+us,Mississippi,states,USA,United States,123,MS
+us,Missouri,states,USA,United States,123,MO
+us,Montana,states,USA,United States,123,MT
+us,Nebraska,states,USA,United States,123,NE
+us,Nevada,states,USA,United States,123,NV
+us,New Hampshire,states,USA,United States,123,NH
+us,New Jersey,states,USA,United States,123,NJ
+us,New Mexico,states,USA,United States,123,NM
+us,New York,states,USA,United States,123,NY
+us,North Carolina,states,USA,United States,123,NC
+us,North Dakota,states,USA,United States,123,ND
+us,Ohio,states,USA,United States,123,OH
+us,Oklahoma,states,USA,United States,123,OK
+us,Oregon,states,USA,United States,123,OR
+us,Pennsylvania,states,USA,United States,123,PA
+us,Rhode Island,states,USA,United States,123,RI
+us,South Carolina,states,USA,United States,123,SC
+us,South Dakota,states,USA,United States,123,SD
+us,Tennessee,states,USA,United States,123,TN
+us,Texas,states,USA,United States,123,TX
+us,Utah,states,USA,United States,123,UT
+us,Vermont,states,USA,United States,123,VT
+us,Virginia,states,USA,United States,123,VA
+us,Washington,states,USA,United States,123,WA
+us,West Virginia,states,USA,United States,123,WV
+us,Wisconsin,states,USA,United States,123,WI
+us,Wyoming,states,USA,United States,123,WY
+us-west,Alaska,states,USA,United States,123,AK
+us-west,Arizona,states,USA,United States,123,AZ
+us-west,California,states,USA,United States,123,CA
+us-west,Colorado,states,USA,United States,123,CO
+us-west,Hawaii,states,USA,United States,123,HI
+us-west,Idaho,states,USA,United States,123,ID
+us-west,Montana,states,USA,United States,123,MT
+us-west,New Mexico,states,USA,United States,123,NM
+us-west,Nevada,states,USA,United States,123,NV
+us-west,Oregon,states,USA,United States,123,OR
+us-west,Utah,states,USA,United States,123,UT
+us-west,Washington,states,USA,United States,123,WA
+us-west,Wyoming,states,USA,United States,123,WY
+us-east,Alabama,states,USA,United States,123,AL
+us-east,Connecticut,states,USA,United States,123,CT
+us-east,Delaware,states,USA,United States,123,DE
+us-east,Florida,states,USA,United States,123,FL
+us-east,Georgia,states,USA,United States,123,GA
+us-east,Kentucky,states,USA,United States,123,KY
+us-east,Illinois,states,USA,United States,123,IL
+us-east,Indiana,states,USA,United States,123,IN
+us-east,Maine,states,USA,United States,123,ME
+us-east,Maryland,states,USA,United States,123,MD
+us-east,Massachusetts,states,USA,United States,123,MA
+us-east,Michigan,states,USA,United States,123,MI
+us-east,Mississippi,states,USA,United States,123,MS
+us-east,New Hampshire,states,USA,United States,123,NH
+us-east,New Jersey,states,USA,United States,123,NJ
+us-east,New York,states,USA,United States,123,NY
+us-east,North Carolina,states,USA,United States,123,NC
+us-east,Ohio,states,USA,United States,123,OH
+us-east,Pennsylvania,states,USA,United States,123,PA
+us-east,Rhode Island,states,USA,United States,123,RI
+us-east,South Carolina,states,USA,United States,123,SC
+us-east,Tennessee,states,USA,United States,123,TN
+us-east,Vermont,states,USA,United States,123,VT
+us-east,Virginia,states,USA,United States,123,VA
+us-east,West Virginia,states,USA,United States,123,WV
+us-east,Wisconsin,states,USA,United States,123,WI
+china,Sichuan,states,CHN,China,129,SC
+china,Xinjiang,states,CHN,China,129,XJ
+china,Yunnan,states,CHN,China,129,YN
+china,Inner Mongolia,states,CHN,China,129,NM
+china,Other,states,,,,
+china,Gansu,states,CHN,China,129,GS
+china,Beijing,states,CHN,China,129,BJ
+china,Shanxi,states,CHN,China,129,SX
+china,Qinghai,states,CHN,China,129,QH

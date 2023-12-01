@@ -27,7 +27,7 @@ def network_power_demand(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def annualised_consumption(version: str, value: float):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_annualised_consumption(value)
     raise NotImplementedError('Not Implemented')
 
@@ -38,7 +38,7 @@ def annualised_consumption(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def monthly_total_electricity_consumption(version: str, value: float):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_monthly_total_electricity_consumption(value)
     raise NotImplementedError('Not Implemented')
 
@@ -49,7 +49,7 @@ def monthly_total_electricity_consumption(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def yearly_total_electricity_consumption(version: str, value: float):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_yearly_total_electricity_consumption(value)
     raise NotImplementedError('Not Implemented')
 
@@ -58,7 +58,7 @@ def yearly_total_electricity_consumption(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def network_efficiency(version: str):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_network_efficiency()
     raise NotImplementedError('Not Implemented')
 
@@ -67,7 +67,7 @@ def network_efficiency(version: str):
 @cache_control()
 @cache.memoize()
 def mining_equipment_efficiency(version: str):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_mining_equipment_efficiency()
     raise NotImplementedError('Not Implemented')
 
@@ -78,7 +78,7 @@ def mining_equipment_efficiency(version: str):
 @cache_control()
 @cache.memoize()
 def profitability_threshold(version: str, value: float):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_profitability_threshold(value)
     raise NotImplementedError('Not Implemented')
 
@@ -87,7 +87,7 @@ def profitability_threshold(version: str, value: float):
 @cache_control()
 @cache.memoize()
 def source_comparison(version: str):
-    if version_parse(version) == version_parse('v1.2.0'):
+    if version_parse(version) == version_parse('v1.2.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_source_comparison()
     raise NotImplementedError('Not Implemented')
 

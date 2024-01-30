@@ -39,7 +39,7 @@ def handle():
                 values.append(cursor.mogrify('(' + placeholder + ')', tuple(row.values())).decode('utf-8'))
             insert += ','.join(values)
             cursor.execute(
-                insert + ' on conflict (asset, price, date) do nothing'
+                insert + ' on conflict (asset, price, date) do update set value = EXCLUDED.value, cumulative_value = EXCLUDED.cumulative_value'
             )
 
         digiconomist = Digiconomist()

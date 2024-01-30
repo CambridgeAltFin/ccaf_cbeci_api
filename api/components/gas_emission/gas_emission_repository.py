@@ -74,7 +74,8 @@ class GasEmissionRepository(CustomDataRepository):
     def get_total_greenhouse_gas_emissions(self, price):
         sql = "SELECT date, timestamp, value AS v, cumulative_value AS cumulative_v " \
               "FROM cumulative_greenhouse_gas_emissions " \
-              "WHERE asset = 'btc' and price = %s"
+              "WHERE asset = 'btc' and price = %s" \
+              "ORDER BY timestamp"
         return self._run_select_query(sql, (str(price),))
 
     def get_monthly_bitcoin_power_mix(self):

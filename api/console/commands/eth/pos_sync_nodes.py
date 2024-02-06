@@ -10,30 +10,30 @@ import pandas as pd
 
 @click.command(name='eth-pos:sync:nodes')
 def handle():
-    prometheus_data = Prometheus().crawler_observed_client_distribution()
-    new_prometheus_data = Prometheus2().crawler_observed_client_distribution()
+    #prometheus_data = Prometheus().crawler_observed_client_distribution()
+    #new_prometheus_data = Prometheus2().crawler_observed_client_distribution()
 
     ### add missing date for prometheus
-    prometheus_data_ffill = pd.DataFrame(prometheus_data)
-    start_date = prometheus_data_ffill['Date'][0]
-    end_date = prometheus_data_ffill['Date'][prometheus_data_ffill.shape[0]-1]
-    date_range = pd.date_range(start=start_date, end=end_date, freq='D')
-    new_dates = pd.DataFrame({'Date': date_range})
-    new_dates['Date'] = new_dates['Date'].astype(str)
-    prometheus_data_ffill = new_dates.merge(prometheus_data_ffill, how = 'left', on = 'Date')
-    prometheus_data_ffill = prometheus_data_ffill.ffill()
-    prometheus_data = prometheus_data_ffill.to_dict('records')
+    #prometheus_data_ffill = pd.DataFrame(prometheus_data)
+    #start_date = prometheus_data_ffill['Date'][0]
+    #end_date = prometheus_data_ffill['Date'][prometheus_data_ffill.shape[0]-1]
+    #date_range = pd.date_range(start=start_date, end=end_date, freq='D')
+    #new_dates = pd.DataFrame({'Date': date_range})
+    #new_dates['Date'] = new_dates['Date'].astype(str)
+    #prometheus_data_ffill = new_dates.merge(prometheus_data_ffill, how = 'left', on = 'Date')
+    #prometheus_data_ffill = prometheus_data_ffill.ffill()
+    #prometheus_data = prometheus_data_ffill.to_dict('records')
 
     monitoreth_data = Monitoreth().client_diversity()
 
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
-        if len(prometheus_data):
-            save_data(cursor, prometheus_data, 'prometheus')
-            save_data(cursor, prometheus_data, 'monitoreth')
-        if len(new_prometheus_data):
-            save_data_update(cursor, new_prometheus_data, 'prometheus')
-            save_data(cursor, new_prometheus_data, 'monitoreth')
+        #if len(prometheus_data):
+        #    save_data(cursor, prometheus_data, 'prometheus')
+        #    save_data(cursor, prometheus_data, 'monitoreth')
+        #if len(new_prometheus_data):
+        #    save_data_update(cursor, new_prometheus_data, 'prometheus')
+        #    save_data(cursor, new_prometheus_data, 'monitoreth')
         if len(monitoreth_data):
             save_data_update(cursor, monitoreth_data, 'monitoreth')
 

@@ -9,8 +9,8 @@ import psycopg2.extras
 
 @click.command(name='eth-pos:sync:nodes-distribution')
 def handle():
-    prometheus_data = Prometheus().crawler_geographical_distribution()
-    new_prometheus_data = Prometheus2().crawler_geographical_distribution()
+    #prometheus_data = Prometheus().crawler_geographical_distribution()
+    #new_prometheus_data = Prometheus2().crawler_geographical_distribution()
     monitoreth_data = Monitoreth().geographical_distribution()
 
     with psycopg2.connect(**config['custom_data']) as conn:
@@ -47,13 +47,13 @@ def handle():
                 ) for i in data if i['country'] in countries]
             )
 
-        if len(prometheus_data):
-            insert(prometheus_data, 'prometheus')
-            insert(prometheus_data, 'monitoreth')
+        #if len(prometheus_data):
+        #    insert(prometheus_data, 'prometheus')
+        #    insert(prometheus_data, 'monitoreth')
 
-        if len(new_prometheus_data):
-            insert_and_update(new_prometheus_data, 'prometheus')
-            insert(new_prometheus_data, 'monitoreth')
+        #if len(new_prometheus_data):
+        #    insert_and_update(new_prometheus_data, 'prometheus')
+        #    insert(new_prometheus_data, 'monitoreth')
 
         if len(monitoreth_data):
             insert_and_update(monitoreth_data, 'monitoreth')

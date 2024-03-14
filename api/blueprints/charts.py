@@ -230,16 +230,18 @@ def yearly_bitcoin_power_mix():
 
 
 @bp.route('/energy_efficiency_of_mining_hardware/daily')
+@bp.route('/energy_efficiency_of_mining_hardware/daily/<price>')
 @cache_control()
 @cache.memoize()
-def energy_efficiency_of_mining_hardware_daily():
+def energy_efficiency_of_mining_hardware_daily(price=0.05):
     service = EnergyConsumptionServiceFactory.create()
-    return jsonify(data=service.energy_efficiency_of_mining_hardware_chart())
+    return jsonify(data=service.energy_efficiency_of_mining_hardware_chart(float(price)))
 
 
 @bp.route('/energy_efficiency_of_mining_hardware/yearly')
+@bp.route('/energy_efficiency_of_mining_hardware/yearly/<price>')
 @cache_control()
 @cache.memoize()
-def energy_efficiency_of_mining_hardware_yearly():
+def energy_efficiency_of_mining_hardware_yearly(price=0.05):
     service = EnergyConsumptionServiceFactory.create()
-    return jsonify(data=service.energy_efficiency_of_mining_hardware_yearly_chart())
+    return jsonify(data=service.energy_efficiency_of_mining_hardware_yearly_chart(float(price)))

@@ -25,8 +25,8 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_3_1):
     def is_calculated(self, price: float) -> bool:
         return int(price * 100) in self.calculated_prices
 
-    def energy_efficiency_of_mining_hardware_chart(self):
-        data = self.repository.get_daily_profitability_equipment()
+    def energy_efficiency_of_mining_hardware_chart(self, price: float):
+        data = self.repository.get_daily_profitability_equipment(price)
         return [{
             'x': int(item['date'].timestamp()),
             'lower_bound': round(item['lower_bound'] * 10000 * 1000) / 10000,
@@ -34,8 +34,8 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_3_1):
             'upper_bound': round(item['upper_bound'] * 10000 * 1000) / 10000,
         } for item in data]
 
-    def download_energy_efficiency_of_mining_hardware(self):
-        data = self.repository.get_daily_profitability_equipment()
+    def download_energy_efficiency_of_mining_hardware(self, price: float):
+        data = self.repository.get_daily_profitability_equipment(price)
         return [{
             'date': item['date'].strftime('%Y-%m-%d'),
             'lower_bound': item['lower_bound'] * 1000,
@@ -43,8 +43,8 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_3_1):
             'upper_bound': item['upper_bound'] * 1000,
         } for item in data]
 
-    def energy_efficiency_of_mining_hardware_yearly_chart(self):
-        data = self.repository.get_yearly_profitability_equipment()
+    def energy_efficiency_of_mining_hardware_yearly_chart(self, price: float):
+        data = self.repository.get_yearly_profitability_equipment(price)
         return [{
             'x': int(datetime.strptime(str(int(item['date'])), '%Y').timestamp()),
             'lower_bound': round(item['lower_bound'] * 10000 * 1000) / 10000,
@@ -52,8 +52,8 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_3_1):
             'upper_bound': round(item['upper_bound'] * 10000 * 1000) / 10000,
         } for item in data]
 
-    def download_efficiency_of_mining_hardware_yearly(self):
-        data = self.repository.get_yearly_profitability_equipment()
+    def download_efficiency_of_mining_hardware_yearly(self, price: float):
+        data = self.repository.get_yearly_profitability_equipment(price)
         return [{
             'year': str(int(item['date'])),
             'lower_bound': item['lower_bound'] * 1000,

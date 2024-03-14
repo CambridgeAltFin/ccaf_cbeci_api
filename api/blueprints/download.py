@@ -548,8 +548,9 @@ def ghg_emissions(version=None):
 
 
 @bp.route('/energy_efficiency_of_mining_hardware/daily')
+@bp.route('/energy_efficiency_of_mining_hardware/daily/<price>')
 @cache_control()
-def energy_efficiency_of_mining_hardware_daily(version=None):
+def energy_efficiency_of_mining_hardware_daily(version=None, price=0.05):
     if version != 'v1.4.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
@@ -566,13 +567,14 @@ def energy_efficiency_of_mining_hardware_daily(version=None):
 
     return send_file_func(
         headers,
-        service.download_energy_efficiency_of_mining_hardware(),
+        service.download_energy_efficiency_of_mining_hardware(float(price)),
     )
 
 
 @bp.route('/energy_efficiency_of_mining_hardware/yearly')
+@bp.route('/energy_efficiency_of_mining_hardware/yearly/<price>')
 @cache_control()
-def energy_efficiency_of_mining_hardware_yearly(version=None):
+def energy_efficiency_of_mining_hardware_yearly(version=None, price=0.05):
     if version != 'v1.4.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
@@ -589,5 +591,5 @@ def energy_efficiency_of_mining_hardware_yearly(version=None):
 
     return send_file_func(
         headers,
-        service.download_efficiency_of_mining_hardware_yearly(),
+        service.download_efficiency_of_mining_hardware_yearly(float(price)),
     )

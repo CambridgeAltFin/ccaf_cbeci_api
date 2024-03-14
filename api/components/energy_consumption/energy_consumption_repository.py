@@ -26,33 +26,35 @@ class EnergyConsumptionRepository(EnergyConsumptionRepository_v1_3_1):
             Connection.custom_data
         )
 
-    def get_daily_profitability_equipment(self):
+    def get_daily_profitability_equipment(self, price: float):
         sql = '''
             SELECT date,
              lower_bound, 
              estimated, 
              upper_bound
-            FROM miner_energy_efficients 
+            FROM miner_energy_efficients
+            WHERE price = %s
             ORDER BY date
         '''
         return self._run_select_query(
             sql,
-            (),
+            (str(price),),
             Connection.custom_data
         )
 
-    def get_yearly_profitability_equipment(self):
+    def get_yearly_profitability_equipment(self, price: float):
         sql = '''
             SELECT extract(year from date) as date,
                    avg(lower_bound)        as lower_bound,
                    avg(estimated)          as estimated,
                    avg(upper_bound)        as upper_bound
             FROM miner_energy_efficients
+            WHERE price = %s
             GROUP BY extract(year from date)
             ORDER BY date
         '''
         return self._run_select_query(
             sql,
-            (),
+            (str(price),),
             Connection.custom_data
         )

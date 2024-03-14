@@ -33,12 +33,11 @@ class EnergyConsumptionRepository(EnergyConsumptionRepository_v1_3_1):
              estimated, 
              upper_bound
             FROM miner_energy_efficients
-            WHERE price = %s
             ORDER BY date
         '''
         return self._run_select_query(
             sql,
-            (str(price),),
+            (),
             Connection.custom_data
         )
 
@@ -49,12 +48,11 @@ class EnergyConsumptionRepository(EnergyConsumptionRepository_v1_3_1):
                    avg(estimated)          as estimated,
                    avg(upper_bound)        as upper_bound
             FROM miner_energy_efficients
-            WHERE price = %s
             GROUP BY extract(year from date)
             ORDER BY date
         '''
         return self._run_select_query(
             sql,
-            (str(price),),
+            (),
             Connection.custom_data
         )

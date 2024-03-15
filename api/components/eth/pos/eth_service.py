@@ -22,6 +22,7 @@ from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
 import datetime
+from api.migalabs import Migalabs as ApiMigalabs
 
 
 class EthService:
@@ -204,4 +205,12 @@ class EthService:
             'cbnsi': str(round(stats['guess_consumption'], 2)) + ' GWh',
             'ccri': str(live[0]['value']) + ' GWh',
             'digiconomist': str(live[1]['value']) + ' GWh',
+        }
+    
+    def total_number_of_active_validators(self, date: str = None):
+        api_migalabs = ApiMigalabs('https://monitoreth.io/data-api/api/')
+        
+
+        return {
+            'migalabs': api_migalabs.total_number_of_active_validators()
         }

@@ -85,3 +85,10 @@ def power_demand_legacy_vs_future(date=None):
 @cache.memoize()
 def comparison_of_annual_consumption(date=None):
     return jsonify(data=eth_service.comparison_of_annual_consumption(date))
+
+@bp.route('/total_number_of_active_validators')
+@bp.route('/total_number_of_active_validators/<date>')
+@cache_control()
+@cache.memoize()
+def total_number_of_active_validators(date=None):
+    return jsonify(data=eth_service.total_number_of_active_validators(date))

@@ -28,15 +28,31 @@ def handle():
             insert.append((
                 next(x['outputValue'] for x in tx_count['entries'] if x['date'] == date.strftime('%Y-%m-%d')),
                 next(x['outputValue'] for x in holdings['entries'] if x['date'] == date.strftime('%Y-%m-%d')),
+                None,
+                'btc',
                 date.strftime('%Y-%m-%d'),
+            ))
+
+        eth2_emissions = requests.get(
+            'https://v2.api.carbon-ratings.com/currencies/eth2/emissions/network?key=' +
+            config['api_carbon_ratings']['api_key']
+        ).json()
+
+        for entry in eth2_emissions['entries']:
+            insert.append((
+                None,
+                None,
+                entry['emissions_365d'],
+                'eth_pos',
+                entry['date'],
             ))
 
         psycopg2.extras.execute_values(
             cursor,
             """
-            insert into carbon_ratings ("kWh_per_tx", "kWh_per_holding", date) 
+            insert into carbon_ratings ("kWh_per_tx", "kWh_per_holding", "emissions_365d", asset, date) 
             values %s
-            on conflict(date) do nothing
+            on conflict(asset, date) do nothing
             """,
             insert
         )

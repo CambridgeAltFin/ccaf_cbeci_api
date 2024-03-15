@@ -12,7 +12,7 @@ def handle():
     with psycopg2.connect(**config['custom_data']) as conn:
         cursor = conn.cursor()
         cursor.execute("select date, prysm, lighthouse, lodestar, nimbus, teku from eth_pos_nodes "
-                       "where source = 'prometheus'")
+                       "where source = 'monitoreth'")
         data = [{
             'Date': date.strftime('%Y-%m-%d'),
             'Prysm': prysm,

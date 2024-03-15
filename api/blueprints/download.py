@@ -88,6 +88,23 @@ def get_data(version=None, price=0.05):
 
         return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
 
+    def v1_5_0(price):
+        def to_dict(timestamp, row):
+            return {
+                'timestamp': timestamp,
+                'date': datetime.utcfromtimestamp(timestamp).isoformat(),
+                'guess_consumption': row['guess_consumption'],
+                'max_consumption': row['max_consumption'],
+                'min_consumption': row['min_consumption'],
+                'guess_power': row['guess_power'],
+                'max_power': row['max_power'],
+                'min_power': row['min_power']
+            }
+
+        energy_consumption = EnergyConsumptionServiceFactory.create()
+
+        return [to_dict(timestamp, row) for timestamp, row in energy_consumption.get_data(price)]
+
     func = locals().get(version.replace('.', '_'))
     if callable(func):
         return func(price)
@@ -107,7 +124,7 @@ def get_monthly_data(version, price=.05):
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0' or version == 'v1.3.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
-    elif version == 'v1.4.0':
+    elif version == 'v1.4.0' or version == 'v1.5.0':
         energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
@@ -127,7 +144,7 @@ def get_yearly_data(version, price=.05):
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0' or version == 'v1.3.1':
         energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
-    elif version == 'v1.4.0':
+    elif version == 'v1.4.0' or version == 'v1.5.0':
         energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
@@ -238,7 +255,7 @@ def profitability_equipment(version=None):
         energy_consumption = EnergyConsumptionServiceFactory_v1_1_1.create()
     elif version == 'v1.2.0':
         energy_consumption = EnergyConsumptionServiceFactory_v1_3_1.create()
-    elif version == 'v1.4.0':
+    elif version == 'v1.4.0' or version == 'v1.5.0':
         energy_consumption = EnergyConsumptionServiceFactory.create()
     else:
         raise NotImplementedError('Not Implemented')
@@ -251,7 +268,7 @@ def profitability_equipment(version=None):
 @bp.route('/mining_countries')
 @cache_control()
 def mining_countries(version=None):
-    if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0']:
+    if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0', 'v1.5.0']:
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -300,7 +317,7 @@ def mining_provinces(version=None, country='cn'):
         },
     }
 
-    if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0'] or country not in country_titles:
+    if version not in ['v1.1.0', 'v1.1.1', 'v1.2.0', 'v1.5.0'] or country not in country_titles:
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -322,7 +339,7 @@ def mining_provinces(version=None, country='cn'):
 @bp.route('/absolute_mining_countries')
 @cache_control()
 def absolute_mining_countries(version=None):
-    if version != 'v1.1.1':
+    if version != 'v1.1.1' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     file_type = request.args.get('file_type', 'csv')
@@ -343,7 +360,7 @@ def absolute_mining_countries(version=None):
 @bp.route('/bitcoin_greenhouse_gas_emissions')
 @cache_control()
 def bitcoin_greenhouse_gas_emissions(version=None):
-    if version != 'v1.1.1' and version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     price = request.args.get('price', 0.05)
@@ -374,7 +391,7 @@ def total_bitcoin_greenhouse_gas_emissions(version=None):
             'cumulative_v': round(row['cumulative_v'], 4),
         }
 
-    if version != 'v1.1.1' and version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     price = request.args.get('price', 0.05)
@@ -405,7 +422,7 @@ def total_yearly_bitcoin_greenhouse_gas_emissions(version=None):
             'cumulative_v': round(row['cumulative_v'], 4),
         }
 
-    if version != 'v1.1.1' and version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     price = request.args.get('price', 0.05)
@@ -432,7 +449,7 @@ def bitcoin_emission_intensity(version=None):
         row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%Y-%m-%dT%H:%M:%S')
         return row
 
-    if version != 'v1.1.1' and version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -458,7 +475,7 @@ def monthly_bitcoin_power_mix(version=None):
         row['value'] = round(row['value'] * 100, 2)
         return row
 
-    if version != 'v1.1.1' and version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -484,7 +501,7 @@ def yearly_bitcoin_power_mix(version=None):
         row['date'] = datetime.fromtimestamp(row['timestamp']).strftime('%m/%Y')
         return row
 
-    if version != 'v1.1.1' and version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -512,7 +529,7 @@ def ghg_emissions(version=None):
             'value': round(row['value'], 2)
         }
 
-    if version != 'v1.1.1' and version != 'v1.2.0':
+    if version != 'v1.1.1' and version != 'v1.2.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -531,9 +548,10 @@ def ghg_emissions(version=None):
 
 
 @bp.route('/energy_efficiency_of_mining_hardware/daily')
+@bp.route('/energy_efficiency_of_mining_hardware/daily/<price>')
 @cache_control()
-def energy_efficiency_of_mining_hardware_daily(version=None):
-    if version != 'v1.4.0':
+def energy_efficiency_of_mining_hardware_daily(version=None, price=0.05):
+    if version != 'v1.4.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -549,14 +567,15 @@ def energy_efficiency_of_mining_hardware_daily(version=None):
 
     return send_file_func(
         headers,
-        service.download_energy_efficiency_of_mining_hardware(),
+        service.download_energy_efficiency_of_mining_hardware(float(price)),
     )
 
 
 @bp.route('/energy_efficiency_of_mining_hardware/yearly')
+@bp.route('/energy_efficiency_of_mining_hardware/yearly/<price>')
 @cache_control()
-def energy_efficiency_of_mining_hardware_yearly(version=None):
-    if version != 'v1.4.0':
+def energy_efficiency_of_mining_hardware_yearly(version=None, price=0.05):
+    if version != 'v1.4.0' and version != 'v1.5.0':
         raise NotImplementedError('Not Implemented')
 
     send_file_func = send_file()
@@ -572,5 +591,5 @@ def energy_efficiency_of_mining_hardware_yearly(version=None):
 
     return send_file_func(
         headers,
-        service.download_efficiency_of_mining_hardware_yearly(),
+        service.download_efficiency_of_mining_hardware_yearly(float(price)),
     )

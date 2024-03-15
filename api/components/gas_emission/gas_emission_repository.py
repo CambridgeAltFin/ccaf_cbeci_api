@@ -8,7 +8,7 @@ from datetime import datetime
 class GasEmissionRepository(CustomDataRepository):
 
     def get_global_co2_coefficients(self):
-        sql = 'SELECT t.timestamp, t.date, t.co2_coef, t.name FROM co2_coefficients t ORDER BY timestamp'
+        sql = "SELECT t.timestamp, t.date, t.co2_coef, t.name FROM co2_coefficients t WHERE asset = 'btc' ORDER BY timestamp"
         co2_coefficients = self._run_select_query(sql)
         return co2_coefficients
 
@@ -22,24 +22,25 @@ class GasEmissionRepository(CustomDataRepository):
               ", to_char(t.date, 'YYYY') AS year " \
               "FROM co2_coefficients t " \
               "JOIN countries c ON c.code = 'BTC'" \
+              "WHERE asset = 'btc' " \
               "ORDER BY timestamp DESC LIMIT 1"
         co2_coefficients = self._run_select_query(sql)
         return co2_coefficients[0]
 
     def get_total_global_co2_coefficients(self):
         sql = "SELECT to_char(t.date, 'YYYY-MM') AS month, MAX(t.co2_coef) AS co2_coef FROM co2_coefficients t " \
-              'GROUP BY month ORDER BY month DESC'
+              "WHERE asset = 'btc' GROUP BY month ORDER BY month DESC"
         return self._run_select_query(sql)
 
     def get_newest_co2_coefficient(self) -> dict:
-        sql = 'SELECT t.timestamp, t.date, t.co2_coef FROM co2_coefficients t ORDER BY t.timestamp DESC LIMIT 1'
+        sql = "SELECT t.timestamp, t.date, t.co2_coef FROM co2_coefficients t WHERE asset = 'btc' ORDER BY t.timestamp DESC LIMIT 1"
         result = self._run_select_query(sql)
         return result[0]
 
     def create_co2_coefficient_record(self, date: str, co2_coefficient: float, coefficient_type: str):
-        sql = 'INSERT INTO co2_coefficients (timestamp, date, co2_coef, name) VALUES (%s, %s, %s, %s) ' \
-              'ON CONFLICT ON CONSTRAINT "ix_co2_coefficients_timestamp" DO UPDATE SET co2_coef = %s, name = %s ' \
-              'WHERE co2_coefficients.timestamp = %s'
+        sql = "INSERT INTO co2_coefficients (timestamp, date, co2_coef, name, asset) VALUES (%s, %s, %s, %s, 'btc') " \
+              "ON CONFLICT (asset, date) DO UPDATE SET co2_coef = %s, name = %s " \
+              "WHERE co2_coefficients.timestamp = %s"
         timestamp = int(time.mktime(datetime.strptime(date, '%Y-%m-%d').timetuple()))
         self._run_query(
             sql,
@@ -47,8 +48,8 @@ class GasEmissionRepository(CustomDataRepository):
         )
 
     def get_greenhouse_gas_emissions(self, price):
-        sql = 'SELECT name, timestamp, value FROM greenhouse_gas_emissions ' \
-              'WHERE price = %s'
+        sql = "SELECT name, timestamp, value FROM greenhouse_gas_emissions " \
+              "WHERE asset = 'btc' and price = %s"
         return self._run_select_query(sql, (str(price),))
 
     def get_flat_greenhouse_gas_emissions(self, price):
@@ -57,7 +58,7 @@ class GasEmissionRepository(CustomDataRepository):
               ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS guess_co2 " \
               ", MAX(CASE WHEN name = ANY (ARRAY [%s, %s, %s]) THEN value END) AS max_co2 " \
               "FROM greenhouse_gas_emissions " \
-              "WHERE greenhouse_gas_emissions.price = %s " \
+              "WHERE greenhouse_gas_emissions.asset = 'btc' and greenhouse_gas_emissions.price = %s " \
               "GROUP BY greenhouse_gas_emissions.timestamp " \
               "ORDER BY timestamp"
         return self._run_select_query(sql, (
@@ -71,21 +72,22 @@ class GasEmissionRepository(CustomDataRepository):
         ))
 
     def get_total_greenhouse_gas_emissions(self, price):
-        sql = 'SELECT date, timestamp, value AS v, cumulative_value AS cumulative_v ' \
-              'FROM cumulative_greenhouse_gas_emissions ' \
-              'WHERE price = %s'
+        sql = "SELECT date, timestamp, value AS v, cumulative_value AS cumulative_v " \
+              "FROM cumulative_greenhouse_gas_emissions " \
+              "WHERE asset = 'btc' and price = %s" \
+              "ORDER BY timestamp"
         return self._run_select_query(sql, (str(price),))
 
     def get_monthly_bitcoin_power_mix(self):
         sql = "SELECT timestamp, to_char(date, 'YYYY-MM') AS month, name, value " \
               "FROM power_sources " \
-              "WHERE type = 'monthly' " \
+              "WHERE asset = 'btc' and type = 'monthly' " \
               "ORDER BY timestamp, power_sources.order"
         return self._run_select_query(sql)
 
     def get_yearly_bitcoin_power_mix(self):
         sql = "SELECT timestamp, to_char(date, 'YYYY') AS year, name, value " \
-              "FROM power_sources WHERE type = 'yearly' " \
+              "FROM power_sources WHERE asset = 'btc' and type = 'yearly' " \
               "ORDER BY timestamp, power_sources.order"
         return self._run_select_query(sql)
 
@@ -119,7 +121,7 @@ class GasEmissionRepository(CustomDataRepository):
 
     def get_annualised_btc_greenhouse_gas_emissions(self, year):
         sql = "SELECT SUM(value) as value FROM cumulative_greenhouse_gas_emissions " \
-              "WHERE price = %s " \
+              "WHERE asset = 'btc' and price = %s " \
               "AND to_char(date, 'YYYY') = %s "
         result = self._run_select_query(sql, (str(.05), str(year)))
         return {'code': 'BTC', 'name': 'Annualised', 'year': year, 'value': result[0]['value']}
@@ -129,7 +131,7 @@ class GasEmissionRepository(CustomDataRepository):
               ", to_char(date, 'YYYY') AS year" \
               ", (SELECT country_flag FROM countries WHERE code = 'BTC') AS flag" \
               " FROM greenhouse_gas_emissions " \
-              "WHERE price = %s " \
+              "WHERE asset = 'btc' and price = %s " \
               "AND name IN ('Predicted Estimated') " \
               "ORDER BY timestamp DESC LIMIT 1"
         result = self._run_select_query(sql, (str(.05),))

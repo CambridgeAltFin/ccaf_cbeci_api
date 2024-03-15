@@ -15,24 +15,22 @@ def handle():
     with psycopg2.connect(**config[Connection.custom_data]) as connection:
         cursor = connection.cursor()
 
-        cursor.execute('TRUNCATE greenhouse_gas_emissions')
         for cents in range(1, 21):
             price = round(cents / 100, 2)
             greenhouse_gas_emissions = service.calc_greenhouse_gas_emissions(price)
-            insert = 'INSERT INTO greenhouse_gas_emissions (timestamp,date,price,value,name) VALUES '
+            insert = 'INSERT INTO greenhouse_gas_emissions (timestamp,date,price,value,name,asset) VALUES '
             values = []
             for _, item in greenhouse_gas_emissions.iterrows():
                 row = to_dict(item, cents)
                 placeholder = ','.join(['%s' for _ in row.values()])
                 values.append(cursor.mogrify('(' + placeholder + ')', tuple(row.values())).decode('utf-8'))
             insert += ','.join(values)
-            cursor.execute(insert)
+            cursor.execute(insert + ' on conflict (asset, price, date, name) do nothing')
 
-        cursor.execute('TRUNCATE cumulative_greenhouse_gas_emissions')
         for cents in range(1, 21):
             price = round(cents / 100, 2)
             greenhouse_gas_emissions = service.calc_total_greenhouse_gas_emissions(price)
-            insert = 'INSERT INTO cumulative_greenhouse_gas_emissions (timestamp,date,price,value,cumulative_value) ' \
+            insert = 'INSERT INTO cumulative_greenhouse_gas_emissions (timestamp,date,price,value,cumulative_value,asset) ' \
                      'VALUES '
             values = []
             for _, item in greenhouse_gas_emissions.iterrows():
@@ -40,7 +38,9 @@ def handle():
                 placeholder = ','.join(['%s' for _ in row.values()])
                 values.append(cursor.mogrify('(' + placeholder + ')', tuple(row.values())).decode('utf-8'))
             insert += ','.join(values)
-            cursor.execute(insert)
+            cursor.execute(
+                insert + ' on conflict (asset, price, date) do update set value = EXCLUDED.value, cumulative_value = EXCLUDED.cumulative_value'
+            )
 
         digiconomist = Digiconomist()
         yesterday = datetime.today() - timedelta(days=1)
@@ -66,7 +66,8 @@ def to_dict(row, cents):
         'date': row['date'],
         'price': str(round(cents / 100, 2)),
         'value': round(row['value'], 6),
-        'name': row['name']
+        'name': row['name'],
+        'asset': 'btc',
     }
 
 
@@ -76,5 +77,6 @@ def to_cum_dict(row, cents):
         'date': row['date'],
         'price': str(round(cents / 100, 2)),
         'value': round(row['v'], 6),
-        'cumulative_value': round(row['cumulative_v'], 6)
+        'cumulative_value': round(row['cumulative_v'], 6),
+        'asset': 'btc',
     }

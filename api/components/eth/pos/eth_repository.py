@@ -376,3 +376,12 @@ class EthRepository(CustomDataRepository):
         return self._run_select_query(sql, (
             GhgConstants.HISTORICAL_GUESS_CO2, GhgConstants.GUESS_CO2, GhgConstants.PREDICTED_GUESS_CO2,
         ))[0]
+    
+    def active_validators(self):
+        sql = """
+            select "emissions_365d" as value from carbon_ratings
+            where asset = 'eth_pos'
+            order by date desc
+            limit 1
+        """
+        return self._run_select_query(sql)[0]

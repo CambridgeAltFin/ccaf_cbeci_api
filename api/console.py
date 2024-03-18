@@ -30,12 +30,10 @@ cli.add_command(commands.eth.pos_calc_electricity)
 cli.add_command(commands.eth.pos_sync_nodes)
 cli.add_command(commands.eth.pos_sync_nodes_distribution)
 cli.add_command(commands.eth.live_data)
-<<<<<<< HEAD
-cli.add_command(commands.eth.pos_total_number_of_active_validators)
-=======
 cli.add_command(commands.eth.pos_ghg_emissions)
 cli.add_command(commands.eth.pow_ghg_emissions)
->>>>>>> develop
+cli.add_command(commands.eth.pos_active_validators_fetch)
+cli.add_command(commands.eth.pos_active_validators_import)
 
 cli.add_command(commands.carbon_accounting_tool.calc_carbon_ratings)
 

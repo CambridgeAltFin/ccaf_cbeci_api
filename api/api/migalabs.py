@@ -40,8 +40,4 @@ class Migalabs:
             for [country, number_of_nodes]
             in response['data']['rows']
         ]
-    
-    def total_number_of_active_validators(self):
-        response = requests.get(urljoin(self.base_url, 'eth/v1/beacon/consensus/entities/active_validators')).json()
 
-        return response

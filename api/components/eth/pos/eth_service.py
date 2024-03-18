@@ -22,7 +22,7 @@ from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
 import datetime
-from api.migalabs import Migalabs as ApiMigalabs
+from api.monitoreth import Monitoreth as ApiMonitoreth
 from calendar import month_name
 
 
@@ -209,11 +209,11 @@ class EthService:
         }
     
     def total_number_of_active_validators(self, date: str = None):
-        api_migalabs = ApiMigalabs('https://monitoreth.io/data-api/api/')
+        api_migalabs = ApiMonitoreth()
         
 
         return {
-            'migalabs': api_migalabs.total_number_of_active_validators()
+            'migalabs': api_migalabs.active_validators()
         }
 
     def greenhouse_gas_emissions(self):

@@ -62,3 +62,13 @@ class Monitoreth:
             return list(result.values())
         except:
             return []
+        
+    def active_validators(self):
+        response = requests.get(
+            urljoin(self.base_url,
+                    'eth/v1/beacon/consensus/entities/active_validators'),
+            headers={
+                'X-Api-Key': config['monitoreth']['api_key']
+            }).json()[0]['data']
+
+        return response

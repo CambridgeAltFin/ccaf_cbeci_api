@@ -1,3 +1,4 @@
+import calendar
 from .eth_repository import EthRepository
 from .dto.charts import \
     NetworkPowerDemandDto, \
@@ -217,6 +218,52 @@ class EthService:
             }
             for x in chart_data
         ]
+    
+    def market_share_of_staking_entities(self):
+        chart_data = self.repository.active_validators()
+
+        result = []
+        prev_date = None
+        total = 0
+        month_data = []
+        for i in range(len(chart_data)):
+            cur_date = datetime.date.fromtimestamp(chart_data[i]["timestamp"])
+            if (not prev_date):
+                prev_date = cur_date
+
+            if (cur_date.month != prev_date.month or cur_date.year != prev_date.year):
+                for j in range(len(month_data)):
+                    month_data[j]['share'] = round(month_data[j]['total'] / total * 100, 2)
+                result.append({
+                    'x': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
+                    'data': month_data,
+                    'total': total
+                })
+
+                total = 0
+                month_data = []
+
+            value = chart_data[i]["value"]
+            entity = chart_data[i]["entity"]
+
+            found = False
+            for j in range(len(month_data)):
+                if (month_data[j]['name'] == entity):
+                    found = True
+                    month_data[j]['total'] += value
+                    break
+
+            if (not found):
+                month_data.append({
+                    'name': entity,
+                    'total': value,
+                    'share': 0,
+                })
+
+            total += value
+            prev_date = cur_date
+
+        return result
 
     def greenhouse_gas_emissions(self):
         chart_data = self.repository.get_greenhouse_gas_emissions()

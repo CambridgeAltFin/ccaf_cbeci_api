@@ -384,3 +384,10 @@ class EthRepository(CustomDataRepository):
             ORDER BY pos_active_validators.timestamp desc
         """
         return self._run_select_query(sql)
+    
+    def active_validators(self):
+        sql = """
+            select entity, value, timestamp from pos_active_validators
+            ORDER BY timestamp desc
+        """
+        return self._run_select_query(sql)

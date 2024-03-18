@@ -1,8 +1,9 @@
 
+import calendar
 from console.cli import LOGGER
 from config import config
 from api.monitoreth import Monitoreth as ApiMonitoreth
-from datetime import date
+from datetime import date, timezone
 
 import os
 import psycopg2
@@ -20,19 +21,22 @@ def handle_fetch():
 
         apiMonitoreth = ApiMonitoreth()
         data = apiMonitoreth.active_validators()
-        today = date.isoformat(date.today())
+        today = calendar.timegm(date.today().timetuple())
 
         try:
             cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ("
                             f"id serial NOT NULL,"
                             f"entity varchar(100) NOT NULL,"
                             f"value integer NOT NULL,"
-                            f"timestamp varchar(20),"
+                            f"share real NOT NULL,"
+                            f"timestamp bigint NOT NULL,"
                             f"CONSTRAINT {table_name}_pkey PRIMARY KEY (id)"
                             f");")
             
             cursor.execute(f"DELETE FROM {table_name} "
                             f"WHERE timestamp = %s", (today,))
+            
+            total = sum(d['num_validators'] for d in data)
             
             chunkSize = 50
             for i in range(0, len(data), chunkSize): 
@@ -40,8 +44,9 @@ def handle_fetch():
                 sql = ""
 
                 for i in range(len(chunk)):
-                    sql += f"INSERT INTO {table_name} (entity, value, timestamp) " \
-                        f"VALUES ('{chunk[i]['entity']}', {chunk[i]['num_validators']}, '{today}');\n"
+                    share = round(chunk[i]['num_validators'] / total * 100, 6)
+                    sql += f"INSERT INTO {table_name} (entity, value, share, timestamp) " \
+                        f"VALUES ('{chunk[i]['entity']}', {chunk[i]['num_validators']}, {share}, {today});\n"
                     
                 cursor.execute(sql)
 
@@ -64,27 +69,45 @@ def handle_import():
                             f"id serial NOT NULL,"
                             f"entity varchar(100) NOT NULL,"
                             f"value integer NOT NULL,"
-                            f"timestamp varchar(20),"
+                            f"timestamp bigint NOT NULL,"
                             f"CONSTRAINT {table_name}_pkey PRIMARY KEY (id)"
                             f");")
             
-            chunkSize = 100
             sql = ""
-            i = 0
+            dayRows = []
+            dayTimestamp = 0
+            dayTotal = 0
             for index, row in data.iterrows():
-                i = index
-                if(i % chunkSize == 0 and i != 0): 
+                if(dayTimestamp == 0):
+                    dayTimestamp = row["timestamp"]
+                if(row["timestamp"] != dayTimestamp):
+                    cur_date = calendar.timegm(date.fromtimestamp(dayTimestamp).timetuple())
+
+                    for j in range(len(dayRows)):
+                        share = round(dayRows[j]['active_validators'] / dayTotal * 100, 6)
+                        sql += f"DELETE FROM {table_name} " \
+                            f"WHERE timestamp = {cur_date} AND entity = '{row['entity']}';\n" \
+                            f"INSERT INTO {table_name} (entity, value, share, timestamp) " \
+                            f"VALUES ('{row['entity']}', {row['active_validators']}, {share}, {cur_date});\n"
+                        
                     cursor.execute(sql)
                     sql = ""
+                    print(len(dayRows))
+                    dayRows = []
+                    dayTimestamp = row["timestamp"]
+                    dayTotal = 0
 
-                cur_date = date.isoformat(date.fromtimestamp(row['timestamp']))
-
+                dayRows.append(row)
+                dayTotal += row['active_validators']
+            
+            cur_date = calendar.timegm(date.fromtimestamp(dayTimestamp).timetuple())
+            for j in range(len(dayRows)):
+                share = round(dayRows[j]['active_validators'] / dayTotal * 100, 6)
                 sql += f"DELETE FROM {table_name} " \
-                            f"WHERE timestamp = '{cur_date}' AND entity = '{row['entity']}';\n" \
-                            f"INSERT INTO {table_name} (entity, value, timestamp) " \
-                            f"VALUES ('{row['entity']}', {row['active_validators']}, '{cur_date}');\n"
-                
-            if(i % chunkSize != 0):
+                    f"WHERE timestamp = {cur_date} AND entity = '{row['entity']}';\n" \
+                    f"INSERT INTO {table_name} (entity, value, share, timestamp) " \
+                    f"VALUES ('{row['entity']}', {row['active_validators']}, {share}, {cur_date});\n"
+            if(sql != ""):
                 cursor.execute(sql)
 
         except Exception as error:

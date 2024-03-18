@@ -22,7 +22,6 @@ from .dto.data import StatsDto
 from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
 import datetime
-from api.monitoreth import Monitoreth as ApiMonitoreth
 from calendar import month_name
 
 
@@ -208,13 +207,16 @@ class EthService:
             'digiconomist': str(live[1]['value']) + ' GWh',
         }
     
-    def total_number_of_active_validators(self, date: str = None):
-        api_migalabs = ApiMonitoreth()
-        
+    def total_number_of_active_validators(self):
+        chart_data = self.repository.active_validators_total()
 
-        return {
-            'migalabs': api_migalabs.active_validators()
-        }
+        return [
+            {
+                'x': x['timestamp'],
+                'y': x['total']
+            }
+            for x in chart_data
+        ]
 
     def greenhouse_gas_emissions(self):
         chart_data = self.repository.get_greenhouse_gas_emissions()

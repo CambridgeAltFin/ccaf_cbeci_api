@@ -377,11 +377,10 @@ class EthRepository(CustomDataRepository):
             GhgConstants.HISTORICAL_GUESS_CO2, GhgConstants.GUESS_CO2, GhgConstants.PREDICTED_GUESS_CO2,
         ))[0]
     
-    def active_validators(self):
+    def active_validators_total(self):
         sql = """
-            select "emissions_365d" as value from carbon_ratings
-            where asset = 'eth_pos'
-            order by date desc
-            limit 1
+            select SUM(pos_active_validators.value) as total, pos_active_validators.timestamp from pos_active_validators
+            GROUP BY pos_active_validators.timestamp
+            ORDER BY pos_active_validators.timestamp desc
         """
-        return self._run_select_query(sql)[0]
+        return self._run_select_query(sql)

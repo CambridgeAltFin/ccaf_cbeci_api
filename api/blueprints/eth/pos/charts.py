@@ -87,11 +87,10 @@ def comparison_of_annual_consumption(date=None):
     return jsonify(data=eth_service.comparison_of_annual_consumption(date))
 
 @bp.route('/total_number_of_active_validators')
-@bp.route('/total_number_of_active_validators/<date>')
 @cache_control()
 @cache.memoize()
-def total_number_of_active_validators(date=None):
-    return jsonify(data=eth_service.total_number_of_active_validators(date))
+def total_number_of_active_validators():
+    return jsonify(data=eth_service.total_number_of_active_validators())
 
 @bp.route('/greenhouse_gas_emissions')
 @cache_control()

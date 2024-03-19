@@ -34,6 +34,8 @@ cli.add_command(commands.eth.pos_ghg_emissions)
 cli.add_command(commands.eth.pow_ghg_emissions)
 cli.add_command(commands.eth.pos_active_validators_fetch)
 cli.add_command(commands.eth.pos_active_validators_import)
+cli.add_command(commands.eth.pos_staking_entities_categorization_fetch)
+cli.add_command(commands.eth.pos_staking_entities_categorization_import)
 
 cli.add_command(commands.carbon_accounting_tool.calc_carbon_ratings)
 

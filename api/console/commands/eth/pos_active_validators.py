@@ -3,7 +3,7 @@ import calendar
 from console.cli import LOGGER
 from config import config
 from api.monitoreth import Monitoreth as ApiMonitoreth
-from datetime import date, timezone
+from datetime import date
 
 import os
 import psycopg2
@@ -34,17 +34,13 @@ def handle_fetch():
             
             cursor.execute(f"DELETE FROM {table_name} "
                             f"WHERE timestamp = %s", (today,))
-                        
-            chunkSize = 50
-            for i in range(0, len(data), chunkSize): 
-                chunk = data[i:i+chunkSize]
-                sql = ""
 
-                for i in range(len(chunk)):
-                    sql += f"INSERT INTO {table_name} (entity, value, timestamp) " \
-                        f"VALUES ('{chunk[i]['entity']}', {chunk[i]['num_validators']}, {today});\n"
-                    
-                cursor.execute(sql)
+            insert_sql = f"INSERT INTO {table_name} (entity, value, timestamp) " \
+                f"VALUES (%s, %s, {today})"
+
+            for item in data:
+                cursor.execute(
+                    insert_sql, (item['entity'], item['num_validators']))
 
         except Exception as error:
             LOGGER.exception(f"{table_name}: {str(error)}")
@@ -69,24 +65,22 @@ def handle_import():
                             f"CONSTRAINT {table_name}_pkey PRIMARY KEY (id)"
                             f");")
             
-            chunkSize = 100
-            sql = ""
-            i = 0
-            for index, row in data.iterrows():
-                i = index
-                if(i % chunkSize == 0 and i != 0): 
-                    cursor.execute(sql)
-                    sql = ""
+            delete_sql=f"DELETE FROM {table_name} " \
+                        f"WHERE timestamp = %s AND entity = %s"
+            insert_sql=f"INSERT INTO {table_name} (entity, value, timestamp) " \
+                        f"VALUES %s"
+            
+            insert_typles = tuple([
+                (row['entity'], row['active_validators'], calendar.timegm(date.fromtimestamp(row['timestamp']).timetuple()))
+                for index, row in data.iterrows()
+            ])
+            delete_typles = tuple([
+                (calendar.timegm(date.fromtimestamp(row['timestamp']).timetuple()), row['entity'])
+                for index, row in data.iterrows()
+            ])
+            psycopg2.extras.execute_batch(cursor, delete_sql, delete_typles)
+            psycopg2.extras.execute_values(cursor, insert_sql, insert_typles)
 
-                cur_date = calendar.timegm(date.fromtimestamp(row['timestamp']).timetuple())
-
-                sql += f"DELETE FROM {table_name} " \
-                            f"WHERE timestamp = {cur_date} AND entity = '{row['entity']}';\n" \
-                            f"INSERT INTO {table_name} (entity, value, timestamp) " \
-                            f"VALUES ('{row['entity']}', {row['active_validators']}, {cur_date});\n"
-
-            if(i % chunkSize != 0):
-                cursor.execute(sql)
 
         except Exception as error:
             LOGGER.exception(f"{table_name}: {str(error)}")

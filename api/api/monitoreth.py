@@ -72,3 +72,13 @@ class Monitoreth:
             }).json()[0]['data']
 
         return response
+    
+    def staking_entities_categorization(self):
+        response = requests.get(
+            urljoin(self.base_url,
+                    'eth/v1/nodes/consensus/all/hosting_type'),
+            headers={
+                'X-Api-Key': config['monitoreth']['api_key']
+            }).json()[0]['data']
+
+        return response

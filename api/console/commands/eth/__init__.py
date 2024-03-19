@@ -9,3 +9,5 @@ from console.commands.eth.pos_ghg_emissions import handle as pos_ghg_emissions
 from console.commands.eth.pow_ghg_emissions import handle as pow_ghg_emissions
 from console.commands.eth.pos_active_validators import handle_fetch as pos_active_validators_fetch
 from console.commands.eth.pos_active_validators import handle_import as pos_active_validators_import
+from console.commands.eth.pos_staking_entities_categorization import handle_fetch as pos_staking_entities_categorization_fetch
+from console.commands.eth.pos_staking_entities_categorization import handle_import as pos_staking_entities_categorization_import

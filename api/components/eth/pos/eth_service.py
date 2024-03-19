@@ -24,6 +24,7 @@ from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
 import datetime
 from calendar import month_name
+from api.monitoreth import Monitoreth as ApiMonitoreth
 
 
 class EthService:
@@ -219,8 +220,14 @@ class EthService:
             for x in chart_data
         ]
     
-    def market_share_of_staking_entities(self):
-        chart_data = self.repository.active_validators()
+    def market_share_of_staking_entities(self, date: str = None):
+        if not (date is None) and is_valid_date_string_format(date):
+            date_temp = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+            date = calendar.timegm(datetime.date(date_temp.year, date_temp.month, 1).timetuple())
+        elif not (date is None):
+            raise HttpException(f'Invalid date: {date}')
+
+        chart_data = self.repository.active_validators(date)
 
         result = []
         prev_date = None
@@ -269,6 +276,61 @@ class EthService:
 
             total += value
             prev_date = cur_date
+
+        for j in range(len(month_data)):
+            month_data[j]['share'] = round(month_data[j]['total'] / total * 100, 2)
+        result.append({
+            'timestamp': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
+            'data': month_data,
+            'total': total
+        })
+
+        return result
+    
+    def staking_entities_categorization(self, date: str = None):
+        if not (date is None) and is_valid_date_string_format(date):
+            date = calendar.timegm(datetime.datetime.strptime(date, '%Y-%m-%d').date().timetuple())
+        elif not (date is None):
+            raise HttpException(f'Invalid date: {date}')
+
+        chart_data = self.repository.staking_entities_categorization(date)
+
+        result = []
+        day_data = []
+        total = 0
+        prev_timestamp = None
+        if(len(chart_data) > 0):
+            prev_timestamp = chart_data[0]["timestamp"]
+        
+        for row in chart_data:
+            if (row["timestamp"] != prev_timestamp):
+                for j in range(len(day_data)):
+                    day_data[j]['share'] = round(day_data[j]['value'] / total * 100, 2)
+                result.append({
+                    'timestamp': calendar.timegm(datetime.date.fromtimestamp(prev_timestamp).timetuple()),
+                    'data': day_data,
+                    'total': total
+                })
+
+                total = 0
+                day_data = []
+
+            day_data.append({
+                'category': row['category'],
+                'value': row['node_count'],
+                'share': 0,
+            })
+
+            total += row['node_count']
+            prev_timestamp = row["timestamp"]
+
+        for j in range(len(day_data)):
+            day_data[j]['share'] = round(day_data[j]['value'] / total * 100, 2)
+        result.append({
+            'timestamp': calendar.timegm(datetime.date.fromtimestamp(prev_timestamp).timetuple()),
+            'data': day_data,
+            'total': total
+        })
 
         return result
 

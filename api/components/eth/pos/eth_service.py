@@ -235,7 +235,7 @@ class EthService:
                 for j in range(len(month_data)):
                     month_data[j]['share'] = round(month_data[j]['total'] / total * 100, 2)
                 result.append({
-                    'x': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
+                    'timestamp': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
                     'data': month_data,
                     'total': total
                 })
@@ -248,17 +248,24 @@ class EthService:
 
             found = False
             for j in range(len(month_data)):
-                if (month_data[j]['name'] == entity):
+                if (month_data[j]['name'] == entity or entity.find('_lido') != -1 and month_data[j]['name'] == 'lido'):
                     found = True
                     month_data[j]['total'] += value
                     break
 
             if (not found):
-                month_data.append({
-                    'name': entity,
-                    'total': value,
-                    'share': 0,
-                })
+                if (entity.find('_lido') != -1):
+                    month_data.append({
+                        'name': 'lido',
+                        'total': value,
+                        'share': 0,
+                    })
+                else:
+                    month_data.append({
+                        'name': entity,
+                        'total': value,
+                        'share': 0,
+                    })
 
             total += value
             prev_date = cur_date

@@ -25,7 +25,8 @@ from exceptions import HttpException
 import datetime
 from calendar import month_name
 from api.monitoreth import Monitoreth as ApiMonitoreth
-
+import tempfile
+import pandas as pd
 
 class EthService:
     def __init__(self, repository: EthRepository):
@@ -220,6 +221,21 @@ class EthService:
             for x in chart_data
         ]
     
+    def download_total_number_of_active_validators(self):
+        chart_data = self.repository.active_validators_total()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'x': 'timestamp',
+            'y': 'total',
+        }, [
+            {
+                'x': x['timestamp'],
+                'y': x['total']
+            }
+            for x in chart_data
+        ])
+    
     def market_share_of_staking_entities(self, date: str = None):
         if not (date is None) and is_valid_date_string_format(date):
             date_temp = datetime.datetime.strptime(date, '%Y-%m-%d').date()
@@ -287,6 +303,23 @@ class EthService:
 
         return result
     
+    def download_market_share_of_staking_entities(self):
+        chart_data = self.repository.active_validators()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'timestamp',
+            'entity': 'entity',
+            'value': 'active_validators',
+        }, [
+            {
+                'timestamp': x['timestamp'],
+                'entity': x['entity'],
+                'value': x['value']
+            }
+            for x in chart_data
+        ])
+    
     def staking_entities_categorization(self, date: str = None):
         if not (date is None) and is_valid_date_string_format(date):
             date = calendar.timegm(datetime.datetime.strptime(date, '%Y-%m-%d').date().timetuple())
@@ -333,6 +366,28 @@ class EthService:
         })
 
         return result
+    
+    def download_staking_entities_categorization(self):
+        chart_data = self.repository.staking_entities_categorization()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'timestamp',
+            'category': 'hosting_type',
+            'node_count': 'node_count',
+        }, [
+            {
+                'timestamp': x['timestamp'],
+                'category': x['category'],
+                'node_count': x['node_count']
+            }
+            for x in chart_data
+        ])
+    
+    def hosting_providers(self, date: str = None):
+        chart_data = ApiMonitoreth().hosting_providers()
+
+        return chart_data
 
     def greenhouse_gas_emissions(self):
         chart_data = self.repository.get_greenhouse_gas_emissions()

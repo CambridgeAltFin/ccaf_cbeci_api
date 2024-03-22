@@ -79,6 +79,8 @@ def handle_import():
             day_data = {}
             prev_date = None
             prev_date_formatted = None
+            sql_counter = 0
+            sql_threshold = 10000
             for index, row in data.iterrows():
                 if (not row['isp'] or row['node_count'] == 0 ):
                     continue
@@ -95,6 +97,20 @@ def handle_import():
                             (isp, day_data[isp], prev_date_formatted))
                     delete_data.append((prev_date_formatted,))
                     
+                    sql_counter += len(day_data)
+                    if(sql_counter >= sql_threshold):
+                        psycopg2.extras.execute_batch(
+                            cursor, delete_sql, tuple(delete_data))
+                        psycopg2.extras.execute_values(
+                            cursor, insert_sql, tuple(insert_data))
+                        connection.commit()
+
+                        print('Added 10000 rows')
+
+                        sql_counter = 0
+                        insert_data = []
+                        delete_data = []
+
                     day_data = {}
 
                 if row['isp'] in pos_isp_associations.keys():
@@ -115,10 +131,11 @@ def handle_import():
                     (isp, day_data[isp], prev_date_formatted))
             delete_data.append((prev_date_formatted,))
 
-            psycopg2.extras.execute_batch(
-                cursor, delete_sql, tuple(delete_data))
-            psycopg2.extras.execute_values(
-                cursor, insert_sql, tuple(insert_data))
+            if(len(insert_sql)):
+                psycopg2.extras.execute_batch(
+                    cursor, delete_sql, tuple(delete_data))
+                psycopg2.extras.execute_values(
+                    cursor, insert_sql, tuple(insert_data))
 
         except Exception as error:
             LOGGER.exception(f"{table_name}: {str(error)}")

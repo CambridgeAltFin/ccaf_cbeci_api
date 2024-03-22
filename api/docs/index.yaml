@@ -7,6 +7,8 @@ servers:
     description: Main (production) server
   - url: https://demo.ccaf.io/cbeci/api
     description: Demo server for testing
+  - url: http://localhost:5000/api
+    description: Local server for testing
 tags:
   - name: Index
   - name: Greenhouse Gas
@@ -157,6 +159,20 @@ paths:
      $ref: "./endpoints/eth/pos/charts/emission_intensity.yaml"
   /eth/pos/charts/emission_intensity/monthly:
      $ref: "./endpoints/eth/pos/charts/emission_intensity_monthly.yaml"
+  /eth/pos/charts/total_number_of_active_validators:
+     $ref: "./endpoints/eth/pos/charts/total_number_of_active_validators.yaml"
+  /eth/pos/charts/total_number_of_active_validators/{date}:
+     $ref: "./endpoints/eth/pos/charts/total_number_of_active_validators.yaml"
+  /eth/pos/charts/market_share_of_staking_entities:
+     $ref: "./endpoints/eth/pos/charts/market_share_of_staking_entities.yaml"
+  /eth/pos/charts/market_share_of_staking_entities/{date}:
+     $ref: "./endpoints/eth/pos/charts/market_share_of_staking_entities.yaml"
+  /eth/pos/charts/staking_entities_categorization:
+     $ref: "./endpoints/eth/pos/charts/staking_entities_categorization.yaml"
+  /eth/pos/charts/staking_entities_categorization/{date}:
+     $ref: "./endpoints/eth/pos/charts/staking_entities_categorization.yaml"
+  /eth/pos/charts/hosting_providers/{date}:
+     $ref: "./endpoints/eth/pos/charts/hosting_providers.yaml"
 
   /{version}/eth/pos/download/network_power_demand:
      $ref: "./endpoints/eth/pos/download/network_power_demand.yaml"
@@ -188,6 +204,14 @@ paths:
     $ref: "./endpoints/eth/pos/download/emission_intensity.yaml"
   /{version}/eth/pos/download/emission_intensity/monthly:
     $ref: "./endpoints/eth/pos/download/emission_intensity_monthly.yaml"
+  /{version}/eth/pos/download/total_number_of_active_validators:
+    $ref: "./endpoints/eth/pos/download/total_number_of_active_validators.yaml"
+  /{version}/eth/pos/download/market_share_of_staking_entities:
+    $ref: "./endpoints/eth/pos/download/market_share_of_staking_entities.yaml"
+  /{version}/eth/pos/download/staking_entities_categorization:
+    $ref: "./endpoints/eth/pos/download/staking_entities_categorization.yaml"
+  /{version}/eth/pos/download/hosting_providers:
+    $ref: "./endpoints/eth/pos/download/hosting_providers.yaml"
 
   /eth/pow/data/stats/{price}:
      $ref: "./endpoints/eth/pow/data/stats.yaml"

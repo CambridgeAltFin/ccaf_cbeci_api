@@ -385,7 +385,11 @@ class EthService:
         ])
     
     def hosting_providers(self, date: str):
-        date = calendar.timegm(datetime.datetime.strptime(date, '%Y-%m-%d').date().timetuple())
+        if is_valid_date_string_format(date):
+            date = calendar.timegm(datetime.datetime.strptime(date, '%Y-%m-%d').date().timetuple())
+        else:
+            raise HttpException(f'Invalid date: {date}')
+        
         chart_data = self.repository.hosting_providers(date)
 
         top_count = 9

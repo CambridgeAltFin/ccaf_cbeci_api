@@ -1,0 +1,38 @@
+get:
+  summary: Staking entities categorization
+  tags:
+    - Ethereum/Charts
+  parameters:
+    - in: path
+      name: date
+      schema:
+        type: string
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: number
+                    total:
+                      type: number
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          category:
+                            type: string
+                          value:
+                            type: number
+                          share:
+                            type: number

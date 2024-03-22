@@ -1,0 +1,29 @@
+get:
+  summary: Hosting providers
+  tags:
+    - Ethereum/Charts
+  parameters:
+    - in: path
+      name: date
+      schema:
+        type: string
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    isp:
+                      type: string
+                    value:
+                      type: number
+                    share:
+                      type: number

@@ -395,7 +395,7 @@ class EthRepository(CustomDataRepository):
             sql = """
                 select entity, value, timestamp from pos_active_validators
                 WHERE timestamp = %s
-                ORDER BY timestamp desc
+                ORDER BY value desc
             """
         return self._run_select_query(sql, (date,))
     
@@ -409,6 +409,20 @@ class EthRepository(CustomDataRepository):
             sql = """
                 select category, node_count, timestamp from pos_staking_entities_categorization
                 WHERE timestamp = %s
+                ORDER BY node_count desc
+            """
+        return self._run_select_query(sql, (date,))
+    
+    def hosting_providers(self, date: int = None):
+        if (date is None):
+            sql = """
+                select isp, node_count, timestamp from pos_hosting_providers
                 ORDER BY timestamp desc
+            """
+        else:
+            sql = """
+                select isp, node_count, timestamp from pos_hosting_providers
+                WHERE timestamp = %s
+                ORDER BY node_count desc
             """
         return self._run_select_query(sql, (date,))

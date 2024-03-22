@@ -66,7 +66,7 @@ def handle_import():
                             f");")
             
             delete_sql=f"DELETE FROM {table_name} " \
-                        f"WHERE timestamp = %s AND entity = %s"
+                        f"WHERE timestamp = %s"
             insert_sql=f"INSERT INTO {table_name} (entity, value, timestamp) " \
                         f"VALUES %s"
             
@@ -75,7 +75,7 @@ def handle_import():
                 for index, row in data.iterrows()
             ])
             delete_typles = tuple([
-                (calendar.timegm(date.fromtimestamp(row['timestamp']).timetuple()), row['entity'])
+                (calendar.timegm(date.fromtimestamp(row['timestamp']).timetuple()),)
                 for index, row in data.iterrows()
             ])
             psycopg2.extras.execute_batch(cursor, delete_sql, delete_typles)

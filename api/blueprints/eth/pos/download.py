@@ -166,3 +166,11 @@ def staking_entities_categorization(version=None):
     if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_staking_entities_categorization()
     raise NotImplementedError('Not Implemented')
+
+@bp.route('/hosting_providers')
+@cache_control()
+@cache.memoize()
+def hosting_providers(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_hosting_providers()
+    raise NotImplementedError('Not Implemented')

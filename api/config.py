@@ -26,11 +26,13 @@ pos_isp_associations = {
     "Amazon.com, Inc.": "Amazon",
     "Amazon Technologies Inc.": "Amazon",
     "Amazon.com": "Amazon",
+    "Amazon Technologies Inc": "Amazon",
     "OVH SAS": "OVH",
     "OVH Hosting": "OVH",
     "OVH Australia PTY LTD": "OVH",
     "OVH US LLC": "OVH",
     "OVH Singapore PTE. LTD": "OVH",
+    "OVH Australia PTY LTD": "OVH",
     "DigitalOcean, LLC": "DigitalOcean",
     "Contabo GmbH": "Contabo",
     "Contabo Inc.": "Contabo",
@@ -94,4 +96,8 @@ pos_isp_associations = {
     "Alibaba (US) Technology Co., Ltd.": "Alibaba.com LLC",
     "Altibox": "Altibox AS",
     "Spark New Zealand Trading Ltd": "Spark New Zealand Trading Limited",
+    "Google Fiber Inc.": "Google LLC",
+    "Microsoft": "Microsoft Corporation",
+    "TELUS Communications Inc.": "TELUS Communications Inc",
+    "Latitude.sh": "Amazon"
 }

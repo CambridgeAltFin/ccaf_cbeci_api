@@ -384,10 +384,52 @@ class EthService:
             for x in chart_data
         ])
     
-    def hosting_providers(self, date: str = None):
-        chart_data = ApiMonitoreth().hosting_providers()
+    def hosting_providers(self, date: str):
+        date = calendar.timegm(datetime.datetime.strptime(date, '%Y-%m-%d').date().timetuple())
+        chart_data = self.repository.hosting_providers(date)
 
-        return chart_data
+        top_count = 9
+        data = []
+        total = sum(x['node_count'] for x in chart_data)
+        for row in chart_data:
+            if(top_count <= 0):
+                break
+
+            if(row['isp'] != 'Other'):
+                data.append({
+                    'isp': row['isp'],
+                    'value': row['node_count'],
+                    'share': round(row['node_count'] / total * 100, 2)
+                })
+                chart_data.remove(row)
+                top_count -= 1
+
+        if(len(chart_data)):
+            others_total = sum(x['node_count'] for x in chart_data)
+            data.append({
+                'isp': 'Other',
+                'value': others_total,
+                'share': round(others_total / total * 100, 2)
+            })
+
+        return data
+    
+    def download_hosting_providers(self):
+        chart_data = self.repository.hosting_providers()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'timestamp',
+            'isp': 'isp',
+            'node_count': 'node_count',
+        }, [
+            {
+                'timestamp': x['timestamp'],
+                'isp': x['isp'],
+                'node_count': x['node_count']
+            }
+            for x in chart_data
+        ])
 
     def greenhouse_gas_emissions(self):
         chart_data = self.repository.get_greenhouse_gas_emissions()

@@ -11,3 +11,5 @@ from console.commands.eth.pos_active_validators import handle_fetch as pos_activ
 from console.commands.eth.pos_active_validators import handle_import as pos_active_validators_import
 from console.commands.eth.pos_staking_entities_categorization import handle_fetch as pos_staking_entities_categorization_fetch
 from console.commands.eth.pos_staking_entities_categorization import handle_import as pos_staking_entities_categorization_import
+from console.commands.eth.pos_hosting_providers import handle_fetch as pos_hosting_providers_fetch
+from console.commands.eth.pos_hosting_providers import handle_import as pos_hosting_providers_import

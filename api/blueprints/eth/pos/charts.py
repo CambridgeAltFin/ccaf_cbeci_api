@@ -106,11 +106,10 @@ def market_share_of_staking_entities(date=None):
 def staking_entities_categorization(date=None):
     return jsonify(data=eth_service.staking_entities_categorization(date))
 
-@bp.route('/hosting_providers')
 @bp.route('/hosting_providers/<date>')
 @cache_control()
 @cache.memoize()
-def hosting_providers(date=None):
+def hosting_providers(date):
     return jsonify(data=eth_service.hosting_providers(date))
 
 @bp.route('/greenhouse_gas_emissions')

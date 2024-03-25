@@ -33,6 +33,8 @@ cli.add_command(commands.eth.live_data)
 cli.add_command(commands.eth.pos_ghg_emissions)
 cli.add_command(commands.eth.pow_ghg_emissions)
 
+cli.add_command(commands.btc.sync_coinmetrics)
+
 cli.add_command(commands.carbon_accounting_tool.calc_carbon_ratings)
 
 cli()

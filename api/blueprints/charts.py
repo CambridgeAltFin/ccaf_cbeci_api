@@ -17,6 +17,7 @@ from resources.gas_emission.total_yearly_bitcoin_greenhouse_gas_emission import 
 from components.gas_emission import EmissionIntensityServiceFactory, GreenhouseGasEmissionServiceFactory, \
     PowerMixServiceFactory
 from components.energy_consumption import EnergyConsumptionServiceFactory
+from components.bitcoin_cost_of_minting import BitcoinCostOfMintingServiceFactory
 
 bp = Blueprint('charts', __name__, url_prefix='/charts')
 
@@ -245,3 +246,23 @@ def energy_efficiency_of_mining_hardware_daily(price=0.05):
 def energy_efficiency_of_mining_hardware_yearly(price=0.05):
     service = EnergyConsumptionServiceFactory.create()
     return jsonify(data=service.energy_efficiency_of_mining_hardware_yearly_chart(float(price)))
+
+
+@bp.route('/bitcoin_cost_of_minting/daily')
+@bp.route('/bitcoin_cost_of_minting/daily/<price>')
+@cache_control()
+@cache.memoize()
+def bitcoin_cost_of_minting_daily(price=0.05):
+    service = BitcoinCostOfMintingServiceFactory.create()
+    return jsonify(data=service.bitcoin_cost_of_minting_chart(float(price)))
+
+
+@bp.route('/bitcoin_cost_of_minting/yearly')
+@bp.route('/bitcoin_cost_of_minting/yearly/<price>')
+@cache_control()
+@cache.memoize()
+def bitcoin_cost_of_minting_yearly(price=0.05):
+    service = BitcoinCostOfMintingServiceFactory.create()
+    return jsonify(data=service.bitcoin_cost_of_minting_yearly_chart(float(price)))
+
+

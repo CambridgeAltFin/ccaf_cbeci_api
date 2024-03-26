@@ -40,3 +40,4 @@ class Migalabs:
             for [country, number_of_nodes]
             in response['data']['rows']
         ]
+

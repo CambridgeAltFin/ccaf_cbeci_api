@@ -142,3 +142,35 @@ def emission_intensity_monthly(version=None):
     if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
         return eth_service.download_monthly_emission_intensity()
     raise NotImplementedError('Not Implemented')
+
+@bp.route('/total_number_of_active_validators')
+@cache_control()
+@cache.memoize()
+def total_number_of_active_validators(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_total_number_of_active_validators()
+    raise NotImplementedError('Not Implemented')
+
+@bp.route('/market_share_of_staking_entities')
+@cache_control()
+@cache.memoize()
+def market_share_of_staking_entities(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_market_share_of_staking_entities()
+    raise NotImplementedError('Not Implemented')
+
+@bp.route('/staking_entities_categorization')
+@cache_control()
+@cache.memoize()
+def staking_entities_categorization(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_staking_entities_categorization()
+    raise NotImplementedError('Not Implemented')
+
+@bp.route('/hosting_providers')
+@cache_control()
+@cache.memoize()
+def hosting_providers(version=None):
+    if version_parse(version) == version_parse('v1.4.0') or version_parse(version) == version_parse('v1.5.0'):
+        return eth_service.download_hosting_providers()
+    raise NotImplementedError('Not Implemented')

@@ -1,3 +1,4 @@
+import calendar
 from .eth_repository import EthRepository
 from .dto.charts import \
     NetworkPowerDemandDto, \
@@ -23,7 +24,9 @@ from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
 import datetime
 from calendar import month_name
-
+from api.monitoreth import Monitoreth as ApiMonitoreth
+import tempfile
+import pandas as pd
 
 class EthService:
     def __init__(self, repository: EthRepository):
@@ -206,6 +209,231 @@ class EthService:
             'ccri': str(live[0]['value']) + ' GWh',
             'digiconomist': str(live[1]['value']) + ' GWh',
         }
+    
+    def total_number_of_active_validators(self):
+        chart_data = self.repository.active_validators_total()
+
+        return [
+            {
+                'x': x['timestamp'],
+                'y': x['total']
+            }
+            for x in chart_data
+        ]
+    
+    def download_total_number_of_active_validators(self):
+        chart_data = self.repository.active_validators_total()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'x': 'timestamp',
+            'y': 'total',
+        }, [
+            {
+                'x': x['timestamp'],
+                'y': x['total']
+            }
+            for x in chart_data
+        ])
+    
+    def market_share_of_staking_entities(self, date: str = None):
+        if not (date is None) and is_valid_date_string_format(date):
+            date_temp = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+            date = calendar.timegm(datetime.date(date_temp.year, date_temp.month, 1).timetuple())
+        elif not (date is None):
+            raise HttpException(f'Invalid date: {date}')
+
+        chart_data = self.repository.active_validators(date)
+
+        result = []
+        prev_date = None
+        total = 0
+        month_data = []
+        for i in range(len(chart_data)):
+            cur_date = datetime.date.fromtimestamp(chart_data[i]["timestamp"])
+            if (not prev_date):
+                prev_date = cur_date
+
+            if (cur_date.month != prev_date.month or cur_date.year != prev_date.year):
+                for j in range(len(month_data)):
+                    month_data[j]['share'] = round(month_data[j]['total'] / total * 100, 2)
+                result.append({
+                    'timestamp': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
+                    'data': month_data,
+                    'total': total
+                })
+
+                total = 0
+                month_data = []
+
+            value = chart_data[i]["value"]
+            entity = chart_data[i]["entity"]
+
+            found = False
+            for j in range(len(month_data)):
+                if (month_data[j]['name'] == entity or entity.find('_lido') != -1 and month_data[j]['name'] == 'lido'):
+                    found = True
+                    month_data[j]['total'] += value
+                    break
+
+            if (not found):
+                if (entity.find('_lido') != -1):
+                    month_data.append({
+                        'name': 'lido',
+                        'total': value,
+                        'share': 0,
+                    })
+                else:
+                    month_data.append({
+                        'name': entity,
+                        'total': value,
+                        'share': 0,
+                    })
+
+            total += value
+            prev_date = cur_date
+
+        for j in range(len(month_data)):
+            month_data[j]['share'] = round(month_data[j]['total'] / total * 100, 2)
+        result.append({
+            'timestamp': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
+            'data': month_data,
+            'total': total
+        })
+
+        return result
+    
+    def download_market_share_of_staking_entities(self):
+        chart_data = self.repository.active_validators()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'timestamp',
+            'entity': 'entity',
+            'value': 'active_validators',
+        }, [
+            {
+                'timestamp': x['timestamp'],
+                'entity': x['entity'],
+                'value': x['value']
+            }
+            for x in chart_data
+        ])
+    
+    def staking_entities_categorization(self, date: str = None):
+        if not (date is None) and is_valid_date_string_format(date):
+            date = calendar.timegm(datetime.datetime.strptime(date, '%Y-%m-%d').date().timetuple())
+        elif not (date is None):
+            raise HttpException(f'Invalid date: {date}')
+
+        chart_data = self.repository.staking_entities_categorization(date)
+
+        result = []
+        day_data = []
+        total = 0
+        prev_timestamp = None
+        if(len(chart_data) > 0):
+            prev_timestamp = chart_data[0]["timestamp"]
+        
+        for row in chart_data:
+            if (row["timestamp"] != prev_timestamp):
+                for j in range(len(day_data)):
+                    day_data[j]['share'] = round(day_data[j]['value'] / total * 100, 2)
+                result.append({
+                    'timestamp': calendar.timegm(datetime.date.fromtimestamp(prev_timestamp).timetuple()),
+                    'data': day_data,
+                    'total': total
+                })
+
+                total = 0
+                day_data = []
+
+            day_data.append({
+                'category': row['category'],
+                'value': row['node_count'],
+                'share': 0,
+            })
+
+            total += row['node_count']
+            prev_timestamp = row["timestamp"]
+
+        for j in range(len(day_data)):
+            day_data[j]['share'] = round(day_data[j]['value'] / total * 100, 2)
+        result.append({
+            'timestamp': calendar.timegm(datetime.date.fromtimestamp(prev_timestamp).timetuple()),
+            'data': day_data,
+            'total': total
+        })
+
+        return result
+    
+    def download_staking_entities_categorization(self):
+        chart_data = self.repository.staking_entities_categorization()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'timestamp',
+            'category': 'hosting_type',
+            'node_count': 'node_count',
+        }, [
+            {
+                'timestamp': x['timestamp'],
+                'category': x['category'],
+                'node_count': x['node_count']
+            }
+            for x in chart_data
+        ])
+    
+    def hosting_providers(self, date: str):
+        if is_valid_date_string_format(date):
+            date = calendar.timegm(datetime.datetime.strptime(date, '%Y-%m-%d').date().timetuple())
+        else:
+            raise HttpException(f'Invalid date: {date}')
+        
+        chart_data = self.repository.hosting_providers(date)
+
+        top_count = 9
+        data = []
+        total = sum(x['node_count'] for x in chart_data)
+        for row in chart_data:
+            if(top_count <= 0):
+                break
+
+            if(row['isp'] != 'Other'):
+                data.append({
+                    'isp': row['isp'],
+                    'value': row['node_count'],
+                    'share': round(row['node_count'] / total * 100, 2)
+                })
+                chart_data.remove(row)
+                top_count -= 1
+
+        if(len(chart_data)):
+            others_total = sum(x['node_count'] for x in chart_data)
+            data.append({
+                'isp': 'Other',
+                'value': others_total,
+                'share': round(others_total / total * 100, 2)
+            })
+
+        return data
+    
+    def download_hosting_providers(self):
+        chart_data = self.repository.hosting_providers()
+        send_file_func = send_file()
+
+        return send_file_func({
+            'timestamp': 'timestamp',
+            'isp': 'isp',
+            'node_count': 'node_count',
+        }, [
+            {
+                'timestamp': x['timestamp'],
+                'isp': x['isp'],
+                'node_count': x['node_count']
+            }
+            for x in chart_data
+        ])
 
     def greenhouse_gas_emissions(self):
         chart_data = self.repository.get_greenhouse_gas_emissions()

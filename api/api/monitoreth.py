@@ -62,3 +62,33 @@ class Monitoreth:
             return list(result.values())
         except:
             return []
+        
+    def active_validators(self):
+        response = requests.get(
+            urljoin(self.base_url,
+                    'eth/v1/beacon/consensus/entities/active_validators'),
+            headers={
+                'X-Api-Key': config['monitoreth']['api_key']
+            }).json()[0]['data']
+
+        return response
+    
+    def staking_entities_categorization(self):
+        response = requests.get(
+            urljoin(self.base_url,
+                    'eth/v1/nodes/consensus/all/hosting_type'),
+            headers={
+                'X-Api-Key': config['monitoreth']['api_key']
+            }).json()[0]['data']
+
+        return response
+
+    def hosting_providers(self):
+        response = requests.get(
+            urljoin(self.base_url,
+                    'eth/v1/nodes/consensus/all/internet_providers'),
+            headers={
+                'X-Api-Key': config['monitoreth']['api_key']
+            }).json()[0]['data']
+
+        return response

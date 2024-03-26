@@ -376,3 +376,53 @@ class EthRepository(CustomDataRepository):
         return self._run_select_query(sql, (
             GhgConstants.HISTORICAL_GUESS_CO2, GhgConstants.GUESS_CO2, GhgConstants.PREDICTED_GUESS_CO2,
         ))[0]
+    
+    def active_validators_total(self):
+        sql = """
+            select SUM(pos_active_validators.value) as total, pos_active_validators.timestamp from pos_active_validators
+            GROUP BY pos_active_validators.timestamp
+            ORDER BY pos_active_validators.timestamp desc
+        """
+        return self._run_select_query(sql)
+    
+    def active_validators(self, date: int = None):
+        if (date is None):
+            sql = """
+                select entity, value, timestamp from pos_active_validators
+                ORDER BY timestamp desc
+            """
+        else:
+            sql = """
+                select entity, value, timestamp from pos_active_validators
+                WHERE timestamp = %s
+                ORDER BY value desc
+            """
+        return self._run_select_query(sql, (date,))
+    
+    def staking_entities_categorization(self, date: int = None):
+        if (date is None):
+            sql = """
+                select category, node_count, timestamp from pos_staking_entities_categorization
+                ORDER BY timestamp desc
+            """
+        else:
+            sql = """
+                select category, node_count, timestamp from pos_staking_entities_categorization
+                WHERE timestamp = %s
+                ORDER BY node_count desc
+            """
+        return self._run_select_query(sql, (date,))
+    
+    def hosting_providers(self, date: int = None):
+        if (date is None):
+            sql = """
+                select isp, node_count, timestamp from pos_hosting_providers
+                ORDER BY timestamp desc
+            """
+        else:
+            sql = """
+                select isp, node_count, timestamp from pos_hosting_providers
+                WHERE timestamp = %s
+                ORDER BY node_count desc
+            """
+        return self._run_select_query(sql, (date,))

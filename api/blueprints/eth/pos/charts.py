@@ -86,6 +86,31 @@ def power_demand_legacy_vs_future(date=None):
 def comparison_of_annual_consumption(date=None):
     return jsonify(data=eth_service.comparison_of_annual_consumption(date))
 
+@bp.route('/total_number_of_active_validators')
+@cache_control()
+@cache.memoize()
+def total_number_of_active_validators():
+    return jsonify(data=eth_service.total_number_of_active_validators())
+
+@bp.route('/market_share_of_staking_entities')
+@bp.route('/market_share_of_staking_entities/<date>')
+@cache_control()
+@cache.memoize()
+def market_share_of_staking_entities(date=None):
+    return jsonify(data=eth_service.market_share_of_staking_entities(date))
+
+@bp.route('/staking_entities_categorization')
+@bp.route('/staking_entities_categorization/<date>')
+@cache_control()
+@cache.memoize()
+def staking_entities_categorization(date=None):
+    return jsonify(data=eth_service.staking_entities_categorization(date))
+
+@bp.route('/hosting_providers/<date>')
+@cache_control()
+@cache.memoize()
+def hosting_providers(date):
+    return jsonify(data=eth_service.hosting_providers(date))
 
 @bp.route('/greenhouse_gas_emissions')
 @cache_control()

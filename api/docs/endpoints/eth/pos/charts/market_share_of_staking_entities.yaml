@@ -1,0 +1,38 @@
+get:
+  summary: Market share of staking entities
+  tags:
+    - Ethereum/Charts
+  parameters:
+    - in: path
+      name: date
+      schema:
+        type: string
+      required: false
+  responses:
+    200:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: number
+                    total:
+                      type: number
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          total:
+                            type: number
+                          share:
+                            type: number

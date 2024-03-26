@@ -13,6 +13,7 @@ from packaging.version import parse as version_parse
 from calendar import month_name
 from decorators.cache_control import cache_control
 from helpers import send_file
+from components.bitcoin_cost_of_minting import BitcoinCostOfMintingServiceFactory
 
 bp = Blueprint('download', __name__, url_prefix='/download')
 
@@ -592,4 +593,47 @@ def energy_efficiency_of_mining_hardware_yearly(version=None, price=0.05):
     return send_file_func(
         headers,
         service.download_efficiency_of_mining_hardware_yearly(float(price)),
+    )
+
+
+@bp.route('/bitcoin_cost_of_minting/daily')
+@bp.route('/bitcoin_cost_of_minting/daily/<price>')
+@cache_control()
+def bitcoin_cost_of_minting_daily(version=None, price=0.05):
+    send_file_func = send_file()
+
+    headers = {
+        'date': 'Date',
+        'lower_bound': 'Lower bound cost of minting USD',
+        'estimated': 'Estimated cost of minting USD',
+        'upper_bound': 'Upper bound cost of minting USD',
+    }
+
+    service = BitcoinCostOfMintingServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        service.download_bitcoin_cost_of_minting_chart(float(price)),
+    )
+
+
+@bp.route('/bitcoin_cost_of_minting/yearly')
+@bp.route('/bitcoin_cost_of_minting/yearly/<price>')
+@cache_control()
+def bitcoin_cost_of_minting_yearly(version=None, price=0.05):
+
+    send_file_func = send_file()
+
+    headers = {
+        'year': 'Year',
+        'lower_bound': 'Lower bound cost of minting USD',
+        'estimated': 'Estimated cost of minting USD',
+        'upper_bound': 'Upper bound cost of minting USD',
+    }
+
+    service = BitcoinCostOfMintingServiceFactory.create()
+
+    return send_file_func(
+        headers,
+        service.download_bitcoin_cost_of_minting_yearly_chart(float(price)),
     )

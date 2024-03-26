@@ -1,0 +1,20 @@
+version: '3'
+networks:
+  general:
+    driver: bridge
+volumes:
+  mysql:
+    driver: local
+services:
+  python:
+    build:
+      context: ./docker/python
+      args:
+        - 'PYTHON_VERSION=3.9.0'
+    volumes:
+      - '.:/var/app/python'
+    tty: true
+    ports:
+      - '5000:5000'
+    networks:
+      - general

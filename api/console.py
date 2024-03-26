@@ -39,6 +39,8 @@ cli.add_command(commands.eth.pos_staking_entities_categorization_import)
 cli.add_command(commands.eth.pos_hosting_providers_fetch)
 cli.add_command(commands.eth.pos_hosting_providers_import)
 
+cli.add_command(commands.btc.sync_coinmetrics)
+
 cli.add_command(commands.carbon_accounting_tool.calc_carbon_ratings)
 
 cli()

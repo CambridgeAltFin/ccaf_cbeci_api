@@ -26,40 +26,60 @@ class EnergyConsumptionService(EnergyConsumptionService_v1_3_1):
         return int(price * 100) in self.calculated_prices
 
     def energy_efficiency_of_mining_hardware_chart(self, price: float):
-        data = self.repository.get_daily_profitability_equipment(price)
+        equipment_list = self.get_equipment_list(price)
+        #data = self.repository.get_daily_profitability_equipment(price)
         return [{
-            'x': int(item['date'].timestamp()),
-            'lower_bound': round(item['lower_bound'] * 10000 * 1000) / 10000,
-            'estimated': round(item['estimated'] * 10000 * 1000) / 10000,
-            'upper_bound': round(item['upper_bound'] * 10000 * 1000) / 10000,
-        } for item in data]
+            'x': int(datetime.strptime(item['date'], "%Y-%m-%d").timestamp()),
+            'lower_bound': round(item['profitability_equipment_lower_bound'] * 10000 * 1000) / 10000,
+            'estimated': round(item['profitability_equipment'] * 10000 * 1000) / 10000,
+            'upper_bound': round(item['profitability_equipment_upper_bound'] * 10000 * 1000) / 10000,
+        } for item in equipment_list]
 
     def download_energy_efficiency_of_mining_hardware(self, price: float):
-        data = self.repository.get_daily_profitability_equipment(price)
+        equipment_list = self.get_equipment_list(price)
+        #data = self.repository.get_daily_profitability_equipment(price)
         return [{
-            'date': item['date'].strftime('%Y-%m-%d'),
-            'lower_bound': item['lower_bound'] * 1000,
-            'estimated': item['estimated'] * 1000,
-            'upper_bound': item['upper_bound'] * 1000,
-        } for item in data]
+            'date': item['date'],
+            'lower_bound': item['profitability_equipment_lower_bound'] * 1000,
+            'estimated': item['profitability_equipment'] * 1000,
+            'upper_bound': item['profitability_equipment_upper_bound'] * 1000,
+        } for item in equipment_list]
 
     def energy_efficiency_of_mining_hardware_yearly_chart(self, price: float):
-        data = self.repository.get_yearly_profitability_equipment(price)
+        equipment_list = self.get_equipment_list(price)
+        df = pd.DataFrame(equipment_list)
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.groupby(df['date'].dt.year).agg(
+            {
+                'profitability_equipment_lower_bound': 'mean',
+                'profitability_equipment': 'mean',
+                'profitability_equipment_upper_bound': 'mean',
+             }
+        )
         return [{
-            'x': int(datetime.strptime(str(int(item['date'])), '%Y').timestamp()),
-            'lower_bound': round(item['lower_bound'] * 10000 * 1000) / 10000,
-            'estimated': round(item['estimated'] * 10000 * 1000) / 10000,
-            'upper_bound': round(item['upper_bound'] * 10000 * 1000) / 10000,
-        } for item in data]
+            'x': int(datetime.strptime(str(int(index)), '%Y').timestamp()),
+            'lower_bound': round(item['profitability_equipment_lower_bound'] * 10000 * 1000) / 10000,
+            'estimated': round(item['profitability_equipment'] * 10000 * 1000) / 10000,
+            'upper_bound': round(item['profitability_equipment_upper_bound'] * 10000 * 1000) / 10000,
+        } for index, item in df.iterrows()]
 
     def download_efficiency_of_mining_hardware_yearly(self, price: float):
-        data = self.repository.get_yearly_profitability_equipment(price)
+        equipment_list = self.get_equipment_list(price)
+        df = pd.DataFrame(equipment_list)
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.groupby(df['date'].dt.year).agg(
+            {
+                'profitability_equipment_lower_bound': 'mean',
+                'profitability_equipment': 'mean',
+                'profitability_equipment_upper_bound': 'mean',
+             }
+        )
         return [{
-            'year': str(int(item['date'])),
-            'lower_bound': item['lower_bound'] * 1000,
-            'estimated': item['estimated'] * 1000,
-            'upper_bound': item['upper_bound'] * 1000,
-        } for item in data]
+            'year': index,
+            'lower_bound': item['profitability_equipment_lower_bound'] * 1000,
+            'estimated': item['profitability_equipment'] * 1000,
+            'upper_bound': item['profitability_equipment_upper_bound'] * 1000,
+        } for index, item in df.iterrows()]
 
     def _get_equipment_list(
             self,

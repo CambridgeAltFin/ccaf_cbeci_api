@@ -293,13 +293,14 @@ class EthService:
             total += value
             prev_date = cur_date
 
-        for j in range(len(month_data)):
-            month_data[j]['share'] = round(month_data[j]['total'] / total * 100, 2)
-        result.append({
-            'timestamp': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
-            'data': month_data,
-            'total': total
-        })
+        if (prev_date):
+            for j in range(len(month_data)):
+                month_data[j]['share'] = round(month_data[j]['total'] / total * 100, 2)
+            result.append({
+                'timestamp': calendar.timegm(datetime.date(prev_date.year, prev_date.month, 1).timetuple()),
+                'data': month_data,
+                'total': total
+            })
 
         return result
     
@@ -357,13 +358,14 @@ class EthService:
             total += row['node_count']
             prev_timestamp = row["timestamp"]
 
-        for j in range(len(day_data)):
-            day_data[j]['share'] = round(day_data[j]['value'] / total * 100, 2)
-        result.append({
-            'timestamp': calendar.timegm(datetime.date.fromtimestamp(prev_timestamp).timetuple()),
-            'data': day_data,
-            'total': total
-        })
+        if (prev_timestamp):
+            for j in range(len(day_data)):
+                day_data[j]['share'] = round(day_data[j]['value'] / total * 100, 2)
+            result.append({
+                'timestamp': calendar.timegm(datetime.date.fromtimestamp(prev_timestamp).timetuple()),
+                'data': day_data,
+                'total': total
+            })
 
         return result
     

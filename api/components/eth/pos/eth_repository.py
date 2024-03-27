@@ -385,8 +385,8 @@ class EthRepository(CustomDataRepository):
         """
         return self._run_select_query(sql)
     
-    def active_validators(self, date: int = None):
-        if (date is None):
+    def active_validators(self, start_date: int = None, end_date: int = None):
+        if (start_date is None or end_date is None):
             sql = """
                 select entity, value, timestamp from pos_active_validators
                 ORDER BY timestamp desc
@@ -394,10 +394,10 @@ class EthRepository(CustomDataRepository):
         else:
             sql = """
                 select entity, value, timestamp from pos_active_validators
-                WHERE timestamp = %s
+                WHERE timestamp >= %s AND timestamp < %s
                 ORDER BY value desc
             """
-        return self._run_select_query(sql, (date,))
+        return self._run_select_query(sql, (start_date, end_date))
     
     def staking_entities_categorization(self, date: int = None):
         if (date is None):

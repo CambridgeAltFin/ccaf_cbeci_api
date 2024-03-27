@@ -24,9 +24,7 @@ from helpers import send_file, is_valid_date_string_format
 from exceptions import HttpException
 import datetime
 from calendar import month_name
-from api.monitoreth import Monitoreth as ApiMonitoreth
-import tempfile
-import pandas as pd
+from dateutil.relativedelta import relativedelta
 
 class EthService:
     def __init__(self, repository: EthRepository):
@@ -237,13 +235,15 @@ class EthService:
         ])
     
     def market_share_of_staking_entities(self, date: str = None):
+        end_date = None
         if not (date is None) and is_valid_date_string_format(date):
             date_temp = datetime.datetime.strptime(date, '%Y-%m-%d').date()
             date = calendar.timegm(datetime.date(date_temp.year, date_temp.month, 1).timetuple())
+            end_date = calendar.timegm((datetime.date(date_temp.year, date_temp.month, 1) + relativedelta(months=1)).timetuple())
         elif not (date is None):
             raise HttpException(f'Invalid date: {date}')
 
-        chart_data = self.repository.active_validators(date)
+        chart_data = self.repository.active_validators(date, end_date)
 
         result = []
         prev_date = None

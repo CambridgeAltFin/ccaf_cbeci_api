@@ -22,6 +22,7 @@ def handle_fetch():
         apiMonitoreth = ApiMonitoreth()
         data = apiMonitoreth.active_validators()
         today = calendar.timegm(date.today().timetuple())
+        print(f"data len: {len(data)}")
 
         try:
             cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ("

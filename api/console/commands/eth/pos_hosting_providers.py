@@ -22,6 +22,7 @@ def handle_fetch():
 
         apiMonitoreth = ApiMonitoreth()
         data = apiMonitoreth.hosting_providers()
+        print(f"data len: {len(data)}")
 
         today = calendar.timegm(date.today().timetuple())
 

@@ -22,6 +22,7 @@ def handle_fetch():
 
         apiMonitoreth = ApiMonitoreth()
         data = apiMonitoreth.staking_entities_categorization()
+        print(f"data len: {len(data)}")
 
         today = calendar.timegm(date.today().timetuple())
 

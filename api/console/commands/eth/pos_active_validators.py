@@ -79,8 +79,12 @@ def handle_import():
                 (calendar.timegm(date.fromtimestamp(row['timestamp']).timetuple()),)
                 for index, row in data.iterrows()
             ])
-            psycopg2.extras.execute_batch(cursor, delete_sql, delete_typles)
-            psycopg2.extras.execute_values(cursor, insert_sql, insert_typles)
+
+            sql_threshold = 10000
+            for i in range(0, len(insert_typles), sql_threshold):
+                psycopg2.extras.execute_batch(cursor, delete_sql, delete_typles[i:i+sql_threshold])
+                psycopg2.extras.execute_values(cursor, insert_sql, insert_typles[i:i+sql_threshold])
+                print(f"Added {len(insert_typles[i:i+sql_threshold])} rows")
 
 
         except Exception as error:

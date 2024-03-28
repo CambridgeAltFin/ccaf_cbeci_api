@@ -7,23 +7,25 @@ import psycopg2.extras
 import datetime
 
 
-
 @click.command(name='btc:sync:coinmetrics')
 @click.argument('start_date', required=False)
 def handle(start_date=None):
+    print("btc:sync:coinmetrics start")
     print(start_date)
-    if(start_date == None):
-        start_date = (datetime.datetime.today() - datetime.timedelta(days=1)).strftime ('%Y-%m-%d')
+    if (start_date == None):
+        start_date = (datetime.datetime.today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+    print(start_date)
 
     url = 'https://api.coinmetrics.io/v4/timeseries/asset-metrics?start_time={start_date}&page_size=10000&assets=btc&api_key={api_key}&metrics=RevHashRateNtv'.format(
         api_key=config['api.coinmetrics.io']['api_key'], start_date=start_date)
+    print(url)
     response = requests.get(url)
     json = response.json()
     rev_has_rate_ntv = pd.DataFrame.from_records(json['data'])
     rev_has_rate_ntv['RevHashRateNtv'] = rev_has_rate_ntv['RevHashRateNtv'].astype(float).fillna(0.0)
     rev_has_rate_ntv['time'] = pd.to_datetime(rev_has_rate_ntv['time']).dt.strftime('%Y-%m-%d')
     rev_has_rate_ntv['RevHashRateNtvSec'] = rev_has_rate_ntv['RevHashRateNtv'] / 86400
-    #print(rev_has_rate_ntv)
+    # print(rev_has_rate_ntv)
 
     with psycopg2.connect(**config['custom_data']) as conn:
         c = conn.cursor()
@@ -35,7 +37,6 @@ def handle(start_date=None):
 
         for index, item in rev_has_rate_ntv.iterrows():
             c.execute(insert_sql, (item['time'], item['RevHashRateNtvSec']))
-
-
-
-
+            print(item['time'])
+            print(item['RevHashRateNtvSec'])
+    print("btc:sync:coinmetrics end")
